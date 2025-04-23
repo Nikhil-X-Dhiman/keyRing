@@ -1,0 +1,24 @@
+{
+  "name": "keyring_server",
+  "version": "1.0.0",
+  "description": "Backend Functionality of KerRing Password Manager Application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon --env-file=.env index.js",
+    "start": "node --env-file=.env index.js",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
+  },
+  "author": "Nikhil Dhiman",
+  "license": "ISC",
+  "devDependencies": {
+    "drizzle-kit": "^0.31.0",
+    "nodemon": "^3.1.10"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.42.0",
+    "mysql2": "^3.14.0"
+  }
+}

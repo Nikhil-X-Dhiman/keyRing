@@ -1,0 +1,22 @@
+version: "3.8" # Specify the compose file format version
+
+services:
+  keyring-mysql: # Service name (can be anything descriptive)
+    image: mysql:latest # The container image to use
+    container_name: keyring-mysql # The specific name for the container instance
+    environment: # Environment variables for the container
+      - MYSQL_ROOT_PASSWORD=qwerty
+      # Consider adding other important MySQL environment variables like:
+      # - MYSQL_DATABASE=mydatabase
+      # - MYSQL_USER=myuser
+      # - MYSQL_PASSWORD=mypassword
+    ports: # Port mappings from host to container
+      - "3306:3306" # Host_port:Container_port
+    volumes: # Volume mounts to persist data
+      - /home/ndhiman/MyFiles/containerVolumes/keyringdb/:/var/lib/mysql:Z
+      # This mounts the host directory to the container's data directory.
+      # :Z is added for SELinux relabeling, often required for permissions.
+      # Use :z instead of :Z if multiple containers need to share this volume.
+    # The --replace flag behavior from 'podman run' is handled by podman-compose
+    # commands like 'podman-compose up --force-recreate' or 'down && up'.
+    restart: unless-stopped # Optional: configure container restart policy
