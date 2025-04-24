@@ -5,8 +5,10 @@ import { Home } from "../components/pages/Home";
 import { LoginEForm } from "../components/UI/LoginEForm";
 import { LoginEmail } from "../components/pages/LoginEmail";
 import { ProtectedRoute } from "./ProtectedRoute";
+import { LoginPass } from "../components/pages/LoginPass";
+import { SignUp } from "../components/pages/SignUp";
 
-export const router = createBrowserRouter([
+export const router = createBrowserRouter( [
   {
     path: "/",
     Component: ProtectedRoute,
@@ -18,7 +20,15 @@ export const router = createBrowserRouter([
     ]
   },
   {
-    path: "/login",
+    path: "/login/email",
     Component: LoginEmail,
+  },
+  {
+    path: "/login/pass",
+    Component: LoginPass,
+  },
+  {
+    path: "/signup/email",
+    Component: SignUp,
   }
-]);
+] );
