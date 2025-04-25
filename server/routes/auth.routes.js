@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { createUser, createUserSession, findLoginEmail, verifyLoginCredential } from "../services/auth.service.js";
+import { createUser, createUserSession, findLoginEmail, findLoginPassword } from "../services/auth.service.js";
+import argon2 from "argon2";
 
 const router = Router();
 
@@ -19,32 +20,43 @@ router.post( '/auth/email', async ( req, res ) => {
   }
 
   // send json res after finding user exist in db
-  res.send( 'ok' );
+  res.send( 'Continue' );
 } );
 
 router.post( '/auth/login', async ( req, res ) => {
-  const { email, password } = req.body;
-  const result = await verifyLoginCredential( email, password );
-  console.log( 'Credential check:', result );
+  let { email, password } = req.body;
+  console.log( 'here' );
+
+  let [ result ] = await findLoginPassword( email, password );
+  console.log( 'Credential check:', result.password );
+  result = await argon2.verify( result.password, password );
+  console.log( result );
+
   if ( !result ) {
     return res.send( 'Incorrect Password' );
   }
   // create session here
-  userClient = req.headers[ 'user-agent' ];
-  ip = req.clientIp;
-  // insert userid in req
-  createUserSession( userClient, ip, userID );
+  // const userClient = req.headers[ 'user-agent' ];
+  // const ip = req.clientIp;
+  // const userID = req.cookies;
+  // // insert userid in req
+  // createUserSession( userClient, ip, userID );
+  res.cookie( 'loggedIn', 'true', { maxAge: 1000 * 60 * 60 * 24 * 7 } );
+  // res.cookie( 'loggedIn', 'true', { maxAge: 604800000 } );
   res.send( 'User Logged In' );
 } );
 
 router.post( '/auth/create', async ( req, res ) => {
-  const { email, name, password } = req.body;
+  let { email, name, password } = req.body;
   const findResult = await findLoginEmail( email );
   if ( findResult ) {
     return res.send( 'Already Registered' );
   }
+  password = await argon2.hash( password );
+  console.log( 'hashed passwd', password );
+
   const createResult = createUser( email, name, password );
-  res.cookie( 'access_token', 'true', { maxAge: 60 * 10, httpOnly: true, secure: true } );
+  res.cookie( 'access_token', 'true', { maxAge: 1000 * 60 * 10, httpOnly: true, secure: true } );
   res.send( 'User Created' );
 } );
 
@@ -54,4 +66,8 @@ router.get( '/logout', ( req, res ) => {
 } );
 
 
-export const authRoutes = router;
+export const authRoutes = router; // const userClient = req.headers[ 'user-agent' ];
+// const ip = req.clientIp;
+// const userID = req.cookies;
+// // insert userid in req
+// createUserSession( userClient, ip, userID );

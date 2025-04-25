@@ -1,5 +1,6 @@
 import e from "express";
 import cookieParser from "cookie-parser";
+import requestIp from "request-ip";
 import { authRoutes } from "./routes/auth.routes.js";
 import { appRoutes } from "./routes/app.routes.js";
 

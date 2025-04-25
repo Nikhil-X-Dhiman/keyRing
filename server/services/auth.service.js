@@ -11,18 +11,21 @@ export const findLoginEmail = async ( email ) => {
   return result;
 };
 
-export const verifyLoginCredential = async ( email, password ) => {
-  const [ result ] = await db
-    .select()
-    .from( users )
-    .where( and( eq( users.email, email ), eq( users.password, password ) ) );
+export const findLoginPassword = async ( email, password ) => {
+  // const [ result ] = await db
+  //   .select()
+  //   .from( users )
+  //   .where( and( eq( users.email, email ), eq( users.password, password ) ) );
 
-  return result;
+  // return result;
+  // returns hashed password
+  return await db
+    .select( { password: users.password } ).from( users ).where( eq( users.email, email ) );
 };
 
 export const createUser = async ( email, name, password ) => {
   return await db
-    .insert( users ).values( { email, name, password } );
+    .insert( users ).values( { email, name, password } ).$returningId();
 };
 
 export const createUserSession = async ( userAgent, ip, userID ) => {
