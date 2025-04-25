@@ -5,18 +5,17 @@ import { mysqlTable, serial, varchar, timestamp, int } from 'drizzle-orm/mysql-c
 export const users = mysqlTable( 'users', {
   id: int( 'id' ).autoincrement().primaryKey(),
   name: varchar( 'name', { length: 255 } ).notNull(),
-  age: int().notNull(),
-  username: varchar( { length: 255 } ).notNull().unique(),
   email: varchar( 'email', { length: 255 } ).notNull().unique(),
+  password: varchar( 'password', { length: 255 } ).notNull(),
   createdAt: timestamp( 'created_at', { mode: 'date' } ).notNull().defaultNow(),
-  updatedAt: timestamp( 'updated_at', { mode: 'date' } ).notNull().$onUpdate( () => new Date() ),
+  updatedAt: timestamp( 'updated_at', { mode: 'date' } ).notNull().defaultNow().$onUpdate( () => new Date() ),
 } );
 
 export const auth = mysqlTable( 'auth', {
   id: int( 'id' ).autoincrement().primaryKey(),
   password: varchar( { length: 255 } ).notNull(),
   createdAt: timestamp( 'created_at', { mode: 'date' } ).defaultNow(),
-  updatedAt: timestamp( 'update_at', { mode: 'date' } ).$onUpdate( () => new Date() ),
+  updatedAt: timestamp( 'update_at', { mode: 'date' } ).defaultNow().$onUpdate( () => new Date() ),
   userID: int( 'user_id' ).references( () => users.id, { onDelete: 'cascade' } ).notNull(),
 } );
 
@@ -26,7 +25,7 @@ export const session = mysqlTable( 'session', {
   userAgent: text( 'user_agent' ),
   ip: varchar( { length: 255 } ),
   createdAt: timestamp( 'created_at', { mode: 'date' } ).defaultNow(),
-  updatedAt: timestamp( 'updated_at', { mode: 'date' } ).$onUpdate( () => new Date() ),
+  updatedAt: timestamp( 'updated_at', { mode: 'date' } ).defaultNow().$onUpdate( () => new Date() ),
   userID: int( 'user_id' ).references( () => users.id, { onDelete: 'cascade' } ).notNull(),
 } );
 
