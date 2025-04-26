@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import requestIp from "request-ip";
 import { authRoutes } from "./routes/auth.routes.js";
 import { appRoutes } from "./routes/app.routes.js";
+import { verifyAuthentication } from "./middleware/auth.middleware.js";
 
 const app = e();
 
@@ -13,6 +14,8 @@ app.use( e.urlencoded( { extended: true } ) );
 app.use( requestIp.mw() );
 
 app.use( cookieParser() );
+
+app.use( verifyAuthentication );
 
 app.use( authRoutes );
 

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createUser, createUserSession, findLoginEmail, findLoginPassword } from "../services/auth.service.js";
+import { createUser, createUserSession, findLoginEmail, findLoginPassword, generateToken } from "../services/auth.service.js";
 import argon2 from "argon2";
 
 const router = Router();
@@ -29,10 +29,10 @@ router.post( '/auth/login', async ( req, res ) => {
 
   let [ result ] = await findLoginPassword( email, password );
   console.log( 'Credential check:', result.password );
-  result = await argon2.verify( result.password, password );
+  let resultCheck = await argon2.verify( result.password, password );
   console.log( result );
 
-  if ( !result ) {
+  if ( !resultCheck ) {
     return res.send( 'Incorrect Password' );
   }
   // create session here
@@ -41,8 +41,13 @@ router.post( '/auth/login', async ( req, res ) => {
   // const userID = req.cookies;
   // // insert userid in req
   // createUserSession( userClient, ip, userID );
-  res.cookie( 'loggedIn', 'true', { maxAge: 1000 * 60 * 60 * 24 * 7 } );
-  // res.cookie( 'loggedIn', 'true', { maxAge: 604800000 } );
+  const token = generateToken( {
+    id: result.id,
+    name: result.name,
+    email: result.email,
+  } );
+  // here the cookie age expires in 15 min also but it takes it in mili-seconds(1000ms = 1s)
+  res.cookie( 'access_token', token, { maxAge: 1000 * 60 * 15 } );
   res.send( 'User Logged In' );
 } );
 
