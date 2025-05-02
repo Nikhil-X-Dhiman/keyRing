@@ -9,18 +9,18 @@ const app = e();
 
 const PORT = process.env.EXPRESS_PORT;
 
-app.use( e.urlencoded( { extended: true } ) );
+app.use(e.urlencoded({ extended: true }));
 
-app.use( requestIp.mw() );
+app.use(requestIp.mw());
 
-app.use( cookieParser() );
+app.use(cookieParser());
 
-app.use( verifyAuthentication );
+app.use(verifyAuthentication);
 
-app.use( authRoutes );
+app.use(authRoutes);
 
-app.use( appRoutes );
+app.use(appRoutes);
 
-app.listen( PORT, () => {
-  console.log( `Server is listening at port: ${PORT}` );
-} );
+app.listen(PORT, () => {
+  console.log(`Server is listening at port: ${PORT}`);
+});
