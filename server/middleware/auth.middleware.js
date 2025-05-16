@@ -25,11 +25,14 @@ export const verifyAuthentication = async (req, res, next) => {
     return next();
   }
   if (refreshToken) {
+    console.log("inside refresh token 1");
+
     const decodedRefreshToken = verifyToken(refreshToken);
     console.log(decodedRefreshToken);
 
-    const userSession = await getSessionById(decodedRefreshToken);
+    const userSession = await getSessionById(decodedRefreshToken.id.id);
     console.log(userSession);
+    console.log("inside refresh token 2");
 
     const user = await getUserById(userSession.userID);
     if (user) {
@@ -43,6 +46,8 @@ export const verifyAuthentication = async (req, res, next) => {
     console.log("inside refresh token");
 
     const newAccessToken = generateToken(req.user);
+    console.log("refresh token decoded", decodedRefreshToken);
+
     const newRefreshToken = generateRefreshToken(decodedRefreshToken.id);
     res.cookie("access_token", newAccessToken, { maxAge: 1000 * 60 * 15 });
     res.cookie("refresh_token", newRefreshToken, {

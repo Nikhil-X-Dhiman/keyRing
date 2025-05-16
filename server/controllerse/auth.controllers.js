@@ -20,24 +20,27 @@ export function conCheck(req, res) {
 
 export async function findEmail(req, res) {
   if (req.user) {
-    res.send("already logged in");
+    return res.send("already logged in");
   }
+
   const { email } = req.body;
+
   const { error, data } = emailLoginSchema.safeParse(email);
   if (error) {
     console.error(error.errors[0].message);
     return res.send("Invalid Email");
   }
+  console.log(data);
   const result = await findLoginEmail(data);
 
   console.log("check user email", result);
 
-  if (!result) {
+  if (result === undefined) {
     return res.send("Email Not Registered");
   }
 
   // send json res after finding user exist in db
-  res.send("Continue");
+  return res.send("Continue");
 }
 
 export async function postLogin(req, res) {

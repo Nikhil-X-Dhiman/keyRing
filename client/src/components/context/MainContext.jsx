@@ -1,28 +1,49 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { jwtDecode } from "jwt-decode";
+import Cookies from "js-cookie";
+import axios from "axios";
+
+export const instance = axios.create({
+	baseURL: "http://localhost:3000/",
+});
 
 const MainContext = createContext(undefined);
 
-export const MainProvider = ({children})=>{
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [user, setUser] = useState(null);
-  // also handle token to save to cookies
+export const MainProvider = ({ children }) => {
+	const [email, setEmail] = useState("");
 
-  function handleLogin() {
-    // logic to req user login try catch
-  }
+	// const [password, setPassword] = useState("");
+	const [user, setUser] = useState(null);
+	// also handle token to save to cookies
+	const [loading, setLoading] = useState(false);
 
-  // handle logout too
+	useEffect(() => {
+		try {
+			const access_token = Cookies.get("access_token");
+			console.log(access_token);
+			const tokenPayload = jwtDecode(access_token);
+			console.log(tokenPayload);
+		} catch {
+			console.log("no token found");
+		}
+	}, []);
 
-  return <MainContext.Provider value={{setEmail, setPassword, handleLogin}}>
-    {children}
-  </MainContext.Provider>
-}
+	// handle logout too
 
-export const useData = () =>{
-  const context = useContext(MainProvider);
-  if (context===undefined) {
-    throw new Error("useData inside Main Provider")
-  }
-  return context;
-}
+	return (
+		<MainContext.Provider
+			value={{ user, email, setEmail, loading, setLoading }}
+		>
+			{children}
+		</MainContext.Provider>
+	);
+};
+
+export const useData = () => {
+	const context = useContext(MainContext);
+
+	if (context === undefined) {
+		throw new Error("useData inside Main Provider");
+	}
+	return context;
+};
