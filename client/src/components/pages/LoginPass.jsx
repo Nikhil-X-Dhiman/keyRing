@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, Navigate, useNavigate } from "react-router";
 import { AuthBtn } from "../UI/AuthBtn";
 import { useRef } from "react";
 import { instance, useData } from "../context/MainContext";
@@ -6,6 +6,7 @@ import { instance, useData } from "../context/MainContext";
 export function LoginPass() {
 	const passwordInputRef = useRef(null);
 	const { setLoading, email } = useData();
+	const navigate = useNavigate();
 
 	function handleLogin(password) {
 		// logic to req user login try catch
@@ -20,6 +21,13 @@ export function LoginPass() {
 			.then((res) => console.log("Login response: ", res))
 			.catch((err) => console.error("Login error: ", err));
 		setLoading(false);
+	}
+
+	function handleHome() {
+		instance
+			.get("/")
+			.then((res) => console.log(res))
+			.catch((err) => console.error(err));
 	}
 
 	return (
@@ -47,6 +55,7 @@ export function LoginPass() {
 				handleBtnClick={handleLogin}
 				passwordInputRef={passwordInputRef}
 			/>
+			<button onClick={handleHome}>Go Home</button>
 		</>
 	);
 }

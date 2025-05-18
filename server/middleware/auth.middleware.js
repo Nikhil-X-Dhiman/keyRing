@@ -49,9 +49,13 @@ export const verifyAuthentication = async (req, res, next) => {
     console.log("refresh token decoded", decodedRefreshToken);
 
     const newRefreshToken = generateRefreshToken(decodedRefreshToken.id);
-    res.cookie("access_token", newAccessToken, { maxAge: 1000 * 60 * 15 });
+    res.cookie("access_token", newAccessToken, {
+      maxAge: 1000 * 60 * 15,
+      sameSite: "None",
+    });
     res.cookie("refresh_token", newRefreshToken, {
       maxAge: 1000 * 60 * 60 * 24 * 7,
+      sameSite: "None",
     });
   }
   console.log(`auth varification completes`);

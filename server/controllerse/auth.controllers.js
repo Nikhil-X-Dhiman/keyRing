@@ -15,6 +15,9 @@ import {
 import argon2 from "argon2";
 
 export function conCheck(req, res) {
+  if (req.user) return res.send("already logged in");
+  console.log(req);
+
   return res.send("Connection Success");
 }
 
@@ -91,9 +94,16 @@ export async function postLogin(req, res) {
     email: result.email,
   });
   const newRefreshToken = generateRefreshToken(sessionID);
-  res.cookie("access_token", accessToken, { maxAge: 1000 * 60 * 15 });
+  res.cookie("access_token", accessToken, {
+    maxAge: 1000 * 60 * 15,
+    sameSite: "None",
+    secure: true,
+  });
   res.cookie("refresh_token", newRefreshToken, {
     maxAge: 1000 * 60 * 60 * 24 * 7,
+    sameSite: "None",
+    secure: true,
+    httpOnly: true,
   });
   // here the cookie age expires in 15 min also but it takes it in mili-seconds(1000ms = 1s)
   // res.cookie("access_token", token, { maxAge: 1000 * 60 * 15 });

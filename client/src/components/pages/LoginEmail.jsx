@@ -12,9 +12,13 @@ export function LoginEmail() {
 		console.log(email);
 
 		instance
-			.post("/auth/email", {
-				email: email,
-			})
+			.post(
+				"/auth/email",
+				{
+					email: email,
+				},
+				{ withCredentials: true }
+			)
 			.then((res) => console.log("email check req success", res))
 			.catch((err) => console.log("error check req success", err));
 		setLoading(false);
