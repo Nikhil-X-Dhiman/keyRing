@@ -1,0 +1,24 @@
+{
+	"name": "keyring",
+	"version": "1.0.0",
+	"description": "Password Manager",
+	"main": "server.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"dev": "nodemon --env-file .env server.js",
+		"pro": "node --env-file .env server.js",
+		"db:migrate": "npx drizzle-kit migrate",
+		"db:generate": "npx drizzle-kit generate",
+		"db:studio": "npx drizzle-kit studio --verbose"
+	},
+	"author": "Nikhil Dhiman",
+	"license": "ISC",
+	"devDependencies": {
+		"drizzle-kit": "^0.31.1",
+		"nodemon": "^3.1.10"
+	},
+	"dependencies": {
+		"drizzle-orm": "^0.43.1",
+		"mysql2": "^3.14.1"
+	}
+}
