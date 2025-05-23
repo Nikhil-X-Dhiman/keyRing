@@ -10,10 +10,9 @@ import {
 	timestamp,
 	varchar,
 } from "drizzle-orm/mysql-core";
-import { serial } from "drizzle-orm/pg-core";
 
 export const userTable = mysqlTable("users", {
-	id: serial("id").primaryKey(),
+	id: int("id").autoincrement().primaryKey(),
 	name: varchar("name", { length: 255 }).notNull(),
 	email: varchar("email", { length: 255 }).notNull().unique(),
 	emailVerified: boolean("email_verified").default(false).notNull(),
@@ -21,7 +20,7 @@ export const userTable = mysqlTable("users", {
 	plan: mysqlEnum("plan", ["free", "plus", "pro"]).default("free").notNull(),
 	isActive: boolean("is_active").default(true).notNull(),
 	failedLoginAttempts: int("failed_login_attempts").default(0).notNull(),
-	lastLogin: datetime("last_login").notNull(),
+	lastLogin: datetime("last_login"),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updateAt: timestamp("updated_at")
 		.defaultNow()
@@ -30,7 +29,7 @@ export const userTable = mysqlTable("users", {
 });
 
 export const userAuthTable = mysqlTable("auth", {
-	id: serial("id").primaryKey(),
+	id: int("id").autoincrement().primaryKey(),
 	userID: int("user_id").references(() => userTable.id, {
 		onDelete: "cascade",
 	}),
@@ -39,7 +38,7 @@ export const userAuthTable = mysqlTable("auth", {
 	verifyTokenExpiry: timestamp("verify_token_expiry", {
 		withTimezone: true,
 	}),
-	resetPasswordToken: varchar("password_hash", { length: 255 }).unique(),
+	resetPasswordToken: varchar("reset_password_token", { length: 255 }).unique(),
 	resetPasswordTokenExpiry: timestamp("reset_password_token_expiry", {
 		withTimezone: true,
 	}),
@@ -51,8 +50,10 @@ export const userAuthTable = mysqlTable("auth", {
 });
 
 export const refreshTokenTable = mysqlTable("refresh_token", {
-	id: serial("id").primaryKey(),
-	userID: int("user_id").references(() => userTable.id),
+	id: int("id").autoincrement().primaryKey(),
+	userID: int("user_id").references(() => userTable.id, {
+		onDelete: "cascade",
+	}),
 	token: varchar("token", { length: 255 }).unique().notNull(),
 	tokenExpiry: timestamp("token_expiry", { withTimezone: true }),
 	ipAddress: varchar("ip_address", { length: 50 }),
@@ -68,8 +69,10 @@ export const refreshTokenTable = mysqlTable("refresh_token", {
 });
 
 export const loginTable = mysqlTable("login", {
-	id: serial("id").primaryKey(),
-	userID: int("user_id").references(() => userTable.id),
+	id: int("id").autoincrement().primaryKey(),
+	userID: int("user_id").references(() => userTable.id, {
+		onDelete: "cascade",
+	}),
 	name: varchar("name", { length: 255 }),
 	username: varchar("username", { length: 255 }),
 	password: varchar("password", { length: 255 }),

@@ -1,0 +1,1 @@
+docker run -d --name keyring-mysql -e MYSQL_ROOT_PASSWORD=qwerty -p 3306:3306 -v /home/wsl_ubuntu/myFiles/databases/keyRing_db:/var/lib/mysql mysql:latest
