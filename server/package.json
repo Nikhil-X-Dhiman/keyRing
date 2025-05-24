@@ -20,8 +20,10 @@
 	},
 	"dependencies": {
 		"argon2": "^0.43.0",
+		"cookie-parser": "^1.4.7",
 		"drizzle-orm": "^0.43.1",
 		"express": "^5.1.0",
+		"jsonwebtoken": "^9.0.2",
 		"mysql2": "^3.14.1"
 	}
 }

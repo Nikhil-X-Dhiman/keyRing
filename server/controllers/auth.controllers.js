@@ -2,8 +2,10 @@ import {
 	getUserByCredentials,
 	insertUserByCredential,
 } from "../models/auth.models.js";
+import { insertRefreshToken } from "../models/token.models.js";
 import { jsonResponse } from "../services/jsonResponse.service.js";
 import { genPasswdHash, verifyPasswd } from "../utils/handleArgon.js";
+import { genAccessToken, genRefreshToken } from "../utils/handleTokens.js";
 
 export const handleLogin = async (req, res) => {
 	const { email, passwd } = req.body;
@@ -32,18 +34,36 @@ export const handleLogin = async (req, res) => {
 	} catch (error) {
 		console.error("handleLogin: ", error);
 	}
+	const payload = {
+		id: result?.users?.id,
+		name: result?.users?.name,
+		email: result?.users?.email,
+		verified: result?.users?.emailVerified,
+		role: result?.users?.role,
+		plan: result?.users?.plan,
+	};
+	const accessToken = genAccessToken(payload);
+	const refreshToken = genRefreshToken({ id: payload?.id });
+	if (!accessToken || !refreshToken) {
+		return res.status(500).json(
+			jsonResponse({
+				isError: true,
+				error: "Access & Refresh token creation failed!!!",
+			})
+		);
+	}
+	await insertRefreshToken(refreshToken, payload?.id);
+
+	res.cookie("refresh_token", refreshToken, {
+		// 14 days (in miliseconds)
+		maxAge: 1000 * 60 * 60 * 24 * 14,
+		httpOnly: true,
+	});
 
 	return res.status(200).json(
 		jsonResponse({
 			isSuccess: true,
-			data: {
-				id: result.users.id,
-				name: result.users.name,
-				email: result.users.email,
-				verified: result.users.emailVerified,
-				role: result.users.role,
-				plan: result.users.plan,
-			},
+			data: { access_token: accessToken },
 		})
 	);
 };
@@ -68,7 +88,7 @@ export const handleRegister = async (req, res) => {
 			.json(jsonResponse({ isSuccess: true, data: "Success" }));
 	}
 	return res
-		.status(500)
+		.status(400)
 		.json(
 			jsonResponse({ isError: true, error: "Email is Already Registered!!!" })
 		);
