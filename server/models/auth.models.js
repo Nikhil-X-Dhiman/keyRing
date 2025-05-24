@@ -7,9 +7,7 @@ export const getUserByCredentials = async (email, passwd) => {
 		.select()
 		.from(userTable)
 		.innerJoin(userAuthTable, eq(userTable.id, userAuthTable.userID))
-		.where(
-			and(eq(userTable.email, email), eq(userAuthTable.passwordHash, passwd))
-		);
+		.where(eq(userTable.email, email));
 };
 
 export const insertUserByCredential = async (email, name, passwd) => {
@@ -20,9 +18,13 @@ export const insertUserByCredential = async (email, name, passwd) => {
 			.$returningId();
 		const [query2] = await db
 			.insert(userAuthTable)
-			.values({ userID: query1.id, passwordHash: passwd });
-		return true;
+			.values({ userID: query1.id, passwordHash: passwd })
+			.$returningId();
+
+		return query2;
 	} catch (error) {
+		console.error("Register User Error: ", error);
+
 		return false;
 	}
 };

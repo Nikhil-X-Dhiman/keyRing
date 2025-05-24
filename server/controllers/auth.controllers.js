@@ -3,6 +3,7 @@ import {
 	insertUserByCredential,
 } from "../models/auth.models.js";
 import { jsonResponse } from "../services/jsonResponse.service.js";
+import { genPasswdHash, verifyPasswd } from "../utils/handleArgon.js";
 
 export const handleLogin = async (req, res) => {
 	const { email, passwd } = req.body;
@@ -14,25 +15,34 @@ export const handleLogin = async (req, res) => {
 			})
 		);
 	}
-	const [result] = await getUserByCredentials(email, passwd);
-	// console.log("result", result);
-	if (!result) {
-		return res
-			.status(404)
-			.json(
-				jsonResponse({ isError: true, error: "Email or Password is Incorrect" })
+	let result;
+	try {
+		[result] = await getUserByCredentials(email, passwd);
+		let passwdVerification = result
+			? verifyPasswd(passwd, result?.auth?.passwordHash)
+			: false;
+		if (!passwdVerification || !result) {
+			return res.status(404).json(
+				jsonResponse({
+					isError: true,
+					error: "Email or Password is Incorrect",
+				})
 			);
+		}
+	} catch (error) {
+		console.error("handleLogin: ", error);
 	}
+
 	return res.status(200).json(
 		jsonResponse({
 			isSuccess: true,
 			data: {
-				id: result.id,
-				name: result.name,
-				email: result.email,
-				verified: result.emailVerified,
-				role: result.role,
-				plan: result.plan,
+				id: result.users.id,
+				name: result.users.name,
+				email: result.users.email,
+				verified: result.users.emailVerified,
+				role: result.users.role,
+				plan: result.users.plan,
 			},
 		})
 	);
@@ -48,7 +58,10 @@ export const handleRegister = async (req, res) => {
 			})
 		);
 	}
-	const result = await insertUserByCredential(email, name, passwd);
+	// Create hash from passwd
+	const hashPasswd = await genPasswdHash(passwd);
+
+	const result = await insertUserByCredential(email, name, hashPasswd);
 	if (result) {
 		return res
 			.status(201)
@@ -57,6 +70,6 @@ export const handleRegister = async (req, res) => {
 	return res
 		.status(500)
 		.json(
-			jsonResponse({ isError: true, error: "Server: User Creation Failed!!!" })
+			jsonResponse({ isError: true, error: "Email is Already Registered!!!" })
 		);
 };
