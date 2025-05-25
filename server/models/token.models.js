@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "../drizzle/db/index.js";
 import { refreshTokenTable, userTable } from "../drizzle/db/schema.js";
+import { log } from "console";
 
 export const getRefreshToken = async (id) => {
 	try {
@@ -26,11 +27,11 @@ export const insertRefreshToken = async (refreshToken, id) => {
 	}
 };
 
-export const removeRefreshToken = async (id) => {
+export const removeRefreshToken = async (token) => {
 	try {
 		return await db
 			.delete(refreshTokenTable)
-			.where(eq(refreshTokenTable.userID, id));
+			.where(eq(refreshTokenTable.token, token));
 	} catch (error) {
 		console.error("Remove Refresh Token Error: ", error);
 		return null;

@@ -1,4 +1,8 @@
-import { getUserByCredentials, getUserByID } from "../models/auth.models.js";
+import {
+	insertRefreshToken,
+	removeRefreshToken,
+} from "../models/token.models.js";
+import { jsonResponse } from "../services/jsonResponse.service.js";
 import {
 	genAccessToken,
 	genRefreshToken,
@@ -13,19 +17,66 @@ export const authenticateUserRequest = async (req, res, next) => {
 	const refreshToken = req.cookies.refresh_token;
 	// console.log("Middleware access token: ", accessToken);
 	// console.log("Middleware refresh token: ", refreshToken);
+	console.log("verify: inside middleware");
 
-	if (!refreshToken) {
+	if (!accessToken && !refreshToken) {
 		req.user = null;
-		next();
-	} else if (accessToken) {
-		req.user = verifyAccessToken(accessToken);
-		next();
-	} else if (refreshToken) {
-		const decodedToken = verifyRefreshToken(refreshToken);
-		const payload = getUserByID(decodedToken?.id);
-		accessToken = genAccessToken(payload);
-		refreshToken = genRefreshToken(decodedToken);
-		// TODO: 1-> store & delete refresh in db 2-> make cookie and send to client 3-> make a response to client
+		return next();
 	}
-	next();
+	if (accessToken) {
+		const decodedAccessToken = verifyAccessToken(accessToken);
+		if (decodedAccessToken) {
+			console.log("Access Token is Valid!!!");
+
+			req.user = decodedAccessToken;
+			return next();
+		}
+		console.log("Access Token is Invalid!!!");
+	}
+
+	if (refreshToken) {
+		console.log("verify: inside refresh token");
+		// TODO: Support for multi session per user, as only one token per userID is supported for now
+		const [decodedToken] = await verifyRefreshToken(refreshToken);
+		if (!decodedToken) {
+			console.log("Refresh Token is Invalid!!!");
+			return res.status(401).json(
+				jsonResponse({
+					isError: true,
+					error:
+						"Protected Route: Authorization Required(Invalid Refresh Token)",
+				})
+			);
+		}
+		console.log("Refresh Token is Valid");
+
+		const payload = {
+			id: decodedToken?.users?.id,
+			name: decodedToken?.users?.name,
+			email: decodedToken?.users?.email,
+			verified: decodedToken?.users?.emailVerified,
+			role: decodedToken?.users?.role,
+			plan: decodedToken?.users?.plan,
+		};
+		req.user = payload;
+
+		const newAccessToken = genAccessToken(payload);
+		console.log("access token: ", newAccessToken);
+		const newRefreshToken = genRefreshToken({
+			id: decodedToken?.users?.id,
+		});
+		// console.log("new refresh token: ", newRefreshToken);
+		await removeRefreshToken(decodedToken?.refresh_token?.token);
+		await insertRefreshToken(newRefreshToken, payload?.id);
+		res.cookie("refresh_token", refreshToken, {
+			maxAge: 1000 * 60 * 60 * 24 * 14,
+			httpOnly: true,
+		});
+		req.newToken = newAccessToken;
+		return next();
+	}
+
+	console.log("No Valid Access & Refresh Token Found");
+	req.user = null;
+	return next();
 };

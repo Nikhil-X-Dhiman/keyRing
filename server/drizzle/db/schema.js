@@ -54,7 +54,7 @@ export const refreshTokenTable = mysqlTable("refresh_token", {
 	userID: int("user_id").references(() => userTable.id, {
 		onDelete: "cascade",
 	}),
-	token: varchar("token", { length: 255 }).unique().notNull(),
+	token: varchar("token", { length: 500 }).unique().notNull(),
 	tokenExpiry: timestamp("token_expiry", { withTimezone: true }),
 	ipAddress: varchar("ip_address", { length: 50 }),
 	userAgent: varchar("user_agent", { length: 255 }),

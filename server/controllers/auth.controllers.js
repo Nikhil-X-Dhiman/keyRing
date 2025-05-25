@@ -52,6 +52,8 @@ export const handleLogin = async (req, res) => {
 			})
 		);
 	}
+	// console.log("refresh token payload (handle login):", payload.id);
+
 	await insertRefreshToken(refreshToken, payload?.id);
 
 	res.cookie("refresh_token", refreshToken, {
