@@ -40,7 +40,7 @@ export const authenticateUserRequest = async (req, res, next) => {
 		const [decodedToken] = await verifyRefreshToken(refreshToken);
 		if (!decodedToken) {
 			console.log("Refresh Token is Invalid!!!");
-			return res.status(401).json(
+			return res.status(403).json(
 				jsonResponse({
 					isError: true,
 					error:
@@ -72,6 +72,7 @@ export const authenticateUserRequest = async (req, res, next) => {
 			maxAge: 1000 * 60 * 60 * 24 * 14,
 			httpOnly: true,
 		});
+		res.setHeader("Authorization", `Bearer ${newAccessToken}`);
 		req.newToken = newAccessToken;
 		return next();
 	}

@@ -1,1 +1,3 @@
 logging
+add ipaddress & useragent in refresh token table
+pass the public key to the client

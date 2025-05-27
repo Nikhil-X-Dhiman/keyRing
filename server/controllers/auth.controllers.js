@@ -8,6 +8,7 @@ import { genPasswdHash, verifyPasswd } from "../utils/handleArgon.js";
 import { genAccessToken, genRefreshToken } from "../utils/handleTokens.js";
 
 export const handleLogin = async (req, res) => {
+	// TODO: detect if user is already logged in
 	const { email, passwd } = req.body;
 	if (!email || !passwd) {
 		return res.status(400).json(
@@ -90,7 +91,7 @@ export const handleRegister = async (req, res) => {
 			.json(jsonResponse({ isSuccess: true, data: "Success" }));
 	}
 	return res
-		.status(400)
+		.status(409)
 		.json(
 			jsonResponse({ isError: true, error: "Email is Already Registered!!!" })
 		);
