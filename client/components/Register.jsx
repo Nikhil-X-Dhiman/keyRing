@@ -1,16 +1,43 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { emailSchema } from "../utils/authSchema";
 
 export const Register = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [email, setEmail] = useState("");
+	const [validEmail, setValidEmail] = useState(false);
+	const emailFocus = useRef();
 	const [name, setName] = useState("");
+	const [validName, setValidName] = useState("");
 	const [passwd, setPasswd] = useState("");
+	const [matchPasswd, setMatchPasswd] = useState("");
+	const [validPasswd, setValidPasswd] = useState(false);
+	const [validMatchPasswd, setValidMatchPasswd] = useState(false);
+
+	const [err, setErr] = useState("");
+
+	useEffect(() => {
+		emailFocus.current.focus();
+	}, []);
+
+	useEffect(() => {
+		if (email) {
+			const { success, data, error } = emailSchema.safeParse(email);
+
+			if (success) {
+				setValidEmail(true);
+				setErr(null);
+			} else {
+				setValidEmail(false);
+				setErr(error.issues[0].message);
+			}
+		}
+	}, [email]);
 
 	const handleSubmitBtn = (e) => {
 		setIsLoading(true);
 		e.preventDefault();
 		const email = emailSchema.safeParse(email);
+		setIsLoading(false);
 	};
 
 	return isLoading ? (
@@ -29,6 +56,7 @@ export const Register = () => {
 					<input
 						type="email"
 						id="register-email"
+						ref={emailFocus}
 						value={email}
 						onChange={(e) => setEmail(e.currentTarget.value)}
 					/>

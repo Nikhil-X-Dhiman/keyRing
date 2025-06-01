@@ -15,8 +15,8 @@ export const Home = () => {
 	const emailRef = useRef();
 
 	const [err, setErr] = useState(undefined);
-	const [success, setSuccess] = useState(false);
-	const errRef = useRef();
+	// const [success, setSuccess] = useState(false);
+	// const errRef = useRef();
 
 	useEffect(() => {
 		emailRef.current.focus();
@@ -24,24 +24,24 @@ export const Home = () => {
 
 	useEffect(() => {
 		const { success, data, error } = emailSchema.safeParse(email);
+
 		if (success) {
 			console.log("Email Schema Success: ", data);
 			setValidEmail(true);
+			setErr("");
 		} else {
 			setValidEmail(false);
-			setErr(error);
+			setErr(error.issues[0].message);
 			console.error("Email Schema Error: ", err);
 		}
 	}, [email]);
 
-	useEffect(() => {
-		setErr("");
-	}, [email]);
-
 	const handleSubmitBtn = (e) => {
-		setIsLoading(true);
 		e.preventDefault();
-		setEmail(data);
+		setIsLoading(true);
+		if (validEmail) {
+			//
+		}
 		setIsLoading(false);
 	};
 
@@ -70,9 +70,12 @@ export const Home = () => {
 							onBlur={() => setEmailFocus(false)}
 						/>
 					</fieldset>
-					<p className={err && email && !validEmail ? "errMsg" : "hide"}>
-						{err}
-					</p>
+					{console.log(err)}
+					{err && !emailFocus && email ? <p>{err}</p> : <p></p>}
+					{/* <p className={err && email && !validEmail ? "errMsg" : "hide"}>
+						// {err}
+						//{" "}
+					</p> */}
 					<input type="checkbox" id="login-remember" />
 					<label htmlFor="login-remember">Remember Email</label>
 					<button onClick={handleSubmitBtn}>Continue</button>
