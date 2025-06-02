@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { emailSchema } from "../utils/authSchema.js";
 
-export const Home = () => {
+export const LoginEmail = () => {
 	const EMAIL_REGEX =
 		/^[a-zA-Z][\w]+([._$%&]?[\w]+)*@[a-zA-Z]+(\.[a-zA-Z]{2,})+$/;
 	const PASSWD_REGEX =
@@ -15,32 +15,37 @@ export const Home = () => {
 	const emailRef = useRef();
 
 	const [err, setErr] = useState(undefined);
-	// const [success, setSuccess] = useState(false);
-	// const errRef = useRef();
 
 	useEffect(() => {
 		emailRef.current.focus();
 	}, []);
 
 	useEffect(() => {
-		const { success, data, error } = emailSchema.safeParse(email);
+		if (!emailFocus && email) {
+			const { success, data, error } = emailSchema.safeParse(email);
+			if (success) {
+				console.log("Email Schema Success: ", data);
+				setValidEmail(true);
+				setErr("");
+			} else {
+				setValidEmail(false);
+				console.log(error);
 
-		if (success) {
-			console.log("Email Schema Success: ", data);
-			setValidEmail(true);
-			setErr("");
-		} else {
-			setValidEmail(false);
-			setErr(error.issues[0].message);
-			console.error("Email Schema Error: ", err);
+				setErr(error.issues[0].message);
+				console.error("Email Schema Error: ", err);
+			}
 		}
+	}, [emailFocus]);
+
+	useEffect(() => {
+		setErr("");
 	}, [email]);
 
 	const handleSubmitBtn = (e) => {
 		e.preventDefault();
 		setIsLoading(true);
 		if (validEmail) {
-			//
+			// navigate to password page
 		}
 		setIsLoading(false);
 	};
@@ -70,12 +75,8 @@ export const Home = () => {
 							onBlur={() => setEmailFocus(false)}
 						/>
 					</fieldset>
-					{console.log(err)}
-					{err && !emailFocus && email ? <p>{err}</p> : <p></p>}
-					{/* <p className={err && email && !validEmail ? "errMsg" : "hide"}>
-						// {err}
-						//{" "}
-					</p> */}
+					{/* change hide & unhide using CSS */}
+					{err && email ? <p>{err}</p> : <p></p>}
 					<input type="checkbox" id="login-remember" />
 					<label htmlFor="login-remember">Remember Email</label>
 					<button onClick={handleSubmitBtn}>Continue</button>
