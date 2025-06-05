@@ -1,13 +1,12 @@
-import { useState } from "react";
 import "./App.css";
 import { LoginEmail } from "../components/LoginEmail";
+import { LoginPasswd } from "../components/LoginPasswd";
 
 function App() {
-	// const [count, setCount] = useState(0);
-
 	return (
 		<>
 			<LoginEmail />
+			<LoginPasswd />
 		</>
 	);
 }

@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { passwdSchema } from "../utils/authSchema.js";
+import { instance } from "../api/axios.js";
+import { useAuth } from "../hooks/useAuth.js";
+import { Navigate, useNavigate } from "react-router";
 
 export const LoginPasswd = () => {
 	const PASSWD_REGEX =
@@ -13,6 +16,9 @@ export const LoginPasswd = () => {
 	const passwdRef = useRef();
 
 	const [err, setErr] = useState(undefined);
+
+	const { email } = useAuth();
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		passwdRef.current.focus();
@@ -33,17 +39,40 @@ export const LoginPasswd = () => {
 				console.error("Passwd Schema Error: ", err);
 			}
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [passwdFocus]);
 
 	useEffect(() => {
 		setErr("");
 	}, [passwd]);
 
-	const handleSubmitBtn = (e) => {
+	if (!email) {
+		return <Navigate to="/login/email" replace />;
+	}
+
+	const handleSubmitBtn = async (e) => {
 		e.preventDefault();
 		setIsLoading(true);
 		if (validPasswd) {
 			// navigate to password page
+			try {
+				const response = await instance.post(
+					"/login",
+					{
+						email: "",
+						passwd,
+					},
+					{ withCredentials: true }
+				);
+				console.log("Axios Response: ", response.data);
+			} catch (error) {
+				if (!error?.response) {
+					console.error("No Server Response");
+				} else {
+					console.error("Server Error: Login Failed!!!: ", error);
+				}
+				// console.error("Login Axios Error: ", error);
+			}
 		}
 		setIsLoading(false);
 	};
@@ -54,13 +83,15 @@ export const LoginPasswd = () => {
 		<>
 			<main>
 				<figure>
-					<img src="../public/vault.png" alt="vault-img" />
-					<figcaption>Log in to KeyRing</figcaption>
+					<img src="../public/wave.png" alt="wave-img" />
+					<figcaption>Welcome Back</figcaption>
 				</figure>
+				{/* TODO: Display email address here from global context */}
+				{email}
 				<form>
 					<fieldset>
 						<legend>
-							Email address <span>(required)</span>
+							Password <span>(required)</span>
 						</legend>
 						<input
 							type="password"
@@ -75,9 +106,9 @@ export const LoginPasswd = () => {
 					</fieldset>
 					{/* change hide & unhide using CSS */}
 					{err && passwd ? <p>{err}</p> : <p></p>}
-					{/* match passwd input comes here */}
 					<button onClick={handleSubmitBtn}>Continue</button>
 				</form>
+				<button onClick={() => navigate(-1)}>Go Back</button>
 				<div>
 					New to Bitwarden? <a href="">Create account</a>
 				</div>

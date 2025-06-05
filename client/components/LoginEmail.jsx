@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { emailSchema } from "../utils/authSchema.js";
+import { instance } from "../api/axios.js";
 
 export const LoginEmail = () => {
 	const EMAIL_REGEX =
@@ -35,6 +36,7 @@ export const LoginEmail = () => {
 				console.error("Email Schema Error: ", err);
 			}
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [emailFocus]);
 
 	useEffect(() => {
@@ -71,6 +73,7 @@ export const LoginEmail = () => {
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
 							required
+							// autoComplete="off"
 							onFocus={() => setEmailFocus(true)}
 							onBlur={() => setEmailFocus(false)}
 						/>
