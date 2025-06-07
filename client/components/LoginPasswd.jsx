@@ -10,14 +10,13 @@ export const LoginPasswd = () => {
 
 	const [isLoading, setIsLoading] = useState(false);
 
-	const [passwd, setPasswd] = useState("");
-	const [validPasswd, setValidPasswd] = useState(false);
 	const [passwdFocus, setPasswdFocus] = useState(false);
 	const passwdRef = useRef();
 
 	const [err, setErr] = useState(undefined);
 
-	const { email } = useAuth();
+	const { userLogin, validEmail, validPasswd, setUserLogin, setValidPasswd } =
+		useAuth();
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -25,8 +24,8 @@ export const LoginPasswd = () => {
 	}, []);
 
 	useEffect(() => {
-		if (!passwdFocus && passwd) {
-			const { success, data, error } = passwdSchema.safeParse(passwd);
+		if (!passwdFocus && userLogin.passwd) {
+			const { success, data, error } = passwdSchema.safeParse(userLogin.passwd);
 			if (success) {
 				console.log("Passwd Schema Success: ", data);
 				setValidPasswd(true);
@@ -44,23 +43,23 @@ export const LoginPasswd = () => {
 
 	useEffect(() => {
 		setErr("");
-	}, [passwd]);
+	}, [userLogin.passwd]);
 
-	if (!email) {
+	if (!userLogin.email && !validEmail) {
 		return <Navigate to="/login/email" replace />;
 	}
 
 	const handleSubmitBtn = async (e) => {
 		e.preventDefault();
 		setIsLoading(true);
-		if (validPasswd) {
+		if (validPasswd && validEmail) {
 			// navigate to password page
 			try {
 				const response = await instance.post(
 					"/login",
 					{
-						email: "",
-						passwd,
+						email: userLogin.email,
+						passwd: userLogin.passwd,
 					},
 					{ withCredentials: true }
 				);
@@ -71,8 +70,11 @@ export const LoginPasswd = () => {
 				} else {
 					console.error("Server Error: Login Failed!!!: ", error);
 				}
-				// console.error("Login Axios Error: ", error);
 			}
+		} else if (!validEmail) {
+			<Navigate to="/login/email" replace />;
+		} else if (!validPasswd) {
+			passwdRef.current.focus();
 		}
 		setIsLoading(false);
 	};
@@ -86,8 +88,7 @@ export const LoginPasswd = () => {
 					<img src="../public/wave.png" alt="wave-img" />
 					<figcaption>Welcome Back</figcaption>
 				</figure>
-				{/* TODO: Display email address here from global context */}
-				{email}
+				{userLogin.email}
 				<form>
 					<fieldset>
 						<legend>
@@ -97,15 +98,17 @@ export const LoginPasswd = () => {
 							type="password"
 							id="login-passwd"
 							ref={passwdRef}
-							value={passwd}
-							onChange={(e) => setPasswd(e.target.value)}
+							value={userLogin.passwd}
+							onChange={(e) =>
+								setUserLogin((prev) => ({ ...prev, passwd: e.target.value }))
+							}
 							required
 							onFocus={() => setPasswdFocus(true)}
 							onBlur={() => setPasswdFocus(false)}
 						/>
 					</fieldset>
-					{/* change hide & unhide using CSS */}
-					{err && passwd ? <p>{err}</p> : <p></p>}
+					{/* TODO: change hide & unhide using CSS */}
+					{err && userLogin.passwd ? <p>{err}</p> : <p></p>}
 					<button onClick={handleSubmitBtn}>Continue</button>
 				</form>
 				<button onClick={() => navigate(-1)}>Go Back</button>

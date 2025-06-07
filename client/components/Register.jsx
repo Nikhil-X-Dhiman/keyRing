@@ -1,43 +1,162 @@
 import { useEffect, useRef, useState } from "react";
-import { emailSchema } from "../utils/authSchema";
+import { emailSchema, nameSchema, passwdSchema } from "../utils/authSchema";
+import { useAuth } from "../hooks/useAuth";
+import { instance } from "../api/axios";
+import { email } from "zod/v4";
 
 export const Register = () => {
 	const [isLoading, setIsLoading] = useState(false);
-	const [email, setEmail] = useState("");
+	// Email States
 	const [validEmail, setValidEmail] = useState(false);
-	const emailFocus = useRef();
-	const [name, setName] = useState("");
-	const [validName, setValidName] = useState("");
-	const [passwd, setPasswd] = useState("");
-	const [matchPasswd, setMatchPasswd] = useState("");
-	const [validPasswd, setValidPasswd] = useState(false);
-	const [validMatchPasswd, setValidMatchPasswd] = useState(false);
+	const emailFocusRef = useRef();
+	const [emailFocus, setEmailFocus] = useState(false);
 
+	// Name States
+	const [validName, setValidName] = useState("");
+	const [nameFocus, setNameFocus] = useState(false);
+
+	// Password States
+	const [passwd, setPasswd] = useState("");
+	const [passwdFocus, setPasswdFocus] = useState(false);
+	const [matchPasswd, setMatchPasswd] = useState("");
+	const [matchPasswdFocus, setMatchPasswdFocus] = useState(false);
+	const [validPasswd, setValidPasswd] = useState(false);
+	const [passwdMatching, setPasswdMatching] = useState(false);
+
+	// Error States
 	const [err, setErr] = useState("");
+	const [emailError, setEmailError] = useState("");
+	const [nameError, setNameError] = useState("");
+	const [passwdError, setPasswdError] = useState("");
+	const [matchPasswdError, setMatchPasswdError] = useState("");
+
+	const { userRegister, setUserRegister } = useAuth();
 
 	useEffect(() => {
-		emailFocus.current.focus();
+		emailFocusRef.current.focus();
 	}, []);
 
 	useEffect(() => {
-		if (email) {
-			const { success, data, error } = emailSchema.safeParse(email);
+		if (userRegister.email) {
+			const { success, data, error } = emailSchema.safeParse(
+				userRegister.email
+			);
 
 			if (success) {
 				setValidEmail(true);
-				setErr(null);
+				setErr("");
 			} else {
 				setValidEmail(false);
 				setErr(error.issues[0].message);
 			}
 		}
-	}, [email]);
+	}, [userRegister.email]);
 
-	const handleSubmitBtn = (e) => {
-		setIsLoading(true);
+	useEffect(() => {
+		if (!validEmail && !emailFocus && userRegister.email) {
+			setEmailError(
+				'Email must be a-z character, 0-9 Numbers, ".@-" special characters & case-insensitinve'
+			);
+		} else if (validEmail) {
+			setEmailError(null);
+		}
+	}, [validEmail, emailFocus]);
+
+	// Name Checking
+	useEffect(() => {
+		if (userRegister.name) {
+			const { success, data, error } = nameSchema.safeParse(userRegister.name);
+
+			if (success) {
+				setValidName(true);
+				setErr("");
+			} else {
+				setValidName(false);
+				setErr(error.issues[0].message);
+			}
+		}
+	}, [userRegister.name]);
+
+	useEffect(() => {
+		if (!validName && !nameFocus && userRegister.name) {
+			setNameError("Name length should be between 2 & 32.");
+		} else if (validName) {
+			setNameError(null);
+		}
+	}, [validName, nameFocus]);
+
+	// Password & Password Match Checking
+	useEffect(() => {
+		if (passwd) {
+			const { success, data, error } = passwdSchema.safeParse(passwd);
+
+			if (success) {
+				console.log("Password Success");
+
+				setValidPasswd(true);
+				if (passwd === matchPasswd) {
+					console.log("inside match password success");
+
+					userRegister.passwd = passwd;
+					setPasswdMatching(true);
+				}
+				setErr("");
+			} else {
+				console.log("Password Error");
+
+				setValidPasswd(false);
+				setErr(error.issues[0].message);
+			}
+
+			if (passwd !== matchPasswd) {
+				userRegister.passwd = "";
+				setPasswdMatching(false);
+			}
+		}
+	}, [passwd, matchPasswd]);
+
+	useEffect(() => {
+		if (!validPasswd && !passwdFocus && passwd) {
+			console.log("hit pass error");
+
+			setPasswdError(
+				"Password must contain a-z, A-Z, 0-9, (*#@!$%&) & atleast 8 characters long"
+			);
+		} else if (validPasswd) {
+			setPasswdError("");
+		}
+	}, [validPasswd, passwdFocus]);
+
+	useEffect(() => {
+		if (matchPasswd && !passwdMatching) {
+			setMatchPasswdError("Password does not match!!!");
+		} else if (passwdMatching) {
+			setMatchPasswdError("");
+		}
+	}, [passwdMatching, matchPasswd, matchPasswdFocus]);
+
+	// Handles Request & Response to/from the Server
+	const handleRegisterSubmit = async (e) => {
 		e.preventDefault();
-		const email = emailSchema.safeParse(email);
-		setIsLoading(false);
+		setIsLoading(true);
+		try {
+			if (validPasswd && validName && validEmail && passwdMatching) {
+				console.log("Register: Response Started");
+				const response = await instance.post(
+					"/api/v1/auth/register",
+					userRegister
+				);
+				console.log("Register Response: ", response);
+			} else {
+				console.error("Client: Request Failed");
+			}
+		} catch (error) {
+			if (!error?.response) {
+				console.error("Register: No Server Response");
+			} else {
+				console.error("Register: Something Went Wrong(Server Side)!!!");
+			}
+		}
 	};
 
 	return isLoading ? (
@@ -48,7 +167,7 @@ export const Register = () => {
 				<img src="../public/add-user.png" alt="add-user-img" />
 				<figcaption>Create account</figcaption>
 			</figure>
-			<form action="">
+			<form onSubmit={handleRegisterSubmit}>
 				<fieldset>
 					<legend>
 						Email address <span>(required)</span>
@@ -56,19 +175,35 @@ export const Register = () => {
 					<input
 						type="email"
 						id="register-email"
-						ref={emailFocus}
-						value={email}
-						onChange={(e) => setEmail(e.currentTarget.value)}
+						ref={emailFocusRef}
+						value={userRegister.email}
+						onChange={(e) =>
+							setUserRegister((prev) => ({
+								...prev,
+								email: e.target.value,
+							}))
+						}
+						onFocus={() => setEmailFocus(true)}
+						onBlur={() => setEmailFocus(false)}
 					/>
+					{emailError || ""}
 				</fieldset>
 				<fieldset>
 					<legend>Name</legend>
 					<input
 						type="text"
 						id="register-name"
-						value={name}
-						onChange={(e) => setName(e.currentTarget.value)}
+						value={userRegister.name}
+						onChange={(e) =>
+							setUserRegister((prev) => ({
+								...prev,
+								name: e.target.value,
+							}))
+						}
+						onFocus={() => setNameFocus(true)}
+						onBlur={() => setNameFocus(false)}
 					/>
+					{nameError || ""}
 				</fieldset>
 				<fieldset>
 					<legend>
@@ -78,10 +213,27 @@ export const Register = () => {
 						type="password"
 						id="register-passwd"
 						value={passwd}
-						onChange={(e) => setPasswd(e.currentTarget.value)}
+						onChange={(e) => setPasswd(e.target.value)}
+						onFocus={() => setPasswdFocus(true)}
+						onBlur={() => setPasswdFocus(false)}
 					/>
+					{passwdError || ""}
 				</fieldset>
-				<button onSubmit={handleSubmitBtn}>Continue</button>
+				<fieldset>
+					<legend>
+						Confirm Password <span>(required)</span>
+					</legend>
+					<input
+						type="password"
+						id="register-match-passwd"
+						value={matchPasswd}
+						onChange={(e) => setMatchPasswd(e.target.value)}
+						onFocus={() => setMatchPasswdFocus(true)}
+						onBlur={() => setMatchPasswdFocus(false)}
+					/>
+					{matchPasswdError || ""}
+				</fieldset>
+				<button>Continue</button>
 			</form>
 		</main>
 	);

@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { emailSchema } from "../utils/authSchema.js";
-import { instance } from "../api/axios.js";
+import { useNavigate } from "react-router";
+import { useAuth } from "../hooks/useAuth.js";
+
+// TODO: implement use replace and state prop in navigate to use secure login
 
 export const LoginEmail = () => {
 	const EMAIL_REGEX =
@@ -10,20 +13,31 @@ export const LoginEmail = () => {
 
 	const [isLoading, setIsLoading] = useState(false);
 
-	const [email, setEmail] = useState("");
-	const [validEmail, setValidEmail] = useState(false);
+	// const [email, setEmail] = useState("");
+	// const [validEmail, setValidEmail] = useState(false);
 	const [emailFocus, setEmailFocus] = useState(false);
 	const emailRef = useRef();
 
 	const [err, setErr] = useState(undefined);
 
+	const navigate = useNavigate();
+	const {
+		userLogin,
+		validEmail,
+		defaultUserValues,
+		setUserLogin,
+		setValidEmail,
+	} = useAuth();
+
 	useEffect(() => {
 		emailRef.current.focus();
+		setValidEmail(false);
+		setUserLogin(defaultUserValues);
 	}, []);
 
 	useEffect(() => {
-		if (!emailFocus && email) {
-			const { success, data, error } = emailSchema.safeParse(email);
+		if (!emailFocus && userLogin.email) {
+			const { success, data, error } = emailSchema.safeParse(userLogin.email);
 			if (success) {
 				console.log("Email Schema Success: ", data);
 				setValidEmail(true);
@@ -41,13 +55,13 @@ export const LoginEmail = () => {
 
 	useEffect(() => {
 		setErr("");
-	}, [email]);
+	}, [userLogin.email]);
 
-	const handleSubmitBtn = (e) => {
+	const handleEmailSubmit = (e) => {
 		e.preventDefault();
 		setIsLoading(true);
 		if (validEmail) {
-			// navigate to password page
+			navigate("/login/password");
 		}
 		setIsLoading(false);
 	};
@@ -58,10 +72,10 @@ export const LoginEmail = () => {
 		<>
 			<main>
 				<figure>
-					<img src="../public/vault.png" alt="vault-img" />
+					<img src="../vault.png" alt="vault-img" />
 					<figcaption>Log in to KeyRing</figcaption>
 				</figure>
-				<form>
+				<form onSubmit={handleEmailSubmit}>
 					<fieldset>
 						<legend>
 							Email address <span>(required)</span>
@@ -70,8 +84,11 @@ export const LoginEmail = () => {
 							type="email"
 							id="login-email"
 							ref={emailRef}
-							value={email}
-							onChange={(e) => setEmail(e.target.value)}
+							value={userLogin.email}
+							// onChange={(e) => setEmail(e.target.value)}
+							onChange={(e) =>
+								setUserLogin((prev) => ({ ...prev, email: e.target.value }))
+							}
 							required
 							// autoComplete="off"
 							onFocus={() => setEmailFocus(true)}
@@ -79,10 +96,10 @@ export const LoginEmail = () => {
 						/>
 					</fieldset>
 					{/* change hide & unhide using CSS */}
-					{err && email ? <p>{err}</p> : <p></p>}
+					{err && userLogin.email ? <p>{err}</p> : <p></p>}
 					<input type="checkbox" id="login-remember" />
 					<label htmlFor="login-remember">Remember Email</label>
-					<button onClick={handleSubmitBtn}>Continue</button>
+					<button>Continue</button>
 				</form>
 				<div>
 					New to Bitwarden? <a href="">Create account</a>

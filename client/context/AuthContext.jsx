@@ -4,8 +4,9 @@ import { AuthContext } from "./AuthContextObject";
 // export const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
+	const defaultUserValues = { email: "", passwd: "" };
 	const [auth, setAuth] = useState();
-	const [userLogin, setUserLogin] = useState({ email: "", passwd: "" });
+	const [userLogin, setUserLogin] = useState(defaultUserValues);
 	const [userRegister, setUserRegister] = useState({
 		email: "",
 		name: "",
@@ -21,6 +22,7 @@ export const AuthProvider = ({ children }) => {
 			value={{
 				auth,
 				setAuth,
+				defaultUserValues,
 				userLogin,
 				setUserLogin,
 				validEmail,
