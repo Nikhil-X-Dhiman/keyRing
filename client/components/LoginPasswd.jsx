@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { passwdSchema } from "../utils/authSchema.js";
 import { instance } from "../api/axios.js";
 import { useAuth } from "../hooks/useAuth.js";
-import { Link, Navigate, replace, useNavigate } from "react-router";
+import { Link, Navigate, useNavigate } from "react-router";
 
 export const LoginPasswd = () => {
 	const PASSWD_REGEX =

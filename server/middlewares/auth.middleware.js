@@ -30,6 +30,8 @@ export const authenticateUserRequest = async (req, res, next) => {
 
 			req.user = decodedAccessToken;
 			return next();
+		} else {
+			res.send(403).json("Auth: Token Expired!!!");
 		}
 		console.log("Access Token is Invalid!!!");
 	}

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useRef, useState } from "react";
 import { emailSchema, nameSchema, passwdSchema } from "../utils/authSchema";
 import { useAuth } from "../hooks/useAuth";
@@ -40,9 +41,7 @@ export const Register = () => {
 
 	useEffect(() => {
 		if (userRegister.email) {
-			const { success, data, error } = emailSchema.safeParse(
-				userRegister.email
-			);
+			const { success, error } = emailSchema.safeParse(userRegister.email);
 
 			if (success) {
 				setValidEmail(true);
@@ -67,7 +66,7 @@ export const Register = () => {
 	// Name Checking
 	useEffect(() => {
 		if (userRegister.name) {
-			const { success, data, error } = nameSchema.safeParse(userRegister.name);
+			const { success, error } = nameSchema.safeParse(userRegister.name);
 
 			if (success) {
 				setValidName(true);
@@ -90,7 +89,7 @@ export const Register = () => {
 	// Password & Password Match Checking
 	useEffect(() => {
 		if (passwd) {
-			const { success, data, error } = passwdSchema.safeParse(passwd);
+			const { success, error } = passwdSchema.safeParse(passwd);
 
 			if (success) {
 				console.log("Password Success");
@@ -151,7 +150,7 @@ export const Register = () => {
 				console.log("Register Response: ", response);
 				if (response.status === 201) {
 					console.log("User Register Success");
-					// navigate();
+					navigate("/login/email", { replace: true });
 				}
 			} else {
 				console.error("Client: Request Failed");

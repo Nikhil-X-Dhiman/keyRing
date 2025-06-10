@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useRef, useState } from "react";
 import { emailSchema } from "../utils/authSchema.js";
 import { useNavigate } from "react-router";
@@ -13,8 +14,6 @@ export const LoginEmail = () => {
 
 	const [isLoading, setIsLoading] = useState(false);
 
-	// const [email, setEmail] = useState("");
-	// const [validEmail, setValidEmail] = useState(false);
 	const [emailFocus, setEmailFocus] = useState(false);
 	const emailRef = useRef();
 
@@ -50,7 +49,6 @@ export const LoginEmail = () => {
 				console.error("Email Schema Error: ", err);
 			}
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [emailFocus]);
 
 	useEffect(() => {
