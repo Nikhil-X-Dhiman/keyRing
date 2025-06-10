@@ -1,3 +1,4 @@
+import path from "path";
 import {
 	getUserByCredentials,
 	insertUserByCredential,
@@ -5,7 +6,12 @@ import {
 import { insertRefreshToken } from "../models/token.models.js";
 import { jsonResponse } from "../services/jsonResponse.service.js";
 import { genPasswdHash, verifyPasswd } from "../utils/handleArgon.js";
-import { genAccessToken, genRefreshToken } from "../utils/handleTokens.js";
+import {
+	genAccessToken,
+	genRefreshToken,
+	verifyRefreshToken,
+} from "../utils/handleTokens.js";
+import { readFile } from "fs/promises";
 
 export const handleLogin = async (req, res) => {
 	// TODO: detect if user is already logged in
@@ -71,6 +77,7 @@ export const handleLogin = async (req, res) => {
 	);
 };
 
+// Register by Creating a new User Account
 export const handleRegister = async (req, res) => {
 	const { email, name, passwd } = req.body;
 	if (!email || !name || !passwd) {
@@ -95,4 +102,37 @@ export const handleRegister = async (req, res) => {
 		.json(
 			jsonResponse({ isError: true, error: "Email is Already Registered!!!" })
 		);
+};
+
+export const handleGetPublicKey = async (req, res) => {
+	let publicKey;
+	try {
+		publicKey = await readFile("../publicKey.pem", { encoding: "utf8" });
+		return res.status(200).json({ publicKey: publicKey });
+	} catch (error) {
+		console.error("Server: Get Public Key to Client Error: ", error);
+		return res.status(204).json({ error: "Public Key Error" });
+	}
+};
+
+export const handleRefreshToken = async (req, res) => {
+	let refreshToken = req.cookies.refresh_token;
+	// verify & decode the refresh token
+	const [decodedRefreshToken] = await verifyRefreshToken(refreshToken);
+	if (!decodedRefreshToken) {
+		console.log("Access Token Regeneration: Invalid Refresh Token");
+		res.status(404).json({ error: "Invalid or Expired Token!!!" });
+	}
+	const payload = {
+		id: decodedRefreshToken?.users?.id,
+		name: decodedRefreshToken?.users?.name,
+		email: decodedRefreshToken?.users?.email,
+		verified: decodedRefreshToken?.users?.emailVerified,
+		role: decodedRefreshToken?.users?.role,
+		plan: decodedRefreshToken?.users?.plan,
+	};
+	const newAccessToken = genAccessToken(payload);
+	console.log("Token Regeneration: New Access Token: ", payload);
+	// TODO: Find out weather to send old refresh token again or not?
+	res.status(201).json({ access_token: newAccessToken });
 };

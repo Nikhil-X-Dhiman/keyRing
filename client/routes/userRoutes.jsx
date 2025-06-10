@@ -1,14 +1,21 @@
+import { MainPage } from "../components/MainPage";
 import { RequireAuth } from "../components/RequireAuth";
-import { UserHome } from "../components/UserHome";
+import { AppLayout } from "../components/layout/AppLayout";
 
 export const userRoutes = [
 	{
 		path: "user",
-		element: <RequireAuth />,
+		// element: <RequireAuth />,'
 		children: [
 			{
 				path: "home",
-				element: <UserHome />,
+				element: <AppLayout />,
+				children: [
+					{
+						index: true,
+						element: <MainPage />,
+					},
+				],
 			},
 		],
 	},

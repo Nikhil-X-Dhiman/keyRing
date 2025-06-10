@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { passwdSchema } from "../utils/authSchema.js";
 import { instance } from "../api/axios.js";
 import { useAuth } from "../hooks/useAuth.js";
-import { Navigate, useNavigate } from "react-router";
+import { Link, Navigate, replace, useNavigate } from "react-router";
 
 export const LoginPasswd = () => {
 	const PASSWD_REGEX =
@@ -20,7 +20,7 @@ export const LoginPasswd = () => {
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		passwdRef.current.focus();
+		passwdRef.current?.focus();
 	}, []);
 
 	useEffect(() => {
@@ -45,6 +45,27 @@ export const LoginPasswd = () => {
 		setErr("");
 	}, [userLogin.passwd]);
 
+	// get public key
+
+	useEffect(() => {
+		async function publicKeyRequest() {
+			try {
+				console.log("Public Key Requested");
+
+				const response = await instance.get("/api/v1/auth/public");
+				if (response.status === 200) {
+					// TODO: Create Global State for Public Key
+					console.log("Public Key: ", response.data.publicKey);
+				} else if (response.status === 204) {
+					console.log("Public Key: Not Found!!!");
+				}
+			} catch (error) {
+				console.error("Public Key: Unable to send or receive data", error);
+			}
+		}
+		publicKeyRequest();
+	}, []);
+
 	if (!userLogin.email && !validEmail) {
 		return <Navigate to="/login/email" replace />;
 	}
@@ -55,15 +76,17 @@ export const LoginPasswd = () => {
 		if (validPasswd && validEmail) {
 			// navigate to password page
 			try {
-				const response = await instance.post(
-					"/login",
-					{
-						email: userLogin.email,
-						passwd: userLogin.passwd,
-					},
-					{ withCredentials: true }
-				);
+				const response = await instance.post("/api/v1/auth/login", userLogin, {
+					withCredentials: true,
+				});
+				// const { isSuccess, data } = response;
+				// const { access_token } = data;
 				console.log("Axios Response: ", response.data);
+				if (response.status === 200) {
+					console.log("User Login Success");
+				} else {
+					console.error("Client: Request Failed");
+				}
 			} catch (error) {
 				if (!error?.response) {
 					console.error("No Server Response");
@@ -72,7 +95,8 @@ export const LoginPasswd = () => {
 				}
 			}
 		} else if (!validEmail) {
-			<Navigate to="/login/email" replace />;
+			navigate("/login/email", { replace: true });
+			// <Navigate to="/login/email" replace />;
 		} else if (!validPasswd) {
 			passwdRef.current.focus();
 		}
@@ -113,7 +137,8 @@ export const LoginPasswd = () => {
 				</form>
 				<button onClick={() => navigate(-1)}>Go Back</button>
 				<div>
-					New to Bitwarden? <a href="">Create account</a>
+					New to Bitwarden?
+					<Link to="/register">Create account</Link>
 				</div>
 			</main>
 		</>

@@ -5,7 +5,7 @@ import { Register } from "../components/Register";
 
 export const authRoutes = [
 	{
-		path: "login/",
+		path: "login",
 		element: <Layout />,
 		children: [
 			{

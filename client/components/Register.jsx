@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { emailSchema, nameSchema, passwdSchema } from "../utils/authSchema";
 import { useAuth } from "../hooks/useAuth";
 import { instance } from "../api/axios";
-import { email } from "zod/v4";
+import { useNavigate } from "react-router";
 
 export const Register = () => {
 	const [isLoading, setIsLoading] = useState(false);
@@ -31,6 +31,8 @@ export const Register = () => {
 	const [matchPasswdError, setMatchPasswdError] = useState("");
 
 	const { userRegister, setUserRegister } = useAuth();
+
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		emailFocusRef.current.focus();
@@ -147,6 +149,10 @@ export const Register = () => {
 					userRegister
 				);
 				console.log("Register Response: ", response);
+				if (response.status === 201) {
+					console.log("User Register Success");
+					// navigate();
+				}
 			} else {
 				console.error("Client: Request Failed");
 			}
