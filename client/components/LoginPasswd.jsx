@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { passwdSchema } from "../utils/authSchema.js";
 import { instance } from "../api/axios.js";
 import { useAuth } from "../hooks/useAuth.js";
-import { Link, Navigate, useNavigate } from "react-router";
+import { Link, Navigate, useNavigate, useLocation } from "react-router";
 
 export const LoginPasswd = () => {
 	const PASSWD_REGEX =
@@ -14,6 +14,8 @@ export const LoginPasswd = () => {
 	const passwdRef = useRef();
 
 	const [err, setErr] = useState(undefined);
+	const location = useLocation();
+	const from = location.state?.from?.pathname || "/user/home";
 
 	const { userLogin, validEmail, validPasswd, setUserLogin, setValidPasswd } =
 		useAuth();
@@ -84,6 +86,7 @@ export const LoginPasswd = () => {
 				console.log("Axios Response: ", response.data);
 				if (response.status === 200) {
 					console.log("User Login Success");
+					navigate(from, { replace: true });
 				} else {
 					console.error("Client: Request Failed");
 				}

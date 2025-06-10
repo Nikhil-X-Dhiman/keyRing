@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useRef, useState } from "react";
 import { emailSchema } from "../utils/authSchema.js";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation, replace } from "react-router";
 import { useAuth } from "../hooks/useAuth.js";
 
 // TODO: implement use replace and state prop in navigate to use secure login
@@ -13,6 +13,8 @@ export const LoginEmail = () => {
 		/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[*#@!$%&]).{8,24}$/;
 
 	const [isLoading, setIsLoading] = useState(false);
+	const location = useLocation();
+	const from = location.state?.from?.pathname || "/user/home";
 
 	const [emailFocus, setEmailFocus] = useState(false);
 	const emailRef = useRef();
@@ -59,7 +61,8 @@ export const LoginEmail = () => {
 		e.preventDefault();
 		setIsLoading(true);
 		if (validEmail) {
-			navigate("/login/password");
+			// navigate("/login/password");
+			navigate("/login/password", { state: { from: from }, replace: true });
 		}
 		setIsLoading(false);
 	};
