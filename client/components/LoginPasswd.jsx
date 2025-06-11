@@ -3,6 +3,7 @@ import { passwdSchema } from "../utils/authSchema.js";
 import { instance } from "../api/axios.js";
 import { useAuth } from "../hooks/useAuth.js";
 import { Link, Navigate, useNavigate, useLocation } from "react-router";
+import { useVerifyAccessToken } from "../hooks/useVerifyJWT.jsx";
 
 export const LoginPasswd = () => {
 	const PASSWD_REGEX =
@@ -15,10 +16,19 @@ export const LoginPasswd = () => {
 
 	const [err, setErr] = useState(undefined);
 	const location = useLocation();
+	const verifyToken = useVerifyAccessToken();
 	const from = location.state?.from?.pathname || "/user/home";
 
-	const { userLogin, validEmail, validPasswd, setUserLogin, setValidPasswd } =
-		useAuth();
+	const {
+		auth,
+		setAuth,
+		userLogin,
+		validEmail,
+		validPasswd,
+		setUserLogin,
+		setValidPasswd,
+		setPublicKey,
+	} = useAuth();
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -57,6 +67,7 @@ export const LoginPasswd = () => {
 				const response = await instance.get("/api/v1/auth/public");
 				if (response.status === 200) {
 					// TODO: Create Global State for Public Key
+					setPublicKey(response.data.publicKey);
 					console.log("Public Key: ", response.data.publicKey);
 				} else if (response.status === 204) {
 					console.log("Public Key: Not Found!!!");
@@ -81,10 +92,26 @@ export const LoginPasswd = () => {
 				const response = await instance.post("/api/v1/auth/login", userLogin, {
 					withCredentials: true,
 				});
-				// const { isSuccess, data } = response;
-				// const { access_token } = data;
-				console.log("Axios Response: ", response.data);
+				console.log("Response: ", response, response?.data?.access_token);
+
+				const access_token = response.data.access_token;
 				if (response.status === 200) {
+					console.log("hit 1");
+
+					setAuth((prev) => ({ ...prev, accessToken: access_token }));
+					console.log("hit 2");
+					console.log("Access Token: ", access_token);
+
+					const { isValid, payload, error } = await verifyToken();
+					console.log("hit 3");
+					console.log("Token Payload", payload);
+
+					if (isValid) {
+						setAuth((prev) => ({ ...prev, user: payload }));
+						console.log("Access Token is Verified");
+					} else {
+						console.error("Verify Access Token Failed: ", error);
+					}
 					console.log("User Login Success");
 					navigate(from, { replace: true });
 				} else {
@@ -92,7 +119,7 @@ export const LoginPasswd = () => {
 				}
 			} catch (error) {
 				if (!error?.response) {
-					console.error("No Server Response");
+					console.error("No Server Response", error);
 				} else {
 					console.error("Server Error: Login Failed!!!: ", error);
 				}
@@ -101,7 +128,7 @@ export const LoginPasswd = () => {
 			navigate("/login/email", { replace: true });
 			// <Navigate to="/login/email" replace />;
 		} else if (!validPasswd) {
-			passwdRef.current.focus();
+			passwdRef.current?.focus();
 		}
 		setIsLoading(false);
 	};

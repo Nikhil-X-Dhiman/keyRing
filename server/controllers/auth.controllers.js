@@ -69,12 +69,9 @@ export const handleLogin = async (req, res) => {
 		httpOnly: true,
 	});
 
-	return res.status(200).json(
-		jsonResponse({
-			isSuccess: true,
-			data: { access_token: accessToken },
-		})
-	);
+	return res.status(200).json({
+		access_token: accessToken,
+	});
 };
 
 // Register by Creating a new User Account
