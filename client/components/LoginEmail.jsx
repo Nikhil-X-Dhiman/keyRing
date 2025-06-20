@@ -28,12 +28,15 @@ export const LoginEmail = () => {
 		defaultUserValues,
 		setUserLogin,
 		setValidEmail,
+		persist,
+		setPersist,
 	} = useAuth();
 
 	useEffect(() => {
 		emailRef.current.focus();
 		setValidEmail(false);
 		setUserLogin(defaultUserValues);
+		console.log("Email: ", localStorage.getItem("persist"));
 	}, []);
 
 	useEffect(() => {
@@ -67,13 +70,20 @@ export const LoginEmail = () => {
 		setIsLoading(false);
 	};
 
+	const togglePersist = () => {
+		localStorage.setItem("persist", !persist);
+		setPersist((prev) => !prev);
+	};
+
+	console.log("Email: ", localStorage.getItem("persist"));
+
 	return isLoading ? (
 		<h1>Loading!!!</h1>
 	) : (
 		<>
 			<main>
 				<figure>
-					<img src="../vault.png" alt="vault-img" />
+					<img src="/vault.png" alt="vault-img" />
 					<figcaption>Log in to KeyRing</figcaption>
 				</figure>
 				<form onSubmit={handleEmailSubmit}>
@@ -98,7 +108,13 @@ export const LoginEmail = () => {
 					</fieldset>
 					{/* change hide & unhide using CSS */}
 					{err && userLogin.email ? <p>{err}</p> : <p></p>}
-					<input type="checkbox" id="login-remember" />
+					<input
+						type="checkbox"
+						id="login-remember"
+						onChange={togglePersist}
+						// checked={persist}
+						value={persist}
+					/>
 					<label htmlFor="login-remember">Remember Email</label>
 					<button>Continue</button>
 				</form>

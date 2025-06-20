@@ -2,10 +2,11 @@ import { useEffect } from "react";
 import { privateInstance } from "../api/axios";
 import { useAuth } from "./useAuth";
 import { useRefreshToken } from "./useRefreshToken";
-
+// use this hook instance for requesting resourses that require authentication not the public ones
 export const usePrivateInstance = () => {
 	const refresh = useRefreshToken();
-	const { auth } = useAuth();
+
+	const { auth, setAuth } = useAuth();
 
 	useEffect(() => {
 		const reqIntercept = privateInstance.interceptors.request.use(
@@ -29,6 +30,9 @@ export const usePrivateInstance = () => {
 				if (error?.response?.status === 403 && !prevRequest?.sent) {
 					prevRequest.sent = true;
 					const newAccessToken = await refresh();
+					// check the access token and store access token in global state
+					setAuth((prev) => ({ ...prev, accessToken: newAccessToken }));
+
 					prevRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
 					return privateInstance(prevRequest);
 				}

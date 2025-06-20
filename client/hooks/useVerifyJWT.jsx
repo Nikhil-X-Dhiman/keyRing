@@ -15,7 +15,7 @@ export const useVerifyAccessToken = () => {
 				error: "Public Key Not Available",
 			};
 		}
-		if (!auth.accessToken) {
+		if (!auth?.accessToken) {
 			console.warn("No Token is provided for Verification");
 			return { isValid: false, payload: false, error: "No Token is Available" };
 		}

@@ -20,7 +20,7 @@ export const LoginPasswd = () => {
 	const from = location.state?.from?.pathname || "/user/home";
 
 	const {
-		auth,
+		// auth,
 		setAuth,
 		userLogin,
 		validEmail,
@@ -87,24 +87,16 @@ export const LoginPasswd = () => {
 		e.preventDefault();
 		setIsLoading(true);
 		if (validPasswd && validEmail) {
-			// navigate to password page
 			try {
 				const response = await instance.post("/api/v1/auth/login", userLogin, {
 					withCredentials: true,
 				});
-				console.log("Response: ", response, response?.data?.access_token);
 
 				const access_token = response.data.access_token;
 				if (response.status === 200) {
-					console.log("hit 1");
-
 					setAuth((prev) => ({ ...prev, accessToken: access_token }));
-					console.log("hit 2");
-					console.log("Access Token: ", access_token);
 
 					const { isValid, payload, error } = await verifyToken();
-					console.log("hit 3");
-					console.log("Token Payload", payload);
 
 					if (isValid) {
 						setAuth((prev) => ({ ...prev, user: payload }));
@@ -126,7 +118,6 @@ export const LoginPasswd = () => {
 			}
 		} else if (!validEmail) {
 			navigate("/login/email", { replace: true });
-			// <Navigate to="/login/email" replace />;
 		} else if (!validPasswd) {
 			passwdRef.current?.focus();
 		}
@@ -139,7 +130,7 @@ export const LoginPasswd = () => {
 		<>
 			<main>
 				<figure>
-					<img src="../public/wave.png" alt="wave-img" />
+					<img src="/wave.png" alt="wave-img" />
 					<figcaption>Welcome Back</figcaption>
 				</figure>
 				{userLogin.email}

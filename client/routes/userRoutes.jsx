@@ -5,7 +5,7 @@ import { AppLayout } from "../components/layout/AppLayout";
 export const userRoutes = [
 	{
 		path: "user",
-		// element: <RequireAuth />,'
+		element: <RequireAuth />,
 		children: [
 			{
 				path: "home",

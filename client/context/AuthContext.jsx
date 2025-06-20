@@ -6,6 +6,9 @@ import { AuthContext } from "./AuthContextObject";
 export const AuthProvider = ({ children }) => {
 	const defaultUserValues = { email: "", passwd: "" };
 	const [auth, setAuth] = useState(null);
+	const [persist, setPersist] = useState(
+		localStorage.getItem("persist") || false
+	);
 	const [publicKey, setPublicKey] = useState("");
 	const [userLogin, setUserLogin] = useState(defaultUserValues);
 	const [userRegister, setUserRegister] = useState({
@@ -24,6 +27,8 @@ export const AuthProvider = ({ children }) => {
 				auth,
 				setAuth,
 				defaultUserValues,
+				persist,
+				setPersist,
 				userLogin,
 				setUserLogin,
 				publicKey,
