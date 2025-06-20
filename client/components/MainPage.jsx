@@ -1,381 +1,4 @@
-// import { useRef, useState } from "react";
-// import { v4 as uuidv4 } from "uuid";
-
 import React, { useState } from "react";
-
-// export const MainPage = () => {
-// 	const defaultValues = {
-// 		name: "",
-// 		username: "",
-// 		passwd: "",
-// 		notes: "",
-// 		uri: [],
-// 	};
-// 	// Display Passwd List
-// 	const [passwdList, setPasswdList] = useState([]);
-// 	// Display Passwd Item
-// 	const [selectPasswdItem, setSelectPasswdItem] = useState(false);
-// 	const [showSelectPasswd, setShowSelectPasswd] = useState(null);
-// 	// Display Edit Passwd Dialog
-// 	const [selectEdit, setSelectEdit] = useState(false);
-// 	const [editPasswd, setEditPasswd] = useState(defaultValues);
-// 	// dynamic uri input add
-// 	const editURIRefs = useRef([]);
-
-// 	// Display for adding new passwd
-// 	const [selectAddPasswd, setSelectAddPasswd] = useState(false);
-// 	const [newPasswd, setNewPasswd] = useState(defaultValues);
-// 	// Edit URI List
-// 	// const [selectNewURI, setSelectNewURI] = useState(false);
-// 	const [newURI, setNewURI] = useState("");
-// 	const [newURIList, setNewURIList] = useState([]);
-// 	// dynamically add the ref to the input
-// 	const addURIRefs = useRef([]);
-// 	// const [selectURI, setSelectURI] = useState(false);
-
-// 	const handlePasswdItemClick = (passwdItem) => {
-// 		setSelectAddPasswd(false); // close add form
-// 		setSelectEdit(false); // close edit form
-// 		if (selectPasswdItem && showSelectPasswd.id === passwdItem.id) {
-// 			// close the display passwd box if same entry is selected
-// 			setSelectPasswdItem(false); // close edit form
-// 			setShowSelectPasswd(null); // clear tmp selected password
-// 		} else {
-// 			setShowSelectPasswd(passwdItem); // store selected password item
-// 			setSelectPasswdItem(true); // display select password box
-// 		}
-// 	};
-
-// 	const handleAddItemClick = () => {
-// 		setSelectAddPasswd(true); // open add form
-// 		setSelectPasswdItem(false); // close select password view
-// 		setShowSelectPasswd(null); // clear tmp selected password
-// 		setNewPasswd(defaultValues); // reset add form
-// 		setNewURIList([]); // reset URI list
-// 		setNewURI(""); // reset uri input
-// 	};
-
-// 	const handleNewItemSave = () => {
-// 		let finalURIList = [...newURIList];
-
-// 		if (newURI.trim() !== "") {
-// 			finalURIList.push(newURI.trim());
-// 		}
-// 		setPasswdList((prev) => [
-// 			...prev,
-// 			{ id: uuidv4(), ...newPasswd, uri: finalURIList },
-// 		]); // add new passwd to list
-// 		setSelectAddPasswd(false); // close add form
-// 		setNewPasswd(defaultValues); // reset new passwd input fields
-// 		setNewURIList([]); // reset uri list to empty
-// 		setNewURI(""); // reset uri input
-// 	};
-
-// 	const handleNewItemCancel = () => {
-// 		setSelectAddPasswd(false);
-// 		setNewPasswd(defaultValues);
-// 		setNewURIList([]);
-// 		setNewURI("");
-// 	};
-
-// 	const handleEditItem = () => {
-// 		setEditPasswd(showSelectPasswd); // edit form with current display data
-// 		setSelectEdit(true); // open edit form
-// 		setNewURIList(showSelectPasswd?.uri || []); // pass uri data for editing
-// 	};
-
-// 	const handleDeleteItem = () => {
-// 		const updatedItemList = passwdList.filter(
-// 			(item) => item.id !== showSelectPasswd.id
-// 		);
-// 		setPasswdList(updatedItemList);
-// 		setSelectPasswdItem(false);
-// 		setShowSelectPasswd(null);
-// 	};
-
-// 	const handleSaveEditItem = () => {
-// 		let updatedItemList = passwdList.filter(
-// 			(item) => item.id !== editPasswd.id
-// 		);
-// 		setEditPasswd((prev) => {
-// 			return { ...prev, uri: newURIList };
-// 		});
-// 		updatedItemList = [...updatedItemList, editPasswd];
-// 		setPasswdList(updatedItemList);
-// 		setShowSelectPasswd(editPasswd);
-// 		// setPasswdList((prev) => {
-// 		// 	return { ...prev, uri: [...newURIList] };
-// 		// });
-// 		setNewURIList([]);
-// 		setNewURI("");
-// 		setSelectEdit(false);
-// 		setEditPasswd(defaultValues);
-// 	};
-
-// 	const handleCancelEditItem = () => {
-// 		setSelectEdit(false);
-// 		setEditPasswd(defaultValues);
-// 		setNewURIList([]);
-// 		setNewURI("");
-// 	};
-
-// 	const handleNewURI = () => {
-// 		setNewURIList((prev) => [...prev, " "]);
-// 		setNewURI("");
-// 	};
-
-// 	const handleURIUpdate = (index, value) => {
-// 		setNewURIList((prev) => {
-// 			let newArr = [...prev];
-// 			newArr[index] = value;
-// 			return newArr;
-// 		});
-// 	};
-
-// 	const handleNewURIChange = (e) => {
-// 		setNewURI(e.target.value);
-// 	};
-
-// 	return (
-// 		<main>
-// 			<section>
-// 				<ul>
-// 					<li>All Items</li>
-// 					<li>Favorites</li>
-// 					<li>Trash</li>
-// 				</ul>
-// 			</section>
-// 			<section>
-// 				{/* passwd list is shown here */}
-// 				<ul>
-// 					{passwdList.map((passwdItem) => (
-// 						<li
-// 							key={`${passwdItem.id}`}
-// 							onClick={() => handlePasswdItemClick(passwdItem)}
-// 						>{`${passwdItem.name}`}</li>
-// 					))}
-// 				</ul>
-// 				<div>
-// 					<button onClick={handleAddItemClick}>+</button>
-// 				</div>
-// 			</section>
-// 			<section>
-// 				{selectPasswdItem ? (
-// 					<>
-// 						<h2>ITEM Information</h2>
-// 						<div>
-// 							{showSelectPasswd.name ? (
-// 								<>
-// 									<label htmlFor="item-name">Name</label>
-// 									<input
-// 										type="text"
-// 										id="item-name"
-// 										value={selectEdit ? editPasswd.name : showSelectPasswd.name}
-// 										onChange={
-// 											selectEdit
-// 												? (e) =>
-// 														setEditPasswd((prev) => ({
-// 															...prev,
-// 															name: e.target.value,
-// 														}))
-// 												: undefined
-// 										}
-// 										readOnly={!selectEdit}
-// 									/>
-// 								</>
-// 							) : (
-// 								""
-// 							)}
-// 							{showSelectPasswd.username ? (
-// 								<>
-// 									<label htmlFor="item-username">Username</label>
-// 									<input
-// 										type="text"
-// 										id="item-username"
-// 										value={
-// 											selectEdit
-// 												? editPasswd.username
-// 												: showSelectPasswd.username
-// 										}
-// 										onChange={(e) =>
-// 											setEditPasswd((prev) => ({
-// 												...prev,
-// 												username: e.target.value,
-// 											}))
-// 										}
-// 										readOnly={!selectEdit}
-// 									/>
-// 								</>
-// 							) : (
-// 								""
-// 							)}
-// 							{showSelectPasswd.passwd ? (
-// 								<>
-// 									<label htmlFor="item-passwd">Password</label>
-// 									<input
-// 										type="password"
-// 										id="item-passwd"
-// 										value={
-// 											selectEdit ? editPasswd.passwd : showSelectPasswd.passwd
-// 										}
-// 										onChange={(e) =>
-// 											setEditPasswd((prev) => ({
-// 												...prev,
-// 												passwd: e.target.value,
-// 											}))
-// 										}
-// 										readOnly={!selectEdit}
-// 									/>
-// 								</>
-// 							) : (
-// 								""
-// 							)}
-// 						</div>
-// 						<div>
-// 							{showSelectPasswd.uri && showSelectPasswd.uri.length > 0 ? (
-// 								<>
-// 									<ul>
-// 										{showSelectPasswd.uri.map((currURI, index) => (
-// 											<li key={`${index}${currURI}`}>
-// 												<label htmlFor={`uri-${index}`}>URI</label>
-// 												<input
-// 													type="text"
-// 													id={`uri-${index}`}
-// 													defaultValue={currURI}
-// 													// value={selectURI ? newURI : currURI}
-// 													readOnly={!selectEdit}
-// 													// onFocus={(e)=>setNewURI(currURI)}
-// 													// onChange={}
-// 													onBlur={(e) => {
-// 														setNewURIList((prev) => {
-// 															const newArr = [...prev];
-// 															newArr[index] = e.target.value;
-// 															return [...newArr];
-// 														});
-// 													}}
-// 												/>
-// 											</li>
-// 										))}
-// 									</ul>
-// 								</>
-// 							) : (
-// 								""
-// 							)}
-// 						</div>
-// 						{/* TODO: Add update and created at here */}
-
-// 						<div>
-// 							{/* TODO: Replace Text with img */}
-// 							{selectEdit ? (
-// 								<>
-// 									<button onClick={handleSaveEditItem}>Save</button>
-// 									<button onClick={handleCancelEditItem}>Cancel</button>
-// 								</>
-// 							) : (
-// 								<>
-// 									<button onClick={handleEditItem}>Edit</button>
-// 									<button onClick={handleDeleteItem}>Delete</button>
-// 								</>
-// 							)}
-// 						</div>
-// 					</>
-// 				) : selectAddPasswd ? (
-// 					<>
-// 						<h2>ADD Item</h2>
-// 						<div>
-// 							<label htmlFor="input-name">Name</label>
-// 							<input
-// 								type="text"
-// 								id="input-name"
-// 								value={newPasswd.name}
-// 								onChange={(e) =>
-// 									setNewPasswd((prev) => ({ ...prev, name: e.target.value }))
-// 								}
-// 							/>
-// 							<label htmlFor="input-username">Username</label>
-// 							<input
-// 								type="text"
-// 								id="input-username"
-// 								value={newPasswd.username}
-// 								onChange={(e) =>
-// 									setNewPasswd((prev) => ({
-// 										...prev,
-// 										username: e.target.value,
-// 									}))
-// 								}
-// 							/>
-// 							<label htmlFor="input-passwd">Password</label>
-// 							<input
-// 								type="password"
-// 								id="input-passwd"
-// 								value={newPasswd.passwd}
-// 								onChange={(e) =>
-// 									setNewPasswd((prev) => ({ ...prev, passwd: e.target.value }))
-// 								}
-// 							/>
-// 							<label htmlFor="input-uri">URI</label>
-// 							{newPasswd.uri ? (
-// 								<>
-// 									{newPasswd.uri.map((item, index) => (
-// 										<input
-// 											type="text"
-// 											id={`URI:${index}`}
-// 											// readOnly={!selectEdit}
-// 											value={item}
-// 											onFocus={() => {
-// 												setNewURI(item);
-// 											}}
-// 											onChange={(e) => setNewURI(e.target.value)}
-// 											onBlur={() => {
-// 												setNewURIList((prev) => {
-// 													const newArr = [...prev];
-// 													newArr[index] = newURI;
-// 													setNewURI("");
-// 													return [...newArr];
-// 												});
-// 											}}
-// 										/>
-// 									))}
-// 								</>
-// 							) : (
-// 								""
-// 							)}
-// 							<input
-// 								type="text"
-// 								id={`URI:${newPasswd.uri.length}`}
-// 								value={newURI}
-// 								onChange={(e) => setNewURI(e.target.value)}
-// 								onBlur={() => {
-// 									setNewURIList((prev) => {
-// 										const newArr = [...prev, newURI];
-// 										setNewURI("");
-// 										return newArr;
-// 									});
-// 								}}
-// 							/>
-// 							<button onClick={handleNewURI}>New URI</button>
-// 							<h2>NOTES</h2>
-// 							<textarea
-// 								id="input-notes"
-// 								value={newPasswd.notes}
-// 								onChange={(e) =>
-// 									setNewPasswd((prev) => ({ ...prev, notes: e.target.value }))
-// 								}
-// 							></textarea>
-// 						</div>
-// 						<div>
-// 							<button onClick={handleNewItemSave}>Save</button>
-// 							<button onClick={handleNewItemCancel}>Cancel</button>
-// 						</div>
-// 					</>
-// 				) : (
-// 					<h1>KeyRing</h1>
-// 				)}
-// 			</section>
-// 		</main>
-// 	);
-// };
-
 import { v4 as uuidv4 } from "uuid";
 
 export const MainPage = () => {
@@ -496,8 +119,9 @@ export const MainPage = () => {
 		setFocusItem(defaultEmpty);
 	};
 
-	const handleClickItem = (i) => {
+	const handleClickItem = (id) => {
 		// Display Clicked Passwd View
+		let i = passwdList.findIndex((item) => item.id === id); // find index uring id
 		setItemIndex(i); // setting index to show that passwd item
 		setMode((prev) => {
 			// setting mode to view the clicked passwd item
@@ -516,7 +140,19 @@ export const MainPage = () => {
 
 	return (
 		<>
-			<section>{/* add search bar here */}</section>
+			<section>
+				{/* add search bar here */}
+				<h1>KeyRing</h1>
+				<input
+					type="search"
+					name="app-search"
+					id="app-search"
+					// TODO: ADD search react-icon
+					value={searchItem}
+					onChange={(e) => setSearchItem(e.target.value)}
+					placeholder="🔍Search"
+				/>
+			</section>
 
 			<section>
 				<ul>
@@ -532,8 +168,8 @@ export const MainPage = () => {
 					{/* {passwdList.length !== 0 ? ( */}
 					{filteredList.length !== 0 ? (
 						<ul>
-							{passwdList.map((item, i) => (
-								<li key={item.id} onClick={() => handleClickItem(i)}>
+							{filteredList.map((item) => (
+								<li key={item.id} onClick={() => handleClickItem(item.id)}>
 									{item.name}
 								</li>
 							))}
