@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
 	const defaultUserValues = { email: "", passwd: "" };
 	const [auth, setAuth] = useState(null);
 	const [persist, setPersist] = useState(
-		localStorage.getItem("persist") || false
+		JSON.parse(localStorage.getItem("persist")) || false
 	);
 	const [publicKey, setPublicKey] = useState("");
 	const [userLogin, setUserLogin] = useState(defaultUserValues);

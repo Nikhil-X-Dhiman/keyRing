@@ -36,7 +36,7 @@ export const Register = () => {
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		emailFocusRef.current.focus();
+		emailFocusRef?.current?.focus();
 	}, []);
 
 	useEffect(() => {

@@ -15,13 +15,13 @@ export const LoginEmail = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const location = useLocation();
 	const from = location.state?.from?.pathname || "/user/home";
+	const navigate = useNavigate();
 
 	const [emailFocus, setEmailFocus] = useState(false);
 	const emailRef = useRef();
 
 	const [err, setErr] = useState(undefined);
 
-	const navigate = useNavigate();
 	const {
 		userLogin,
 		validEmail,
@@ -33,7 +33,7 @@ export const LoginEmail = () => {
 	} = useAuth();
 
 	useEffect(() => {
-		emailRef.current.focus();
+		emailRef.current?.focus();
 		setValidEmail(false);
 		setUserLogin(defaultUserValues);
 		console.log("Email: ", localStorage.getItem("persist"));
@@ -71,8 +71,9 @@ export const LoginEmail = () => {
 	};
 
 	const togglePersist = () => {
-		localStorage.setItem("persist", !persist);
+		localStorage.setItem("persist", JSON.stringify(!persist));
 		setPersist((prev) => !prev);
+		console.log(persist);
 	};
 
 	console.log("Email: ", localStorage.getItem("persist"));
@@ -112,8 +113,8 @@ export const LoginEmail = () => {
 						type="checkbox"
 						id="login-remember"
 						onChange={togglePersist}
-						// checked={persist}
-						value={persist}
+						checked={persist}
+						// value={persist}
 					/>
 					<label htmlFor="login-remember">Remember Email</label>
 					<button>Continue</button>

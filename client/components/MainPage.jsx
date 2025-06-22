@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 export const MainPage = () => {
@@ -12,18 +12,34 @@ export const MainPage = () => {
 		favourite: false,
 		trash: false,
 	};
-	const [passwdList, setPasswdList] = useState([]); // list of passwd items
-	// const [newPasswd, setNewPasswd] = useState(defaultEmpty); // add view storage here
+
+	// fetch data from the server and save it to the server only then save the to local too
+	const [passwdList, setPasswdList] = useState([]); //
 	const [itemIndex, setItemIndex] = useState(null); // index for add, edit and view
 	const [focusItem, setFocusItem] = useState(defaultEmpty); // passwd item for edit and add mode
-	const [mode, setMode] = useState(null); // modes for different view selection
+	const [mode, setMode] = useState(null); // modes for different view selection (null, view, edit, add)
 	const [searchItem, setSearchItem] = useState("");
+	const [pageMode, setPageMode] = useState("All");
+	// all, fav, trash
+	const nameRef = useRef();
+
+	useEffect(() => {
+		if ((mode === "Add" || mode === "Edit") && nameRef.current) {
+			nameRef.current.focus();
+		}
+	}, [mode]);
 
 	const filteredList = passwdList.filter((item) => {
-		return (
+		const matchesSearch =
 			item.name.toLowerCase().includes(searchItem.toLowerCase()) ||
-			item.user.toLowerCase().includes(searchItem.toLowerCase())
-		);
+			item.user.toLowerCase().includes(searchItem.toLowerCase());
+
+		const matchesMode =
+			(pageMode === "All" && item.trash === false) || // Only show if not in trash for "View"
+			(pageMode === "Fav" && item.favourite === true) ||
+			(pageMode === "Trash" && item.trash === true);
+
+		return matchesSearch && matchesMode;
 	});
 
 	const handleAddItem = () => {
@@ -57,6 +73,12 @@ export const MainPage = () => {
 		}
 	};
 
+	const handleFavourite = () => {
+		if (mode === "Edit" || mode === "Add") {
+			setFocusItem((prev) => ({ ...prev, favourite: !prev.favourite }));
+		}
+	};
+
 	const handleEditItem = () => {
 		// setFocusItem((prev) => {
 		// 	const item = passwdList[itemIndex];
@@ -73,13 +95,45 @@ export const MainPage = () => {
 	};
 
 	const handleDeleteItem = () => {
-		setPasswdList((prev) => {
-			const updatedPasswdList = prev.filter((item, i) => {
-				return i !== itemIndex;
+		if (pageMode === "All" || pageMode === "Fav") {
+			setPasswdList((prev) => {
+				const updatedList = [...prev];
+				const item = updatedList[itemIndex];
+				const updateItem = { ...item, trash: true };
+				updatedList[itemIndex] = updateItem;
+				return updatedList;
 			});
-			return updatedPasswdList;
+		} else if (pageMode === "Trash") {
+			setPasswdList((prev) => {
+				const updatedPasswdList = prev.filter((_, i) => {
+					return i !== itemIndex;
+				});
+				return updatedPasswdList;
+			});
+		}
+
+		setMode(null);
+	};
+
+	const handleEmptyTrash = () => {
+		setPasswdList((prev) => {
+			let updatedList = [...prev];
+			updatedList = passwdList.filter((item) => {
+				return item.trash === false;
+			});
+			return updatedList;
 		});
 		setMode(null);
+	};
+
+	const handleRestore = () => {
+		setPasswdList((prev) => {
+			const updatedList = [...prev];
+			const item = updatedList[itemIndex];
+			const updatedItem = { ...item, trash: false };
+			updatedList[itemIndex] = updatedItem;
+			return updatedList;
+		});
 	};
 
 	const handleCancel = () => {
@@ -121,6 +175,7 @@ export const MainPage = () => {
 
 	const handleClickItem = (id) => {
 		// Display Clicked Passwd View
+		let prevItemIndex = itemIndex; // get old clicked item index
 		let i = passwdList.findIndex((item) => item.id === id); // find index uring id
 		setItemIndex(i); // setting index to show that passwd item
 		setMode((prev) => {
@@ -129,7 +184,7 @@ export const MainPage = () => {
 				prev === null ||
 				prev === "Add" ||
 				prev === "Edit" ||
-				prev === "View"
+				(prev === "View" && prevItemIndex !== i) // close view for same item click
 			) {
 				return "View";
 			} else {
@@ -150,15 +205,23 @@ export const MainPage = () => {
 					// TODO: ADD search react-icon
 					value={searchItem}
 					onChange={(e) => setSearchItem(e.target.value)}
-					placeholder="🔍Search"
+					placeholder={`🔍 Search ${
+						pageMode === "All"
+							? "vault"
+							: pageMode === "Fav"
+							? "favourites"
+							: pageMode === "Trash"
+							? "trash"
+							: ""
+					}`}
 				/>
 			</section>
 
 			<section>
 				<ul>
-					<li>All Items</li>
-					<li>Favourites</li>
-					<li>Trash</li>
+					<li onClick={() => setPageMode("All")}>All Items</li>
+					<li onClick={() => setPageMode("Fav")}>Favourites</li>
+					<li onClick={() => setPageMode("Trash")}>Trash</li>
 				</ul>
 			</section>
 
@@ -179,7 +242,9 @@ export const MainPage = () => {
 					)}
 				</div>
 				<div>
-					<button onClick={handleAddItem}>Add</button>
+					<button onClick={handleAddItem} disabled={pageMode === "Trash"}>
+						Add
+					</button>
 				</div>
 			</section>
 
@@ -208,6 +273,7 @@ export const MainPage = () => {
 									}
 									onChange={handleInputChange}
 									readOnly={mode === "View"}
+									ref={nameRef}
 								/>
 
 								<label htmlFor="user">Username</label>
@@ -281,26 +347,6 @@ export const MainPage = () => {
 											</React.Fragment>
 									  ))
 									: null}
-								{/* input URI field for no URI emtry */}
-								{/* {mode === "Add" && focusItem.uri.length === 0 && (
-									<>
-										<label htmlFor="add-uri">URI</label>
-										<input
-											type="text"
-											name="add-uri"
-											id="add-uri"
-											value={focusItem.uri.length === 0 ? "" : focusItem.uri[0]}
-											onChange={(e) => {
-												// setFocusItem([e.target.value]);
-												setFocusItem((prev) => ({
-													...prev,
-													uri: [e.target.value],
-												}));
-											}}
-										/>
-									</>
-								)} */}
-								{/* Add button for URI */}
 								{mode === "Add" || mode === "Edit" ? (
 									<button onClick={handleNewURI}>New URI</button>
 								) : null}
@@ -331,14 +377,45 @@ export const MainPage = () => {
 									></textarea>
 								</div>
 							) : null}
+							{mode === "Add" ||
+							mode === "Edit" ||
+							(mode === "View" && passwdList[itemIndex]?.favourite) ? (
+								<>
+									<label htmlFor="favourite">Favourite</label>
+									<input
+										type="checkbox"
+										name="favourite"
+										id="favourite"
+										checked={
+											mode === "View"
+												? passwdList[itemIndex]?.favourite || false
+												: mode === "Add" || mode === "Edit"
+												? focusItem.favourite
+												: false
+										}
+										onChange={handleFavourite}
+										readOnly={mode === "View"}
+									/>
+								</>
+							) : null}
 						</>
 					)}
 				</div>
 				<div>
 					{mode === "View" && (
 						<>
-							<button onClick={handleEditItem}>Edit</button>
+							{pageMode === "Trash" ? null : (
+								<button onClick={handleEditItem}>Edit</button>
+							)}
+
+							{pageMode === "Trash" && (
+								<button onClick={handleEmptyTrash}>Empty Trash</button>
+							)}
 							<button onClick={handleDeleteItem}>Delete</button>
+							{pageMode === "Trash" && (
+								<button onClick={handleRestore}>Restore</button>
+							)}
+
 							<button onClick={handleClose}>Close</button>
 						</>
 					)}
