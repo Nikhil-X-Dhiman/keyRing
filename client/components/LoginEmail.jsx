@@ -23,7 +23,6 @@ export const LoginEmail = () => {
 	const {
 		userLogin,
 		validEmail,
-		defaultUserValues,
 		setUserLogin,
 		setValidEmail,
 		persist,
@@ -33,11 +32,13 @@ export const LoginEmail = () => {
 	useEffect(() => {
 		emailRef.current?.focus();
 		setValidEmail(false);
-		setUserLogin(defaultUserValues);
+		setUserLogin({
+			email: localStorage.getItem("userEmail") || "",
+			passwd: "",
+		});
 	}, []);
 
 	useEffect(() => {
-		// if (!emailFocus && userLogin.email) {
 		if (userLogin.email) {
 			const { success, error } = emailSchema.safeParse(userLogin.email);
 			if (success) {
@@ -63,12 +64,15 @@ export const LoginEmail = () => {
 	const handleEmailSubmit = (e) => {
 		e.preventDefault();
 		setIsLoading(true);
-		console.log("Emter submission");
+
+		if (persist) {
+			localStorage.setItem("userEmail", userLogin.email);
+		}
 
 		if (validEmail) {
+			setIsLoading(false);
 			navigate("/login/password", { state: { from: from }, replace: true });
 		}
-		setIsLoading(false);
 	};
 
 	const togglePersist = () => {
