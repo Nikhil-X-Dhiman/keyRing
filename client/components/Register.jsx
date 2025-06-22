@@ -1,42 +1,33 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+
 import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router";
+import { useAuth } from "../hooks/useAuth.js";
 import { emailSchema, nameSchema, passwdSchema } from "../utils/authSchema";
-import { useAuth } from "../hooks/useAuth";
 import { instance } from "../api/axios";
-import { useNavigate } from "react-router";
 
 export const Register = () => {
-	const [isLoading, setIsLoading] = useState(false);
-	// Email States
-	const [validEmail, setValidEmail] = useState(false);
-	const emailFocusRef = useRef();
-	const [emailFocus, setEmailFocus] = useState(false);
-
-	// Name States
-	const [validName, setValidName] = useState("");
-	const [nameFocus, setNameFocus] = useState(false);
-
-	// Password States
-	const [passwd, setPasswd] = useState("");
-	const [passwdFocus, setPasswdFocus] = useState(false);
-	const [matchPasswd, setMatchPasswd] = useState("");
-	const [matchPasswdFocus, setMatchPasswdFocus] = useState(false);
-	const [validPasswd, setValidPasswd] = useState(false);
-	const [passwdMatching, setPasswdMatching] = useState(false);
-
-	// Error States
-	const [err, setErr] = useState("");
-	const [emailError, setEmailError] = useState("");
-	const [nameError, setNameError] = useState("");
-	const [passwdError, setPasswdError] = useState("");
-	const [matchPasswdError, setMatchPasswdError] = useState("");
-
+	const navigate = useNavigate();
+	const emailRef = useRef();
 	const { userRegister, setUserRegister } = useAuth();
 
-	const navigate = useNavigate();
+	const [errorMsg, setErrorMsg] = useState("");
+	const [passwdCompare, setPasswdCompare] = useState({
+		passwd: "",
+		confirmPasswd: "",
+	});
+
+	const [validEmail, setValidEmail] = useState(false);
+	const [validName, setValidName] = useState(false);
+	const [validPasswd, setValidPasswd] = useState(false);
+
+	const [emailReq, setEmailReq] = useState("");
+	const [nameReq, setNameReq] = useState("");
+	const [passwdReq, setpasswdReq] = useState("");
+	const [confirmPasswdReq, setconfirmPasswdReq] = useState("");
 
 	useEffect(() => {
-		emailFocusRef?.current?.focus();
+		emailRef.current?.focus();
 	}, []);
 
 	useEffect(() => {
@@ -45,201 +36,177 @@ export const Register = () => {
 
 			if (success) {
 				setValidEmail(true);
-				setErr("");
+				setEmailReq("");
 			} else {
 				setValidEmail(false);
-				setErr(error.issues[0].message);
+				console.error("Email Invalid: ", error);
+				setEmailReq(
+					'Note: Email must be a-z character, 0-9 Numbers, ".@-" special characters & case-insensitinve'
+				);
 			}
 		}
 	}, [userRegister.email]);
 
-	useEffect(() => {
-		if (!validEmail && !emailFocus && userRegister.email) {
-			setEmailError(
-				'Email must be a-z character, 0-9 Numbers, ".@-" special characters & case-insensitinve'
-			);
-		} else if (validEmail) {
-			setEmailError(null);
-		}
-	}, [validEmail, emailFocus]);
-
-	// Name Checking
 	useEffect(() => {
 		if (userRegister.name) {
 			const { success, error } = nameSchema.safeParse(userRegister.name);
 
 			if (success) {
 				setValidName(true);
-				setErr("");
+				setNameReq("");
 			} else {
 				setValidName(false);
-				setErr(error.issues[0].message);
+				console.error("Name Invalid: ", error);
+				setNameReq("Note: Name length allowed between 2 & 32");
 			}
 		}
 	}, [userRegister.name]);
 
 	useEffect(() => {
-		if (!validName && !nameFocus && userRegister.name) {
-			setNameError("Name length should be between 2 & 32.");
-		} else if (validName) {
-			setNameError(null);
-		}
-	}, [validName, nameFocus]);
-
-	// Password & Password Match Checking
-	useEffect(() => {
-		if (passwd) {
-			const { success, error } = passwdSchema.safeParse(passwd);
-
+		if (passwdCompare.passwd || passwdCompare.confirmPasswd) {
+			const { success, error } = passwdSchema.safeParse(passwdCompare.passwd);
 			if (success) {
-				console.log("Password Success");
-
 				setValidPasswd(true);
-				if (passwd === matchPasswd) {
-					console.log("inside match password success");
-
-					userRegister.passwd = passwd;
-					setPasswdMatching(true);
-				}
-				setErr("");
+				setpasswdReq("");
 			} else {
-				console.log("Password Error");
-
 				setValidPasswd(false);
-				setErr(error.issues[0].message);
+				console.error("Password Error: ", error);
+				setpasswdReq(
+					"Note: Password must contain a-z, A-Z, 0-9, (*#@!$%&) & atleast 8 characters long"
+				);
 			}
-
-			if (passwd !== matchPasswd) {
-				userRegister.passwd = "";
-				setPasswdMatching(false);
+			if (
+				passwdCompare.confirmPasswd &&
+				passwdCompare.confirmPasswd !== passwdCompare.passwd
+			) {
+				setconfirmPasswdReq("Note: Password Does Not Match");
+				setUserRegister((prev) => ({ ...prev, passwd: "" }));
+			} else if (
+				passwdCompare.confirmPasswd &&
+				passwdCompare.confirmPasswd === passwdCompare.passwd
+			) {
+				setconfirmPasswdReq("");
+				setUserRegister((prev) => ({ ...prev, passwd: passwdCompare.passwd }));
 			}
 		}
-	}, [passwd, matchPasswd]);
+	}, [passwdCompare.passwd, passwdCompare.confirmPasswd]);
 
-	useEffect(() => {
-		if (!validPasswd && !passwdFocus && passwd) {
-			console.log("hit pass error");
+	const handleRegisterInput = (e) => {
+		const { name, value } = e.target;
+		setUserRegister((prev) => ({ ...prev, [name]: value }));
+	};
 
-			setPasswdError(
-				"Password must contain a-z, A-Z, 0-9, (*#@!$%&) & atleast 8 characters long"
-			);
-		} else if (validPasswd) {
-			setPasswdError("");
-		}
-	}, [validPasswd, passwdFocus]);
+	const handlePasswdInput = (e) => {
+		const { name, value } = e.target;
+		setPasswdCompare((prev) => ({ ...prev, [name]: value }));
+	};
 
-	useEffect(() => {
-		if (matchPasswd && !passwdMatching) {
-			setMatchPasswdError("Password does not match!!!");
-		} else if (passwdMatching) {
-			setMatchPasswdError("");
-		}
-	}, [passwdMatching, matchPasswd, matchPasswdFocus]);
-
-	// Handles Request & Response to/from the Server
-	const handleRegisterSubmit = async (e) => {
+	const handleRegisterForm = async (e) => {
 		e.preventDefault();
-		setIsLoading(true);
-		try {
-			if (validPasswd && validName && validEmail && passwdMatching) {
-				console.log("Register: Response Started");
+		if (validEmail && validName && validPasswd && !confirmPasswdReq) {
+			try {
 				const response = await instance.post(
 					"/api/v1/auth/register",
 					userRegister
 				);
-				console.log("Register Response: ", response);
 				if (response.status === 201) {
-					console.log("User Register Success");
+					setUserRegister((prev) => ({ ...prev, passwd: "" }));
 					navigate("/login/email", { replace: true });
 				}
-			} else {
-				console.error("Client: Request Failed");
-			}
-		} catch (error) {
-			if (!error?.response) {
-				console.error("Register: No Server Response");
-			} else {
-				console.error("Register: Something Went Wrong(Server Side)!!!");
+			} catch (error) {
+				if (!error?.response) {
+					console.error("No Server Response!!!");
+				} else {
+					if (error.response.status === 409) {
+						setErrorMsg("Email Already Exist!!!");
+					} else {
+						console.error(`Server Response: ${error.response.status}`);
+						// console.error("Something Went Wrong!!!");
+						setErrorMsg("Something Went Wrong!!!");
+					}
+				}
 			}
 		}
 	};
 
-	return isLoading ? (
-		<h1>Loading!!!</h1>
-	) : (
-		<main>
-			<figure>
-				<img src="../public/add-user.png" alt="add-user-img" />
-				<figcaption>Create account</figcaption>
-			</figure>
-			<form onSubmit={handleRegisterSubmit}>
-				<fieldset>
-					<legend>
-						Email address <span>(required)</span>
-					</legend>
-					<input
-						type="email"
-						id="register-email"
-						ref={emailFocusRef}
-						value={userRegister.email}
-						onChange={(e) =>
-							setUserRegister((prev) => ({
-								...prev,
-								email: e.target.value,
-							}))
-						}
-						onFocus={() => setEmailFocus(true)}
-						onBlur={() => setEmailFocus(false)}
-					/>
-					{emailError || ""}
-				</fieldset>
-				<fieldset>
-					<legend>Name</legend>
-					<input
-						type="text"
-						id="register-name"
-						value={userRegister.name}
-						onChange={(e) =>
-							setUserRegister((prev) => ({
-								...prev,
-								name: e.target.value,
-							}))
-						}
-						onFocus={() => setNameFocus(true)}
-						onBlur={() => setNameFocus(false)}
-					/>
-					{nameError || ""}
-				</fieldset>
-				<fieldset>
-					<legend>
-						Password <span>(required)</span>
-					</legend>
-					<input
-						type="password"
-						id="register-passwd"
-						value={passwd}
-						onChange={(e) => setPasswd(e.target.value)}
-						onFocus={() => setPasswdFocus(true)}
-						onBlur={() => setPasswdFocus(false)}
-					/>
-					{passwdError || ""}
-				</fieldset>
-				<fieldset>
-					<legend>
-						Confirm Password <span>(required)</span>
-					</legend>
-					<input
-						type="password"
-						id="register-match-passwd"
-						value={matchPasswd}
-						onChange={(e) => setMatchPasswd(e.target.value)}
-						onFocus={() => setMatchPasswdFocus(true)}
-						onBlur={() => setMatchPasswdFocus(false)}
-					/>
-					{matchPasswdError || ""}
-				</fieldset>
-				<button>Continue</button>
-			</form>
-		</main>
+	return (
+		<>
+			<main>
+				<section>
+					<figure>
+						<img src="/add-user.png" alt="add-user-img" />
+						<figcaption>Create account</figcaption>
+					</figure>
+				</section>
+				{errorMsg}
+				<section>
+					<form onSubmit={handleRegisterForm}>
+						<fieldset>
+							<legend>
+								Email address <span>(required)</span>
+							</legend>
+							<input
+								type="text"
+								name="email"
+								id="email"
+								ref={emailRef}
+								value={userRegister.email}
+								onChange={handleRegisterInput}
+								required
+							/>
+							{emailReq}
+						</fieldset>
+						<fieldset>
+							<legend>Name</legend>
+							<input
+								type="text"
+								name="name"
+								id="name"
+								value={userRegister.name}
+								onChange={handleRegisterInput}
+							/>
+							{nameReq}
+						</fieldset>
+						<fieldset>
+							<legend>
+								Password <span>(required)</span>
+							</legend>
+							<input
+								type="password"
+								name="passwd"
+								id="passwd"
+								value={passwdCompare.passwd}
+								onChange={handlePasswdInput}
+								required
+							/>
+							{passwdReq}
+						</fieldset>
+						<fieldset>
+							<legend>
+								Confirm Password <span>(required)</span>
+							</legend>
+							<input
+								type="password"
+								name="confirmPasswd"
+								id="confirmPasswd"
+								value={passwdCompare.confirmPasswd}
+								onChange={handlePasswdInput}
+								disabled={!passwdCompare.passwd || !validPasswd}
+								required
+							/>
+							{confirmPasswdReq}
+						</fieldset>
+						<div>
+							<button>Register</button>
+						</div>
+					</form>
+					<div>
+						<p>
+							Already have an account? <Link to="/login/email">Log In</Link>
+						</p>
+					</div>
+				</section>
+			</main>
+		</>
 	);
 };

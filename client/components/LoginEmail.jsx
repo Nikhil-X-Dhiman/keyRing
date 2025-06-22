@@ -61,6 +61,12 @@ export const LoginEmail = () => {
 		}
 	}, [validEmail]);
 
+	useEffect(() => {
+		if (!persist) {
+			localStorage.removeItem("userEmail");
+		}
+	}, [persist]);
+
 	const handleEmailSubmit = (e) => {
 		e.preventDefault();
 		setIsLoading(true);

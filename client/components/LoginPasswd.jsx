@@ -42,7 +42,7 @@ export const LoginPasswd = () => {
 			// success, error & data
 			if (success) {
 				setValidPasswd(true);
-				setErr("");
+				// setErr("");
 			} else {
 				setValidPasswd(false);
 			}

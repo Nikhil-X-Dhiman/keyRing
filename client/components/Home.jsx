@@ -5,8 +5,8 @@ export const Home = () => {
 		<>
 			<h1>Home</h1>
 			<h4>Welcome to KeyRing</h4>
-			<p>Click this to start Login --&gt</p>
-			<Link to={LoginEmail}>Login</Link>
+			<span>Click this to start Login -{"> "}</span>
+			<Link to="/login/email">Login</Link>
 		</>
 	);
 };
