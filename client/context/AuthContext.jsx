@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { AuthContext } from "./AuthContextObject";
 
-// export const AuthContext = createContext({});
-
 export const AuthProvider = ({ children }) => {
 	const defaultUserValues = { email: "", passwd: "" };
 	const [auth, setAuth] = useState(null);
@@ -16,9 +14,7 @@ export const AuthProvider = ({ children }) => {
 		name: "",
 		passwd: "",
 	});
-	// const [email, setEmail] = useState("");
 	const [validEmail, setValidEmail] = useState(false);
-	// const [passwd, setPasswd] = useState("");
 	const [validPasswd, setValidPasswd] = useState(false);
 
 	return (

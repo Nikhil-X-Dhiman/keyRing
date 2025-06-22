@@ -1,10 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useRef, useState } from "react";
 import { emailSchema } from "../utils/authSchema.js";
-import { useNavigate, useLocation, replace } from "react-router";
+import { useNavigate, useLocation, Link } from "react-router";
 import { useAuth } from "../hooks/useAuth.js";
-
-// TODO: implement use replace and state prop in navigate to use secure login
 
 export const LoginEmail = () => {
 	const EMAIL_REGEX =
@@ -20,7 +18,7 @@ export const LoginEmail = () => {
 	const [emailFocus, setEmailFocus] = useState(false);
 	const emailRef = useRef();
 
-	const [err, setErr] = useState(undefined);
+	const [err, setErr] = useState("");
 
 	const {
 		userLogin,
@@ -36,35 +34,38 @@ export const LoginEmail = () => {
 		emailRef.current?.focus();
 		setValidEmail(false);
 		setUserLogin(defaultUserValues);
-		console.log("Email: ", localStorage.getItem("persist"));
 	}, []);
 
 	useEffect(() => {
-		if (!emailFocus && userLogin.email) {
-			const { success, data, error } = emailSchema.safeParse(userLogin.email);
+		// if (!emailFocus && userLogin.email) {
+		if (userLogin.email) {
+			const { success, error } = emailSchema.safeParse(userLogin.email);
 			if (success) {
-				console.log("Email Schema Success: ", data);
 				setValidEmail(true);
 				setErr("");
 			} else {
 				setValidEmail(false);
 				console.log(error);
 
-				setErr(error.issues[0].message);
-				console.error("Email Schema Error: ", err);
+				setErr(
+					'Email must contain username, "@" & domain name. Characters Allowed are [a-z], [0-9] & [ ._$%& ]'
+				);
 			}
 		}
-	}, [emailFocus]);
+	}, [emailFocus, userLogin.email]);
 
 	useEffect(() => {
-		setErr("");
-	}, [userLogin.email]);
+		if (validEmail === true) {
+			setErr("");
+		}
+	}, [validEmail]);
 
 	const handleEmailSubmit = (e) => {
 		e.preventDefault();
 		setIsLoading(true);
+		console.log("Emter submission");
+
 		if (validEmail) {
-			// navigate("/login/password");
 			navigate("/login/password", { state: { from: from }, replace: true });
 		}
 		setIsLoading(false);
@@ -73,10 +74,7 @@ export const LoginEmail = () => {
 	const togglePersist = () => {
 		localStorage.setItem("persist", JSON.stringify(!persist));
 		setPersist((prev) => !prev);
-		console.log(persist);
 	};
-
-	console.log("Email: ", localStorage.getItem("persist"));
 
 	return isLoading ? (
 		<h1>Loading!!!</h1>
@@ -97,12 +95,10 @@ export const LoginEmail = () => {
 							id="login-email"
 							ref={emailRef}
 							value={userLogin.email}
-							// onChange={(e) => setEmail(e.target.value)}
 							onChange={(e) =>
 								setUserLogin((prev) => ({ ...prev, email: e.target.value }))
 							}
 							required
-							// autoComplete="off"
 							onFocus={() => setEmailFocus(true)}
 							onBlur={() => setEmailFocus(false)}
 						/>
@@ -114,13 +110,12 @@ export const LoginEmail = () => {
 						id="login-remember"
 						onChange={togglePersist}
 						checked={persist}
-						// value={persist}
 					/>
-					<label htmlFor="login-remember">Remember Email</label>
-					<button>Continue</button>
+					<label htmlFor="login-remember">Remember Me</label>
+					<button disabled={!validEmail}>Continue</button>
 				</form>
 				<div>
-					New to Bitwarden? <a href="">Create account</a>
+					New to Bitwarden? <Link to="/register">Create Account</Link>
 				</div>
 			</main>
 		</>
