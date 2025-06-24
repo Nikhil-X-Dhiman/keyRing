@@ -11,13 +11,9 @@ import {
 } from "../utils/handleTokens.js";
 
 export const authenticateUserRequest = async (req, res, next) => {
-	// const accessToken = req.access_token;
 	const authHeader = req.headers["authorization"];
 	const accessToken = authHeader?.split(" ")[1];
 	// const refreshToken = req.cookies.refresh_token;
-	// console.log("Middleware access token: ", accessToken);
-	// console.log("Middleware refresh token: ", refreshToken);
-	console.log("verify: inside middleware");
 
 	if (!accessToken) {
 		req.user = null;
@@ -26,14 +22,11 @@ export const authenticateUserRequest = async (req, res, next) => {
 	if (accessToken) {
 		const decodedAccessToken = verifyAccessToken(accessToken);
 		if (decodedAccessToken) {
-			console.log("Access Token is Valid!!!");
-
 			req.user = decodedAccessToken;
 			return next();
 		} else {
 			res.send(403).json("Auth: Token Expired!!!");
 		}
-		console.log("Access Token is Invalid!!!");
 	}
 
 	// if (refreshToken) {

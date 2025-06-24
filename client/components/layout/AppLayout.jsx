@@ -5,7 +5,7 @@ export const AppLayout = () => {
 	return (
 		// add header here
 		<main>
-			<AppHeader />
+			{/* <AppHeader /> */}
 			<Outlet />
 			<h1>Made by Nikhil Dhiman</h1>
 		</main>

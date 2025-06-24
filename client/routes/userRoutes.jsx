@@ -1,19 +1,25 @@
 import { MainPage } from "../components/MainPage";
 import { RequireAuth } from "../components/RequireAuth";
 import { AppLayout } from "../components/layout/AppLayout";
+import { PersistLogin } from "../components/layout/PersistLogin";
 
 export const userRoutes = [
 	{
-		path: "user",
-		element: <RequireAuth />,
+		element: <PersistLogin />,
 		children: [
 			{
-				path: "home",
-				element: <AppLayout />,
+				path: "user",
+				element: <RequireAuth />,
 				children: [
 					{
-						index: true,
-						element: <MainPage />,
+						path: "home",
+						element: <AppLayout />,
+						children: [
+							{
+								index: true,
+								element: <MainPage />,
+							},
+						],
 					},
 				],
 			},

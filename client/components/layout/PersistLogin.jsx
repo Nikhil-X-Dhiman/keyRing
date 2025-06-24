@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useRefreshToken } from "../../hooks/useRefreshToken";
 import { Outlet } from "react-router";
@@ -9,7 +9,7 @@ export const PersistLogin = () => {
 	const refresh = useRefreshToken();
 	const [isLoading, setIsLoading] = useState(false);
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		setIsLoading(true);
 		async function verifyRefreshToken() {
 			try {
@@ -20,7 +20,12 @@ export const PersistLogin = () => {
 				setIsLoading(false);
 			}
 		}
-		auth?.accessToken ? setIsLoading(false) : verifyRefreshToken();
+		const isLogged = JSON.parse(localStorage.getItem("isLogged"));
+		auth?.accessToken
+			? setIsLoading(false)
+			: isLogged
+			? verifyRefreshToken()
+			: setIsLoading(false);
 	}, []);
 
 	return (

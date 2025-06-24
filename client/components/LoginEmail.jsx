@@ -1,8 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { emailSchema } from "../utils/authSchema.js";
 import { useNavigate, useLocation, Link } from "react-router";
 import { useAuth } from "../hooks/useAuth.js";
+import { useRefreshToken } from "../hooks/useRefreshToken.jsx";
 
 export const LoginEmail = () => {
 	const EMAIL_REGEX =
@@ -12,7 +13,7 @@ export const LoginEmail = () => {
 
 	const [isLoading, setIsLoading] = useState(false);
 	const location = useLocation();
-	const from = location.state?.from?.pathname || "/user/home";
+	const from = location.state?.from || "/user/home";
 	const navigate = useNavigate();
 
 	const [emailFocus, setEmailFocus] = useState(false);
@@ -21,6 +22,7 @@ export const LoginEmail = () => {
 	const [err, setErr] = useState("");
 
 	const {
+		auth,
 		userLogin,
 		validEmail,
 		setUserLogin,
@@ -28,6 +30,12 @@ export const LoginEmail = () => {
 		persist,
 		setPersist,
 	} = useAuth();
+
+	useLayoutEffect(() => {
+		if (auth?.user) {
+			navigate(from, { replace: true });
+		}
+	}, [auth?.user]);
 
 	useEffect(() => {
 		emailRef.current?.focus();

@@ -1,5 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { instance } from "../api/axios";
+import { useNavigate } from "react-router";
+import { useAuth } from "../hooks/useAuth";
 
 export const MainPage = () => {
 	const defaultEmpty = {
@@ -22,6 +25,8 @@ export const MainPage = () => {
 	const [pageMode, setPageMode] = useState("All");
 	// all, fav, trash
 	const nameRef = useRef();
+	const navigate = useNavigate();
+	const { setAuth } = useAuth();
 
 	useEffect(() => {
 		if ((mode === "Add" || mode === "Edit") && nameRef.current) {
@@ -193,6 +198,23 @@ export const MainPage = () => {
 		});
 	};
 
+	const handleLogout = async () => {
+		const response = await instance.get("/api/v1/auth/logout", {
+			withCredentials: true,
+		});
+		const success = response?.data?.success;
+		const message = response?.data?.message;
+		console.log("logout response: ", response);
+
+		console.log(success, message);
+
+		if (response.status === 200) {
+			console.log("logged out");
+			navigate("/login/email");
+			setAuth(null);
+		}
+	};
+
 	return (
 		<>
 			<section>
@@ -215,6 +237,7 @@ export const MainPage = () => {
 							: ""
 					}`}
 				/>
+				<button onClick={handleLogout}>Logout</button>
 			</section>
 
 			<section>

@@ -93,6 +93,7 @@ export const LoginPasswd = () => {
 					if (isValid) {
 						setAuth((prev) => ({ ...prev, user: payload }));
 						setUserLogin((prev) => ({ ...prev, passwd: "" }));
+						localStorage.setItem("isLogged", JSON.stringify(true));
 						navigate(from, { replace: true });
 					} else {
 						console.error("Verify Access Token Failed: ", error);

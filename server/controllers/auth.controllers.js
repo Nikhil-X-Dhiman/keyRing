@@ -3,7 +3,10 @@ import {
 	getUserByCredentials,
 	insertUserByCredential,
 } from "../models/auth.models.js";
-import { insertRefreshToken } from "../models/token.models.js";
+import {
+	insertRefreshToken,
+	removeRefreshToken,
+} from "../models/token.models.js";
 import { jsonResponse } from "../services/jsonResponse.service.js";
 import { genPasswdHash, verifyPasswd } from "../utils/handleArgon.js";
 import {
@@ -113,8 +116,13 @@ export const handleGetPublicKey = async (req, res) => {
 };
 
 export const handleRefreshToken = async (req, res) => {
-	let refreshToken = req.cookies.refresh_token;
+	let refreshToken = req.cookies?.refresh_token;
 	// verify & decode the refresh token
+	if (!refreshToken) {
+		res
+			.status(400)
+			.json({ success: false, message: "No Refresh Token Received" });
+	}
 	const [decodedRefreshToken] = await verifyRefreshToken(refreshToken);
 	if (!decodedRefreshToken) {
 		console.log("Access Token Regeneration: Invalid Refresh Token");
@@ -129,7 +137,20 @@ export const handleRefreshToken = async (req, res) => {
 		plan: decodedRefreshToken?.users?.plan,
 	};
 	const newAccessToken = genAccessToken(payload);
+	const publicKey = await readFile("../publicKey.pem", { encoding: "utf8" });
 	console.log("Token Regeneration: New Access Token: ", payload);
 	// TODO: Find out weather to send old refresh token again or not?
-	res.status(201).json({ access_token: newAccessToken });
+	res.status(201).json({ access_token: newAccessToken, publicKey: publicKey });
+};
+
+export const handleLogout = async (req, res) => {
+	const refreshToken = req.cookies.refresh_token;
+	const [result] = await removeRefreshToken(refreshToken);
+	console.log("Logout: ", result);
+	// res.cookie("refresh_token", "", {
+	// 	// 14 days (in miliseconds)
+	// 	httpOnly: true,
+	// });
+	res.clearCookie("refresh_token", { httpOnly: true, path: "/" });
+	res.status(200).json({ success: true, message: "User Logged Out" });
 };

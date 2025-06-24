@@ -5,6 +5,7 @@ import { appRouter } from "./app.routes.js";
 
 export const router = e.Router();
 
+// public Auth Routes
 router.use("/api/v1/auth/", authRouter);
 
 router.use(authenticateUserRequest);
