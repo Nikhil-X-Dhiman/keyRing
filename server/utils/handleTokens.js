@@ -1,9 +1,10 @@
 import jwt from "jsonwebtoken";
-import { readFileSync } from "fs";
+// import { readFileSync } from "fs";
 import { getRefreshToken } from "../models/token.models.js";
+import { privateKey, publicKey } from "./handleCryptoKeys.js";
 
-const publicKey = readFileSync("../publicKey.pem", { encoding: "utf-8" });
-const privateKey = readFileSync("../privateKey.pem", { encoding: "utf-8" });
+// const publicKey = readFileSync("../publicKey.pem", { encoding: "utf-8" });
+// const privateKey = readFileSync("../privateKey.pem", { encoding: "utf-8" });
 
 export const genAccessToken = (payload) => {
 	try {

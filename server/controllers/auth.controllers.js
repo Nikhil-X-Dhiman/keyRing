@@ -117,7 +117,7 @@ export const handleRegister = async (req, res) => {
 	const nameCheck = nameSchema.safeParse(name);
 	const passwdCheck = passwdSchema.safeParse(passwd);
 	if (!emailCheck.success || !nameCheck.success || !passwdCheck.success) {
-		res.send(400).json({
+		return res.send(400).json({
 			success: false,
 			msg: "Proper Format of the Fields are Required!!!",
 		});
@@ -148,7 +148,7 @@ export const handleGetPublicKey = async (req, res) => {
 			.json({ success: true, msg: "Public Key Found and Sent!!!", publicKey });
 	} else {
 		// if public key not found
-		res
+		return res
 			.status(404)
 			.json({ success: false, msg: "Public Key Not Available!!!" });
 	}
@@ -160,14 +160,14 @@ export const handleRefreshToken = async (req, res) => {
 	// verify & decode the refresh token
 	if (!refreshToken) {
 		// send response for no refresh token
-		res
+		return res
 			.status(403)
 			.json({ success: false, msg: "Refresh Token Not Received!!!" });
 	}
 	const [decodedRefreshToken] = await verifyRefreshToken(refreshToken);
 	// it verify, refresh token is valid & exist inside session db
 	if (!decodedRefreshToken) {
-		res
+		return res
 			.status(404)
 			.json({ success: false, msg: "Invalid or Expired Token!!!" });
 	}
@@ -182,18 +182,20 @@ export const handleRefreshToken = async (req, res) => {
 	};
 	const newAccessToken = genAccessToken(payload);
 	// new Access Token is created & sent with public key
-	res.status(200).json({ access_token: newAccessToken, publicKey });
+	return res.status(200).json({ access_token: newAccessToken, publicKey });
 };
 
 export const handleLogout = async (req, res) => {
 	// user refresh token is read
 	if (!req.user) {
-		res.status(400).json({ success: false, msg: "You are not Logged In!!!" });
+		return res
+			.status(400)
+			.json({ success: false, msg: "You are not Logged In!!!" });
 	}
 	const refreshToken = req.cookies.refresh_token;
 	// remove the session refresh token
 	const [result] = await removeRefreshToken(refreshToken);
 	// remove cookies from client system
 	res.clearCookie("refresh_token", { httpOnly: true, path: "/" });
-	res.status(200).json({ success: true, message: "User Logged Out" });
+	return res.status(200).json({ success: true, message: "User Logged Out" });
 };

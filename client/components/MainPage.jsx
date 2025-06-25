@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { instance } from "../api/axios";
 import { useNavigate } from "react-router";
 import { useAuth } from "../hooks/useAuth";
+import { usePrivateInstance } from "../hooks/usePrivateInstance";
 
 export const MainPage = () => {
 	const defaultEmpty = {
@@ -27,6 +27,7 @@ export const MainPage = () => {
 	const nameRef = useRef();
 	const navigate = useNavigate();
 	const { setAuth } = useAuth();
+	const privateInstance = usePrivateInstance();
 
 	useEffect(() => {
 		if ((mode === "Add" || mode === "Edit") && nameRef.current) {
@@ -41,7 +42,7 @@ export const MainPage = () => {
 
 		const matchesMode =
 			(pageMode === "All" && item.trash === false) || // Only show if not in trash for "View"
-			(pageMode === "Fav" && item.favourite === true) ||
+			(pageMode === "Fav" && item.favourite === true && item.trash === false) ||
 			(pageMode === "Trash" && item.trash === true);
 
 		return matchesSearch && matchesMode;
@@ -85,10 +86,6 @@ export const MainPage = () => {
 	};
 
 	const handleEditItem = () => {
-		// setFocusItem((prev) => {
-		// 	const item = passwdList[itemIndex];
-		// 	return { ...item };
-		// });
 		setFocusItem(passwdList[itemIndex] || "");
 		setMode((prev) => {
 			if (prev === null || prev === "Add" || prev === "View") {
@@ -199,7 +196,7 @@ export const MainPage = () => {
 	};
 
 	const handleLogout = async () => {
-		const response = await instance.get("/api/v1/auth/logout", {
+		const response = await privateInstance.get("/api/v1/auth/logout", {
 			withCredentials: true,
 		});
 		const success = response?.data?.success;

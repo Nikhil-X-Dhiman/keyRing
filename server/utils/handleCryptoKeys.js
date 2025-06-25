@@ -1,4 +1,5 @@
 // TODO: handle error
+import { readFileSync } from "fs";
 
 export const publicKey = readFileSync("../publicKey.pem", {
 	encoding: "utf-8",
