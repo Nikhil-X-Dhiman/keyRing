@@ -12,7 +12,6 @@ import {
 	genRefreshToken,
 	verifyRefreshToken,
 } from "../utils/handleTokens.js";
-import { readFile } from "fs/promises";
 import {
 	emailSchema,
 	nameSchema,
