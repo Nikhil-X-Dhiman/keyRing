@@ -6,7 +6,6 @@ import {
 	insertRefreshToken,
 	removeRefreshToken,
 } from "../models/token.models.js";
-import { jsonResponse } from "../services/jsonResponse.service.js";
 import { genPasswdHash, verifyPasswd } from "../utils/handleArgon.js";
 import {
 	genAccessToken,
@@ -142,13 +141,17 @@ export const handleRegister = async (req, res) => {
 };
 
 export const handleGetPublicKey = async (req, res) => {
-	let publicKey;
-	try {
-		publicKey = await readFile("../publicKey.pem", { encoding: "utf8" });
-		return res.status(200).json({ publicKey: publicKey });
-	} catch (error) {
-		console.error("Server: Get Public Key to Client Error: ", error);
-		return res.status(204).json({ error: "Public Key Error" });
+	// read the public key from file
+	if (publicKey) {
+		// if public key found
+		return res
+			.status(200)
+			.json({ success: true, msg: "Public Key Found and Sent!!!", publicKey });
+	} else {
+		// if public key not found
+		res
+			.status(404)
+			.json({ success: false, msg: "Public Key Not Available!!!" });
 	}
 };
 

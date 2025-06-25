@@ -1,3 +1,5 @@
+// TODO: handle error
+
 export const publicKey = readFileSync("../publicKey.pem", {
 	encoding: "utf-8",
 });
