@@ -10,7 +10,7 @@ const server = e();
 
 server.use(cors(corsOptions));
 
-server.use(e.urlencoded({ extended: true }));
+// server.use(e.urlencoded({ extended: true }));
 server.use(e.json());
 server.use(cookieParser());
 

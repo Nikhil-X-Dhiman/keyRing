@@ -1,5 +1,4 @@
 import e from "express";
-// import { jsonResponse } from "../services/jsonResponse.service.js";
 import {
 	handleGetPublicKey,
 	handleLogin,

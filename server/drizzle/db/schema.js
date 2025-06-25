@@ -11,6 +11,7 @@ import {
 	varchar,
 } from "drizzle-orm/mysql-core";
 
+// Track users
 export const userTable = mysqlTable("users", {
 	id: int("id").autoincrement().primaryKey(),
 	name: varchar("name", { length: 255 }).notNull(),
@@ -28,6 +29,7 @@ export const userTable = mysqlTable("users", {
 		.notNull(),
 });
 
+// Track user Auth details
 export const userAuthTable = mysqlTable("auth", {
 	id: int("id").autoincrement().primaryKey(),
 	userID: int("user_id").references(() => userTable.id, {
@@ -49,6 +51,7 @@ export const userAuthTable = mysqlTable("auth", {
 		.notNull(),
 });
 
+// Track user Session Details
 export const refreshTokenTable = mysqlTable("refresh_token", {
 	id: int("id").autoincrement().primaryKey(),
 	userID: int("user_id").references(() => userTable.id, {
@@ -68,6 +71,7 @@ export const refreshTokenTable = mysqlTable("refresh_token", {
 		.notNull(),
 });
 
+// Store user Password Data
 export const loginTable = mysqlTable("login", {
 	id: int("id").autoincrement().primaryKey(),
 	userID: int("user_id").references(() => userTable.id, {

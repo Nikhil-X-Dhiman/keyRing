@@ -6,14 +6,14 @@ const router = e.Router();
 router.route("/connect").get((req, res) => {
 	if (req.user) {
 		console.log("User Logged in: ", req.user);
-		return res
+		res
 			.status(200)
-			.json(jsonResponse({ isSuccess: true, data: "User is Logged In!!!" }));
+			.json({ success: true, msg: "Connection Success!!! User Logged In!!!" });
 	}
 	console.log("User Logged Out!!!");
-	return res
-		.status(404)
-		.json(jsonResponse({ isError: true, error: "User is logged out!!!" }));
+	res
+		.status(200)
+		.json({ success: true, msg: "Connection Success!!! User Logged Out!!!" });
 });
 
 export const appRouter = router;
