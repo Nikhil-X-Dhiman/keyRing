@@ -14,7 +14,11 @@ import {
 	verifyRefreshToken,
 } from "../utils/handleTokens.js";
 import { readFile } from "fs/promises";
-import { emailSchema } from "../utils/handleSchema.js";
+import {
+	emailSchema,
+	nameSchema,
+	passwdSchema,
+} from "../utils/handleSchema.js";
 import { publicKey } from "../utils/handleCryptoKeys.js";
 
 export const handleLogin = async (req, res) => {
@@ -101,29 +105,40 @@ export const handleLogin = async (req, res) => {
 
 // Register by Creating a new User Account
 export const handleRegister = async (req, res) => {
+	// extract fields from request body
 	const { email, name, passwd } = req.body;
+	// check if all fields are present
 	if (!email || !name || !passwd) {
-		return res.status(400).json(
-			jsonResponse({
-				isError: true,
-				error: "Email or Name or Password is Required!!!",
-			})
-		);
+		return res.status(400).json({
+			success: false,
+			msg: "Missing Required Fields!!!",
+		});
+	}
+	//	Check Schemas for all fields
+	const emailCheck = emailSchema.safeParse(email);
+	const nameCheck = nameSchema.safeParse(name);
+	const passwdCheck = passwdSchema.safeParse(passwd);
+	if (!emailCheck.success || !nameCheck.success || !passwdCheck.success) {
+		res.send(400).json({
+			success: false,
+			msg: "Proper Format of the Fields are Required!!!",
+		});
 	}
 	// Create hash from passwd
 	const hashPasswd = await genPasswdHash(passwd);
-
+	// Insert User Credential into db
 	const result = await insertUserByCredential(email, name, hashPasswd);
 	if (result) {
+		// success to register new user
 		return res
 			.status(201)
-			.json(jsonResponse({ isSuccess: true, data: "Success" }));
+			.json({ success: true, msg: "User Account is Created!!!" });
 	}
-	return res
-		.status(409)
-		.json(
-			jsonResponse({ isError: true, error: "Email is Already Registered!!!" })
-		);
+	// failed to register new user
+	return res.status(409).json({
+		success: false,
+		msg: "User already registered or failed to create new user!!!",
+	});
 };
 
 export const handleGetPublicKey = async (req, res) => {
