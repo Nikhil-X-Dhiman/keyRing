@@ -45,11 +45,8 @@ export const genRefreshToken = (payload) => {
 
 export const verifyRefreshToken = async (refreshToken) => {
 	try {
-		console.log("inside verify refresh token: ", refreshToken);
 		const decodedToken = jwt.verify(refreshToken, publicKey);
-		console.log("inside verify refresh decoded token: ", decodedToken);
 		const foundRefreshToken = await getRefreshToken(decodedToken.id);
-		console.log("inside verify refresh get refresh token: ", foundRefreshToken);
 		return foundRefreshToken;
 	} catch (error) {
 		console.error("Verify Refresh Token Error: ", error);

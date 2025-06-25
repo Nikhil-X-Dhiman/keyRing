@@ -156,18 +156,23 @@ export const handleGetPublicKey = async (req, res) => {
 };
 
 export const handleRefreshToken = async (req, res) => {
+	// get user refresh token from req
 	let refreshToken = req.cookies?.refresh_token;
 	// verify & decode the refresh token
 	if (!refreshToken) {
+		// send response for no refresh token
 		res
-			.status(400)
-			.json({ success: false, message: "No Refresh Token Received" });
+			.status(403)
+			.json({ success: false, msg: "Refresh Token Not Received!!!" });
 	}
 	const [decodedRefreshToken] = await verifyRefreshToken(refreshToken);
+	// it verify, refresh token is valid & exist inside session db
 	if (!decodedRefreshToken) {
-		console.log("Access Token Regeneration: Invalid Refresh Token");
-		res.status(404).json({ error: "Invalid or Expired Token!!!" });
+		res
+			.status(404)
+			.json({ success: false, msg: "Invalid or Expired Token!!!" });
 	}
+	// payload for new access token creation
 	const payload = {
 		id: decodedRefreshToken?.users?.id,
 		name: decodedRefreshToken?.users?.name,
@@ -177,20 +182,19 @@ export const handleRefreshToken = async (req, res) => {
 		plan: decodedRefreshToken?.users?.plan,
 	};
 	const newAccessToken = genAccessToken(payload);
-	const publicKey = await readFile("../publicKey.pem", { encoding: "utf8" });
-	console.log("Token Regeneration: New Access Token: ", payload);
-	// TODO: Find out weather to send old refresh token again or not?
-	res.status(201).json({ access_token: newAccessToken, publicKey: publicKey });
+	// new Access Token is created & sent with public key
+	res.status(200).json({ access_token: newAccessToken, publicKey });
 };
 
 export const handleLogout = async (req, res) => {
+	// user refresh token is read
+	if (!req.user) {
+		res.status(400).json({ success: false, msg: "You are not Logged In!!!" });
+	}
 	const refreshToken = req.cookies.refresh_token;
+	// remove the session refresh token
 	const [result] = await removeRefreshToken(refreshToken);
-	console.log("Logout: ", result);
-	// res.cookie("refresh_token", "", {
-	// 	// 14 days (in miliseconds)
-	// 	httpOnly: true,
-	// });
+	// remove cookies from client system
 	res.clearCookie("refresh_token", { httpOnly: true, path: "/" });
 	res.status(200).json({ success: true, message: "User Logged Out" });
 };
