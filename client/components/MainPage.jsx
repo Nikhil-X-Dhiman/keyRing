@@ -210,6 +210,7 @@ export const MainPage = () => {
 
 		if (response.status === 200) {
 			console.log("logged out");
+			localStorage.setItem("isLogged", JSON.stringify(false));
 			navigate("/login/email");
 			setAuth(null);
 		}

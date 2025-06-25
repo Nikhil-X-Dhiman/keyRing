@@ -22,7 +22,7 @@ export const LoginEmail = () => {
 	const [err, setErr] = useState("");
 
 	const {
-		auth,
+		// auth,
 		userLogin,
 		validEmail,
 		setUserLogin,
@@ -30,12 +30,6 @@ export const LoginEmail = () => {
 		persist,
 		setPersist,
 	} = useAuth();
-
-	useLayoutEffect(() => {
-		if (auth?.user) {
-			navigate(from, { replace: true });
-		}
-	}, [auth?.user]);
 
 	useEffect(() => {
 		emailRef.current?.focus();
@@ -63,11 +57,11 @@ export const LoginEmail = () => {
 		}
 	}, [emailFocus, userLogin.email]);
 
-	useEffect(() => {
-		if (validEmail === true) {
-			setErr("");
-		}
-	}, [validEmail]);
+	// useEffect(() => {
+	// 	if (validEmail === true) {
+	// 		setErr("");
+	// 	}
+	// }, [validEmail]);
 
 	useEffect(() => {
 		if (!persist) {

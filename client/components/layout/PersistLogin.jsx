@@ -2,33 +2,52 @@
 import { useLayoutEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useRefreshToken } from "../../hooks/useRefreshToken";
-import { Outlet } from "react-router";
+import { Navigate, Outlet, useLocation } from "react-router";
 
 export const PersistLogin = () => {
-	const { auth, persist } = useAuth();
+	const { auth, setAuth, persist } = useAuth();
 	const refresh = useRefreshToken();
-	const [isLoading, setIsLoading] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
+	const location = useLocation();
 
 	useLayoutEffect(() => {
+		let isMounted = true;
 		setIsLoading(true);
 		async function verifyRefreshToken() {
 			try {
 				await refresh();
 			} catch (error) {
 				console.error("Persist Login Refreshing Token: ", error);
+				setAuth(null);
 			} finally {
-				setIsLoading(false);
+				isMounted && setIsLoading(false);
 			}
 		}
-		const isLogged = JSON.parse(localStorage.getItem("isLogged"));
-		auth?.accessToken
-			? setIsLoading(false)
-			: isLogged
-			? verifyRefreshToken()
-			: setIsLoading(false);
+		if (auth?.accessToken) {
+			setIsLoading(false);
+		} else if (persist) {
+			verifyRefreshToken();
+		} else {
+			setIsLoading(false);
+		}
+		return () => {
+			isMounted = false;
+		};
 	}, []);
 
-	return (
-		<>{persist ? isLoading ? <p>Loading...</p> : <Outlet /> : <Outlet />}</>
-	);
+	if (isLoading) {
+		return <p>Loading...</p>;
+	}
+
+	if (auth?.accessToken) {
+		const isAuthPage =
+			location.pathname.startsWith("/login") ||
+			location.pathname.startsWith("/register");
+		if (isAuthPage) {
+			return <Navigate to={"/user/home"} replace />;
+		}
+		return <Outlet />;
+	}
+
+	return <Outlet />;
 };
