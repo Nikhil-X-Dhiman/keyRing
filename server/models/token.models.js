@@ -1,7 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "../drizzle/db/index.js";
 import { refreshTokenTable, userTable } from "../drizzle/db/schema.js";
-import { log } from "console";
 
 export const getRefreshToken = async (id) => {
 	try {

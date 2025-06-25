@@ -9,7 +9,8 @@ export const genAccessToken = (payload) => {
 	try {
 		const accessToken = jwt.sign(payload, privateKey, {
 			algorithm: "RS256",
-			expiresIn: "15m", // 15 minutes
+			expiresIn: process.env.ACCESS_TOKEN_EXPIRY, // 15 minutes
+			// expiresIn: 60 * 15, // in seconds
 		});
 		return accessToken;
 	} catch (error) {
@@ -32,7 +33,8 @@ export const genRefreshToken = (payload) => {
 	try {
 		const refreshToken = jwt.sign(payload, privateKey, {
 			algorithm: "RS256",
-			expiresIn: 1000 * 60 * 60 * 24 * 14, // 14 days
+			expiresIn: process.env.REFRESH_TOKEN_EXPIRY, // 14 days
+			// expiresIn: 60 * 60 * 24 * 14, // 14 days
 		});
 		return refreshToken;
 	} catch (error) {

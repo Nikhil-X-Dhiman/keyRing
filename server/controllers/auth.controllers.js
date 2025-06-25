@@ -1,4 +1,3 @@
-import path from "path";
 import {
 	getUserByCredentials,
 	insertUserByCredential,
@@ -15,35 +14,54 @@ import {
 	verifyRefreshToken,
 } from "../utils/handleTokens.js";
 import { readFile } from "fs/promises";
+import { emailSchema } from "../utils/handleSchema.js";
+import { publicKey } from "../utils/handleCryptoKeys.js";
 
 export const handleLogin = async (req, res) => {
-	// TODO: detect if user is already logged in
+	if (req.user) {
+		// checks if user logged in
+		return res
+			.status(405)
+			.json({ success: false, msg: "User Already Logged In!!!" });
+	}
 	const { email, passwd } = req.body;
 	if (!email || !passwd) {
-		return res.status(400).json(
-			jsonResponse({
-				isError: true,
-				error: "Email or Password is required!!!",
-			})
-		);
+		// checks if email or password is present
+		return res.status(400).json({
+			success: false,
+			msg: "Email or Password is required!!!",
+		});
 	}
+	const { success, data } = emailSchema.safeParse(email);
+	if (!success) {
+		// checks if the format of the email is correct
+		return res.status(400).json({
+			success: false,
+			msg: "Legal format of Email or Password is required!!!",
+		});
+	}
+
 	let result;
 	try {
+		// get user details from db
 		[result] = await getUserByCredentials(email, passwd);
+		// compare passwd with its hash from db
 		let passwdVerification = result
 			? verifyPasswd(passwd, result?.auth?.passwordHash)
 			: false;
 		if (!passwdVerification || !result) {
-			return res.status(404).json(
-				jsonResponse({
-					isError: true,
-					error: "Email or Password is Incorrect",
-				})
-			);
+			// no email found or passwd is incorrect
+			return res
+				.status(403)
+				.json({ success: false, msg: "Email or Password is Incorrect!!!" });
 		}
 	} catch (error) {
 		console.error("handleLogin: ", error);
+		return res
+			.status(400)
+			.json({ success: false, msg: "Error Occured: Authentication" });
 	}
+	// payload created for access token
 	const payload = {
 		id: result?.users?.id,
 		name: result?.users?.name,
@@ -52,28 +70,32 @@ export const handleLogin = async (req, res) => {
 		role: result?.users?.role,
 		plan: result?.users?.plan,
 	};
+	// create access token
 	const accessToken = genAccessToken(payload);
+	// create refresh token
 	const refreshToken = genRefreshToken({ id: payload?.id });
 	if (!accessToken || !refreshToken) {
-		return res.status(500).json(
-			jsonResponse({
-				isError: true,
-				error: "Access & Refresh token creation failed!!!",
-			})
-		);
+		// check if access token & refresh token is created or not
+		return res.status(500).json({
+			success: false,
+			msg: "Access or Refresh token creation failed!!!",
+		});
 	}
-	// console.log("refresh token payload (handle login):", payload.id);
-
+	// insert refresh token into db to track user session
 	await insertRefreshToken(refreshToken, payload?.id);
 
 	res.cookie("refresh_token", refreshToken, {
 		// 14 days (in miliseconds)
 		maxAge: 1000 * 60 * 60 * 24 * 14,
 		httpOnly: true,
+		secure: process.env.PRODUCTION,
 	});
-
+	// send the success response to login with access token & public key to verify it
 	return res.status(200).json({
+		success: true,
 		access_token: accessToken,
+		publicKey: publicKey,
+		msg: "Log In Successful!!!",
 	});
 };
 
