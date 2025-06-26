@@ -2,6 +2,7 @@ import e from "express";
 import {
 	handleAddItem,
 	handleAllDataRetrieval,
+	handleConnectionCheck,
 	handleDeleteItem,
 	handleEditItem,
 	handleEmptyTrash,
@@ -10,30 +11,26 @@ import {
 
 const router = e.Router();
 
-router.route("/connect").get((req, res) => {
-	if (req.user) {
-		// if user is logged in
-		console.log("User Logged in: ", req.user);
-		return res
-			.status(200)
-			.json({ success: true, msg: "Connection Success!!! User Logged In!!!" });
-	}
-	// when user is logged out
-	console.log("User Logged Out!!!");
-	return res
-		.status(200)
-		.json({ success: true, msg: "Connection Success!!! User Logged Out!!!" });
-});
+// Check Connection & Auth Status
+router.route("/connect").get(handleConnectionCheck);
 
+// Retrieve all the passwd list
 router.route("/all").get(handleAllDataRetrieval);
 
-router
-	.route("/item/:itemID")
-	.post(handleAddItem)
-	.delete(handleDeleteItem)
-	.patch(handleMarkTrash)
-	.put(handleEditItem);
-
+// Empty the trash bin
 router.route("/all/del").delete(handleEmptyTrash);
+
+// Insert, edit, move to trash, del from trash
+router
+	// route where individual CRUD op is done
+	.route("/item/:itemID")
+	// insert passwd
+	.post(handleAddItem)
+	// remove passwd from trash bin
+	.delete(handleDeleteItem)
+	// move to trash bin (mark trash to enable or disable)
+	.patch(handleMarkTrash)
+	// replace the whole passwd item with new edited one
+	.put(handleEditItem);
 
 export const appRouter = router;

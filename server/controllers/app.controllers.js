@@ -7,6 +7,21 @@ import {
 	updatePasswdByItemID,
 } from "../models/app.models.js";
 
+export const handleConnectionCheck = (req, res) => {
+	if (req.user) {
+		// if user is logged in
+		console.log("User Logged in: ", req.user);
+		return res
+			.status(200)
+			.json({ success: true, msg: "Connection Success!!! User Logged In!!!" });
+	}
+	// when user is logged out
+	console.log("User Logged Out!!!");
+	return res
+		.status(200)
+		.json({ success: true, msg: "Connection Success!!! User Logged Out!!!" });
+};
+
 export const handleAllDataRetrieval = async (req, res) => {
 	if (!req.user) {
 		return res.status(403).json({
