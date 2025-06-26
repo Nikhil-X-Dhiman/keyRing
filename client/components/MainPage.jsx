@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router";
@@ -34,6 +35,27 @@ export const MainPage = () => {
 			nameRef.current.focus();
 		}
 	}, [mode]);
+
+	useEffect(() => {
+		// TODO: Add created and updated time
+		const getAllItems = async () => {
+			try {
+				const response = await privateInstance.get("/api/v1/all");
+				const { success, result } = response.data;
+				if (success) {
+					const updatedList = result.map((item) => {
+						const { itemID, name, user, passwd, uri, note, fav, trash } = item;
+						return { id: itemID, name, user, passwd, uri, note, fav, trash };
+					});
+					setPasswdList(updatedList);
+				}
+			} catch (error) {
+				console.error(error.response.data.msg);
+			}
+		};
+		getAllItems();
+		// setPasswdList()
+	}, []);
 
 	const filteredList = passwdList.filter((item) => {
 		const matchesSearch =
@@ -154,7 +176,7 @@ export const MainPage = () => {
 		setMode(null);
 	};
 
-	const handleSaveItem = () => {
+	const handleSaveItem = async () => {
 		if (mode === "Edit") {
 			setPasswdList((prev) => {
 				const updatedList = [...prev];
@@ -162,17 +184,26 @@ export const MainPage = () => {
 				return updatedList;
 			});
 		} else if (mode === "Add") {
-			setPasswdList((prev) => {
-				const updatedList = [...prev];
-				// updatedList.push(focusItem);
-				updatedList.push({ ...focusItem, id: uuidv4() });
-				setItemIndex(updatedList.length - 1);
-				return updatedList;
-			});
-			// setItemIndex(passwdList.length);
+			const item = { ...focusItem, id: uuidv4() };
+			console.log("item: ", item);
+			try {
+				const response = await privateInstance.post("/api/v1/item", item);
+				if (response.status === 200 && response.data.success === true) {
+					setPasswdList((prev) => {
+						const updatedList = [...prev];
+						updatedList.push(item);
+						setItemIndex(updatedList.length - 1);
+						setMode("View");
+						setFocusItem(defaultEmpty);
+						return updatedList;
+					});
+				} else {
+					console.log("Unable to update DB...Check your Internet Connection.");
+				}
+			} catch (error) {
+				console.error("Error Occured while adding Item: ", error);
+			}
 		}
-		setMode("View");
-		setFocusItem(defaultEmpty);
 	};
 
 	const handleClickItem = (id) => {
@@ -200,7 +231,7 @@ export const MainPage = () => {
 			withCredentials: true,
 		});
 		const success = response?.data?.success;
-		const message = response?.data?.message;
+		const message = response?.data?.msg;
 		console.log("logout response: ", response);
 
 		console.log(success, message);

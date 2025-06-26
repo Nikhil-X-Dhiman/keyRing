@@ -16,8 +16,13 @@ export const authenticateUserRequest = async (req, res, next) => {
 			req.user = decodedAccessToken;
 			return next();
 		} else {
-			// access token expired or illegal
-			res.send(403).json("Auth: Token Expired!!!");
+			// if access token expired & route is to refresh access token
+			if (req.path.includes("/refresh")) {
+				req.user = null;
+			} else {
+				// access token expired or illegal
+				return res.status(403).json({ msg: "Auth: Token Expired!!!" });
+			}
 		}
 	}
 

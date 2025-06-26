@@ -77,12 +77,14 @@ export const loginTable = mysqlTable("login", {
 	userID: int("user_id").references(() => userTable.id, {
 		onDelete: "cascade",
 	}),
+	itemID: varchar("item_id", { length: 255 }).notNull(),
 	name: varchar("name", { length: 255 }),
-	username: varchar("username", { length: 255 }),
-	password: varchar("password", { length: 255 }),
+	user: varchar("username", { length: 255 }),
+	passwd: varchar("password", { length: 255 }),
 	uri: json("uri"),
-	favorite: boolean("favorite").default(false).notNull(),
-	notes: text("notes"),
+	fav: boolean("favorite").default(false).notNull(),
+	note: text("note"),
+	trash: boolean("trash").default(false).notNull(),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updateAt: timestamp("updated_at")
 		.defaultNow()
