@@ -3,6 +3,9 @@ import {
 	handleAddItem,
 	handleAllDataRetrieval,
 	handleDeleteItem,
+	handleEditItem,
+	handleEmptyTrash,
+	handleMarkTrash,
 } from "../controllers/app.controllers.js";
 
 const router = e.Router();
@@ -24,7 +27,12 @@ router.route("/connect").get((req, res) => {
 
 router.route("/all").get(handleAllDataRetrieval);
 
-router.route("/item/:itemID").post(handleAddItem).delete(handleDeleteItem);
+router
+	.route("/item/:itemID")
+	.post(handleAddItem)
+	.delete(handleDeleteItem)
+	.patch(handleMarkTrash)
+	.put(handleEditItem);
 
 router.route("/all/del").delete(handleEmptyTrash);
 

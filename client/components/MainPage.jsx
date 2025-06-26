@@ -45,7 +45,16 @@ export const MainPage = () => {
 				if (success) {
 					const updatedList = result.map((item) => {
 						const { itemID, name, user, passwd, uri, note, fav, trash } = item;
-						return { id: itemID, name, user, passwd, uri, note, fav, trash };
+						return {
+							id: itemID,
+							name,
+							user,
+							passwd,
+							uri,
+							note,
+							favourite: fav,
+							trash,
+						};
 					});
 					setPasswdList(updatedList);
 				}
@@ -120,21 +129,41 @@ export const MainPage = () => {
 
 	const handleDeleteItem = async () => {
 		if (pageMode === "All" || pageMode === "Fav") {
-			setPasswdList((prev) => {
-				const updatedList = [...prev];
-				const item = updatedList[itemIndex];
-				const updateItem = { ...item, trash: true };
-				updatedList[itemIndex] = updateItem;
-				return updatedList;
-			});
+			const itemID = passwdList[itemIndex].id;
+			try {
+				const response = await privateInstance.patch(`/api/v1/item/${itemID}`, {
+					trash: !passwdList[itemIndex].trash,
+				});
+				if (response.status === 200 && response.data.success) {
+					setPasswdList((prev) => {
+						const updatedList = [...prev];
+						const item = updatedList[itemIndex];
+						const updateItem = { ...item, trash: true };
+						updatedList[itemIndex] = updateItem;
+						return updatedList;
+					});
+				}
+			} catch (error) {
+				console.error(
+					"Trash Mark Failed: ",
+					error,
+					error?.response?.data.msg || "Unknown Error!!!"
+				);
+			}
 		} else if (pageMode === "Trash") {
+			console.log("Handle Trash Del");
+
 			const itemID = passwdList[itemIndex].id;
 			console.log("Delete Item ID: ", itemID);
 
 			try {
 				const response = await privateInstance.delete(`/api/v1/item/${itemID}`);
+				console.log(response);
+
 				if (response.status === 200 && response.data.success === true) {
 					setPasswdList((prev) => {
+						console.log("Empty trash list update");
+
 						const updatedPasswdList = prev.filter((_, i) => {
 							return i !== itemIndex;
 						});
@@ -153,17 +182,29 @@ export const MainPage = () => {
 		setMode(null);
 	};
 
-	const handleEmptyTrash = () => {
+	const handleEmptyTrash = async () => {
 		try {
-			const response = privateInstance.delete(`/api/v1/all/del`);
-		} catch (error) {}
-		setPasswdList((prev) => {
-			let updatedList = [...prev];
-			updatedList = passwdList.filter((item) => {
-				return item.trash === false;
-			});
-			return updatedList;
-		});
+			const response = await privateInstance.delete(`/api/v1/all/del`);
+			console.log(response);
+			console.log("Empty Trash: ", response.status, response.data.success);
+
+			if (response.status === 200 && response.data.success === true) {
+				setPasswdList((prev) => {
+					let updatedList = [...prev];
+					updatedList = passwdList.filter((item) => {
+						return item.trash === false;
+					});
+					return updatedList;
+				});
+			}
+		} catch (error) {
+			console.error(
+				"Empty Trash Error: ",
+				error,
+				error?.response?.data?.msg || "Unknown Error!!!"
+			);
+		}
+
 		setMode(null);
 	};
 
@@ -196,11 +237,27 @@ export const MainPage = () => {
 	const handleSaveItem = async () => {
 		// TODO: Add created and updated time
 		if (mode === "Edit") {
-			setPasswdList((prev) => {
-				const updatedList = [...prev];
-				updatedList[itemIndex] = focusItem;
-				return updatedList;
-			});
+			const itemID = passwdList[itemIndex].id;
+			try {
+				const response = await privateInstance.put(
+					`/api/v1/item/${itemID}`,
+					focusItem
+				);
+				if (response.status === 200 && response.data.success === true) {
+					setPasswdList((prev) => {
+						const updatedList = [...prev];
+						updatedList[itemIndex] = focusItem;
+						return updatedList;
+					});
+					setMode("View");
+				}
+			} catch (error) {
+				console.error(
+					"Error occured while editing field: ",
+					error,
+					error?.response?.data.msg || "Unknown Error!!!"
+				);
+			}
 		} else if (mode === "Add") {
 			const itemID = uuidv4();
 			const item = { ...focusItem, id: itemID };

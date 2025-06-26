@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
 	boolean,
 	datetime,
@@ -25,7 +25,7 @@ export const userTable = mysqlTable("users", {
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updateAt: timestamp("updated_at")
 		.defaultNow()
-		.$onUpdate(() => sql`now()`)
+		.$onUpdate(() => new Date())
 		.notNull(),
 });
 
@@ -47,7 +47,7 @@ export const userAuthTable = mysqlTable("auth", {
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updateAt: timestamp("updated_at")
 		.defaultNow()
-		.$onUpdate(() => sql`now()`)
+		.$onUpdate(() => new Date())
 		.notNull(),
 });
 
@@ -67,7 +67,7 @@ export const refreshTokenTable = mysqlTable("refresh_token", {
 		.notNull(),
 	updateAt: timestamp("updated_at", { withTimezone: true })
 		.defaultNow()
-		.$onUpdate(() => sql`now()`)
+		.$onUpdate(() => new Date())
 		.notNull(),
 });
 
@@ -88,7 +88,7 @@ export const loginTable = mysqlTable("login", {
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updateAt: timestamp("updated_at")
 		.defaultNow()
-		.$onUpdate(() => sql`now()`)
+		.$onUpdate(() => new Date())
 		.notNull(),
 });
 
