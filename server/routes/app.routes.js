@@ -2,6 +2,7 @@ import e from "express";
 import {
 	handleAddItem,
 	handleAllDataRetrieval,
+	handleDeleteItem,
 } from "../controllers/app.controllers.js";
 
 const router = e.Router();
@@ -23,6 +24,8 @@ router.route("/connect").get((req, res) => {
 
 router.route("/all").get(handleAllDataRetrieval);
 
-router.route("/item").post(handleAddItem);
+router.route("/item/:itemID").post(handleAddItem).delete(handleDeleteItem);
+
+router.route("/all/del").delete(handleEmptyTrash);
 
 export const appRouter = router;

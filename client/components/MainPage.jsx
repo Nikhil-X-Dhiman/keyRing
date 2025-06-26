@@ -118,7 +118,7 @@ export const MainPage = () => {
 		});
 	};
 
-	const handleDeleteItem = () => {
+	const handleDeleteItem = async () => {
 		if (pageMode === "All" || pageMode === "Fav") {
 			setPasswdList((prev) => {
 				const updatedList = [...prev];
@@ -128,18 +128,35 @@ export const MainPage = () => {
 				return updatedList;
 			});
 		} else if (pageMode === "Trash") {
-			setPasswdList((prev) => {
-				const updatedPasswdList = prev.filter((_, i) => {
-					return i !== itemIndex;
-				});
-				return updatedPasswdList;
-			});
+			const itemID = passwdList[itemIndex].id;
+			console.log("Delete Item ID: ", itemID);
+
+			try {
+				const response = await privateInstance.delete(`/api/v1/item/${itemID}`);
+				if (response.status === 200 && response.data.success === true) {
+					setPasswdList((prev) => {
+						const updatedPasswdList = prev.filter((_, i) => {
+							return i !== itemIndex;
+						});
+						return updatedPasswdList;
+					});
+				}
+			} catch (error) {
+				console.error(
+					"Delete Item Failed: ",
+					error,
+					error?.response?.data.msg || "Unknown Error!!!"
+				);
+			}
 		}
 
 		setMode(null);
 	};
 
 	const handleEmptyTrash = () => {
+		try {
+			const response = privateInstance.delete(`/api/v1/all/del`);
+		} catch (error) {}
 		setPasswdList((prev) => {
 			let updatedList = [...prev];
 			updatedList = passwdList.filter((item) => {
@@ -177,6 +194,7 @@ export const MainPage = () => {
 	};
 
 	const handleSaveItem = async () => {
+		// TODO: Add created and updated time
 		if (mode === "Edit") {
 			setPasswdList((prev) => {
 				const updatedList = [...prev];
@@ -184,11 +202,15 @@ export const MainPage = () => {
 				return updatedList;
 			});
 		} else if (mode === "Add") {
-			const item = { ...focusItem, id: uuidv4() };
+			const itemID = uuidv4();
+			const item = { ...focusItem, id: itemID };
 			console.log("item: ", item);
 			try {
-				const response = await privateInstance.post("/api/v1/item", item);
-				if (response.status === 200 && response.data.success === true) {
+				const response = await privateInstance.post(
+					`/api/v1/item/${itemID}`,
+					item
+				);
+				if (response.status === 201 && response.data.success === true) {
 					setPasswdList((prev) => {
 						const updatedList = [...prev];
 						updatedList.push(item);
@@ -455,6 +477,7 @@ export const MainPage = () => {
 				</div>
 				<div>
 					{mode === "View" && (
+						// TODO: Refactor Code here
 						<>
 							{pageMode === "Trash" ? null : (
 								<button onClick={handleEditItem}>Edit</button>

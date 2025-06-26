@@ -33,3 +33,12 @@ export const insertPasswdById = async (userID, item) => {
 		return null;
 	}
 };
+
+export const delPasswdByItemID = async (itemID) => {
+	try {
+		return await db.delete(loginTable).where(eq(loginTable.itemID, itemID));
+	} catch (error) {
+		console.error("Delete Passwd: ", error);
+		return null;
+	}
+};
