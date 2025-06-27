@@ -1,21 +1,19 @@
 @import "tailwindcss";
 
 @theme {
-	// text color, dark bg, assets that need more contrast
 	--color-dark-indigo: #020f66;
-	// brand identity color
 	--color-keyring-blue: #175ddc;
-	// text
 	--color-light-grey: #f3f6f9;
-	// color btw primary & indigo only for gradients & illustration elements
 	--color-deep-blue: #1a41ac;
-	// attention to info and draw viewers attention
 	--color-teal-blue: #2cdde9;
-	// only use sparingly
 	--color-amber-orange: #ffbf00;
 	--color-melon-red: #ff4e63;
 	--color-medium-purple: #976fd9;
 }
+
+/* Text Color: text-blue-300 */
+/* Text Color: text-light-grey */
+/* BG Color: bg-gray-800 */
 
 /* :root {
 	font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
