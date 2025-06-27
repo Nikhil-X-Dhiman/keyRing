@@ -92,14 +92,22 @@ export const LoginEmail = () => {
 		<h1>Loading!!!</h1>
 	) : (
 		<>
-			<main>
-				<figure>
-					<img src="/vault.png" alt="vault-img" />
-					<figcaption>Log in to KeyRing</figcaption>
+			<main className="flex flex-col justify-center items-center pt-15 select-none">
+				<figure className="flex flex-col items-center gap-y-2 p-2 select-none">
+					<img src="/vault.png" alt="vault-img" className="w-26 h-23" />
+					<figcaption className="text-xl font-semibold mb-2">
+						Log in to KeyRing
+					</figcaption>
 				</figure>
-				<form onSubmit={handleEmailSubmit}>
-					<fieldset>
-						<legend>
+				<form
+					onSubmit={handleEmailSubmit}
+					className="flex flex-col items-center gap-y-1 border-1 border-gray-400 rounded-2xl m-5 p-7  bg-slate-800 w-md"
+				>
+					<fieldset
+						className="w-full px-2 pb-2 rounded-md border-1 border-gray-400 focus-within:border-blue-500 hover:border-blue-300
+					focus-within:hover:border-blue-500 transition-all"
+					>
+						<legend className="text-[.8rem] text-gray-400">
 							Email address <span>(required)</span>
 						</legend>
 						<input
@@ -113,21 +121,42 @@ export const LoginEmail = () => {
 							required
 							onFocus={() => setEmailFocus(true)}
 							onBlur={() => setEmailFocus(false)}
+							className="w-full border-0 focus:outline-0 autofill:bg-gray-800"
 						/>
 					</fieldset>
 					{/* change hide & unhide using CSS */}
 					{err && userLogin.email ? <p>{err}</p> : <p></p>}
-					<input
-						type="checkbox"
-						id="login-remember"
-						onChange={togglePersist}
-						checked={persist}
-					/>
-					<label htmlFor="login-remember">Remember Me</label>
-					<button disabled={!validEmail}>Continue</button>
+					<div className="flex gap-1.5 items-center self-start mb-4">
+						<input
+							type="checkbox"
+							id="login-remember"
+							onChange={togglePersist}
+							checked={persist}
+							className="w-4 h-4 accent-blue-400 hover:accent-blue-300 hover:cursor-pointer transition-all"
+						/>
+						<label
+							htmlFor="login-remember"
+							className="cursor-pointer select-none"
+						>
+							Remember Me
+						</label>
+					</div>
+
+					<button
+						className="bg-blue-400 hover:bg-blue-300 text-slate-800 font-medium py-2 px-4 w-full rounded-3xl shadow-md transition duration-200 ease-in-out"
+						disabled={!validEmail}
+					>
+						Continue
+					</button>
 				</form>
 				<div>
-					New to Bitwarden? <Link to="/register">Create Account</Link>
+					New to keyRing?{" "}
+					<Link
+						to="/register"
+						className="text-blue-300 hover:text-blue-200 hover:underline transition duration-200 ease-in-out"
+					>
+						Create Account
+					</Link>
 				</div>
 			</main>
 		</>

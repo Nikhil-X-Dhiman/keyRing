@@ -15,17 +15,33 @@
 /* Text Color: text-light-grey */
 /* BG Color: bg-gray-800 */
 
-/* :root {
-	font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-	line-height: 1.5;
-	font-weight: 400;
+/* AI Generated */
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
 
-	color-scheme: light dark;
-	color: rgba(255, 255, 255, 0.87);
-	background-color: #242424;
+/* Custom styles to prevent browser autofill from changing input background */
+/* This targets input fields that have been autofilled by the browser */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+	/* Step 1: Set the desired background color for the input field */
+	/* Your form has bg-slate-800, which is #1e293b */
+	background-color: #1e293b !important;
 
-	font-synthesis: none;
-	text-rendering: optimizeLegibility;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-} */
+	/* Step 2: Crucial trick - apply a large inner shadow to "cover" browser's autofill gradient */
+	/* This box-shadow should match your desired background-color */
+	-webkit-box-shadow: 0 0 0px 1000px #1e293b inset !important;
+
+	/* Step 3: Ensure text and caret (cursor) colors are visible on the dark background */
+	color: #fff !important;
+	-webkit-text-fill-color: #fff !important; /* For text color when autofilled */
+	caret-color: #fff !important; /* For the blinking cursor */
+
+	/* Optional: Transition for a smoother visual if background changes on focus */
+	transition: background-color 5000s ease-in-out 0s; /* Very long transition to make it seem instant */
+}
+
+/* Add specific styling for your form's input text to ensure it's white */
+/* This is separate from autofill but ensures text is visible on slate-800 background */

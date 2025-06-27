@@ -8,7 +8,7 @@ export const Layout = () => {
 			{/* Header */}
 			<div className="flex flex-none items-center justify-center gap-x-1 text-light-grey p-2">
 				<KeyRingIcon className="w-9 h-9" />
-				<span className="font-thin text-2xl">
+				<span className="font-thin text-2xl select-none pointer-none:">
 					<span className="font-bold text-2xl">key</span>Ring
 				</span>
 			</div>
@@ -17,7 +17,7 @@ export const Layout = () => {
 			</div>
 			{/* Footer */}
 			<div className="flex flex-none justify-center items-center p-2">
-				<h1>
+				<h1 className="select-none">
 					Made By <span className="text-blue-300">Nikhil Dhiman</span>
 				</h1>
 			</div>
