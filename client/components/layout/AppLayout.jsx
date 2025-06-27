@@ -4,7 +4,7 @@ import { AppHeader } from "../AppHeader";
 export const AppLayout = () => {
 	return (
 		// add header here
-		<main>
+		<main className="bg-black">
 			{/* <AppHeader /> */}
 			<Outlet />
 			<h1>Made by Nikhil Dhiman</h1>
