@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { emailSchema } from "../utils/authSchema.js";
 import { useNavigate, useLocation, Link } from "react-router";
 import { useAuth } from "../hooks/useAuth.js";
-import { useRefreshToken } from "../hooks/useRefreshToken.jsx";
+import CrossIcon from "../public/cross.svg?react";
 
 export const LoginEmail = () => {
 	const EMAIL_REGEX =
@@ -18,6 +18,7 @@ export const LoginEmail = () => {
 
 	const [emailFocus, setEmailFocus] = useState(false);
 	const emailRef = useRef();
+	const errRef = useRef();
 
 	const [err, setErr] = useState("");
 
@@ -39,6 +40,10 @@ export const LoginEmail = () => {
 			passwd: "",
 		});
 	}, []);
+
+	useEffect(() => {
+		errRef.current?.focus();
+	}, [err]);
 
 	useEffect(() => {
 		if (userLogin.email) {
@@ -104,8 +109,10 @@ export const LoginEmail = () => {
 					className="flex flex-col items-center gap-y-1 border-1 border-gray-400 rounded-2xl m-5 p-7  bg-slate-800 w-md"
 				>
 					<fieldset
-						className="w-full px-2 pb-2 rounded-md border-1 border-gray-400 focus-within:border-blue-500 hover:border-blue-300
-					focus-within:hover:border-blue-500 transition-all"
+						className={`w-full px-2 pb-2 rounded-md border-1 ${
+							err && userLogin.email ? "border-red-500" : "border-gray-400"
+						} focus-within:border-blue-500 hover:border-blue-300
+					focus-within:hover:border-blue-500 transition-all`}
 					>
 						<legend className="text-[.8rem] text-gray-400">
 							Email address <span>(required)</span>
@@ -125,7 +132,18 @@ export const LoginEmail = () => {
 						/>
 					</fieldset>
 					{/* change hide & unhide using CSS */}
-					{err && userLogin.email ? <p>{err}</p> : <p></p>}
+					<div ref={errRef}>
+						{err && userLogin.email ? (
+							<div className="flex items-center gap-1 mb-1.5">
+								<CrossIcon className="w-3.5 h-3.5 font-bold relative bottom-1 text-red-500" />
+								<p className="flex items-center gap-1 text-[.7rem] font-semibold text-left text-red-500 mt-1 -mb-1">
+									{err}
+								</p>
+							</div>
+						) : (
+							<p></p>
+						)}
+					</div>
 					<div className="flex gap-1.5 items-center self-start mb-4">
 						<input
 							type="checkbox"
@@ -143,7 +161,7 @@ export const LoginEmail = () => {
 					</div>
 
 					<button
-						className="bg-blue-400 hover:bg-blue-300 text-slate-800 font-medium py-2 px-4 w-full rounded-3xl shadow-md transition duration-200 ease-in-out"
+						className="bg-blue-400 hover:bg-blue-300 text-slate-800 font-medium py-2 px-4 w-full rounded-3xl shadow-md cursor-pointer transition duration-200 ease-in-out"
 						disabled={!validEmail}
 					>
 						Continue

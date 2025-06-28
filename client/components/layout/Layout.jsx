@@ -8,7 +8,7 @@ export const Layout = () => {
 			{/* Header */}
 			<div className="flex flex-none items-center justify-center gap-x-1 text-light-grey p-2">
 				<KeyRingIcon className="w-9 h-9" />
-				<span className="font-thin text-2xl select-none pointer-none:">
+				<span className="font-thin text-2xl select-none pointer-none">
 					<span className="font-bold text-2xl">key</span>Ring
 				</span>
 			</div>
