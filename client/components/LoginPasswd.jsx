@@ -181,7 +181,6 @@ export const LoginPasswd = () => {
 							)}
 						</button>
 					</fieldset>
-					{/* TODO: change hide & unhide using CSS */}
 					<div className="" ref={errRef}>
 						{err && maidenInput ? (
 							<p className="flex items-center gap-1 text-[.7rem] font-semibold text-left text-red-500 mt-1 -mb-1">
