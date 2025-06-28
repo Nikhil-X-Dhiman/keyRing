@@ -324,10 +324,11 @@ export const MainPage = () => {
 	};
 
 	return (
-		<>
-			<section>
+		// <main className="grid grid-cols-3 grid-rows-[auto_1fr] h-full">
+		<main className="grid grid-cols-3 grid-rows-[auto_1fr] h-full">
+			<section className="col-start-2 col-end-4 row-start-1 row-end-2">
 				{/* add search bar here */}
-				<h1>KeyRing</h1>
+				{/* <h1>KeyRing</h1> */}
 				<input
 					type="search"
 					name="app-search"
@@ -348,7 +349,7 @@ export const MainPage = () => {
 				<button onClick={handleLogout}>Logout</button>
 			</section>
 
-			<section>
+			<section className="col-start-1 col-end-2 row-start-1 row-end-3">
 				<ul>
 					<li onClick={() => setPageMode("All")}>All Items</li>
 					<li onClick={() => setPageMode("Fav")}>Favourites</li>
@@ -356,7 +357,7 @@ export const MainPage = () => {
 				</ul>
 			</section>
 
-			<section>
+			<section className="col-start-2 col-end-3 row-start-2 row-end-3 flex flex-col justify-between">
 				{/* Display all passwd list here */}
 				<div>
 					{/* {passwdList.length !== 0 ? ( */}
@@ -372,14 +373,14 @@ export const MainPage = () => {
 						<h2>Empty List</h2>
 					)}
 				</div>
-				<div>
+				<div className="self-center">
 					<button onClick={handleAddItem} disabled={pageMode === "Trash"}>
 						Add
 					</button>
 				</div>
 			</section>
 
-			<section>
+			<section className="col-start-3 col-end-4 row-start-2 row-end-3">
 				<div>
 					{/* Display view of passwd and edition of them here */}
 					{(mode === "View" || mode === "Edit" || mode === "Add") && (
@@ -566,6 +567,6 @@ export const MainPage = () => {
 					)}
 				</div>
 			</section>
-		</>
+		</main>
 	);
 };
