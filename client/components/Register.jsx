@@ -131,7 +131,7 @@ export const Register = () => {
 
 	return (
 		<>
-			<main>
+			<main className="flex flex-col justify-center items-center pt-15 select-none">
 				<section>
 					<figure>
 						<img src="/add-user.png" alt="add-user-img" />

@@ -47,6 +47,7 @@ export const handleLogin = async (req, res) => {
 	try {
 		// get user details from db
 		[result] = await getUserByCredentials(email, passwd);
+
 		// compare passwd with its hash from db
 		let passwdVerification = result
 			? verifyPasswd(passwd, result?.auth?.passwordHash)

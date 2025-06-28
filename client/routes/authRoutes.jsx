@@ -6,25 +6,26 @@ import { Register } from "../components/Register";
 
 export const authRoutes = [
 	{
+		// re-authenticate user upon reload
 		element: <PersistLogin />,
 		children: [
 			{
-				path: "login",
+				// Layout to display header & footer
 				element: <Layout />,
 				children: [
 					{
-						path: "email",
+						path: "login/email",
 						element: <LoginEmail />,
 					},
 					{
-						path: "password",
+						path: "login/password",
 						element: <LoginPasswd />,
 					},
+					{
+						path: "register",
+						element: <Register />,
+					},
 				],
-			},
-			{
-				path: "register",
-				element: <Register />,
 			},
 		],
 	},
