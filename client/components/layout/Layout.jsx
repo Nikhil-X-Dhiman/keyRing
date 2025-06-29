@@ -4,7 +4,7 @@ import KeyRingIcon from "../../public/keyring.svg?react";
 export const Layout = () => {
 	return (
 		// add header here
-		<div className="flex flex-col dark:bg-gray-800 dark:text-light-grey min-w-screen min-h-screen">
+		<div className="flex flex-col dark:bg-gray-800 dark:text-light-grey w-screen h-screen">
 			{/* Header */}
 			<header className="flex items-center justify-center gap-x-1 text-light-grey p-2">
 				<KeyRingIcon className="w-9 h-9" />
@@ -12,7 +12,7 @@ export const Layout = () => {
 					<span className="font-bold text-2xl">key</span>Ring
 				</span>
 			</header>
-			<div className="grow h-full">
+			<div className="grow">
 				<Outlet />
 			</div>
 			{/* Footer */}

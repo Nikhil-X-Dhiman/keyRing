@@ -325,7 +325,7 @@ export const MainPage = () => {
 
 	return (
 		// <main className="grid grid-cols-3 grid-rows-[auto_1fr] h-full">
-		<main className="grid grid-cols-3 grid-rows-[auto_1fr] h-full">
+		<main className="grid grid-cols-[15rem_20rem_1fr] grid-rows-[auto_1fr] h-full">
 			<section className="col-start-2 col-end-4 row-start-1 row-end-2">
 				{/* add search bar here */}
 				{/* <h1>KeyRing</h1> */}
