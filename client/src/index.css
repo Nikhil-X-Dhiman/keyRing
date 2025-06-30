@@ -16,9 +16,11 @@
 /* BG Color: bg-gray-800 */
 
 /* AI Generated */
-/* @tailwind base;
-@tailwind components;
-@tailwind utilities; */
+
+.webkit-search-input::-webkit-search-cancel-button {
+	/* Remove default appearance */
+	-webkit-appearance: none;
+}
 
 /* Custom styles to prevent browser autofill from changing input background */
 /* This targets input fields that have been autofilled by the browser */

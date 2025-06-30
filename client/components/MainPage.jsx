@@ -4,6 +4,10 @@ import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { usePrivateInstance } from "../hooks/usePrivateInstance";
+import { IoMdCloseCircleOutline } from "react-icons/io";
+import { TbBorderAll } from "react-icons/tb";
+import { LuStar } from "react-icons/lu";
+import { HiOutlineTrash } from "react-icons/hi2";
 
 export const MainPage = () => {
 	const defaultEmpty = {
@@ -26,6 +30,7 @@ export const MainPage = () => {
 	const [pageMode, setPageMode] = useState("All");
 	// all, fav, trash
 	const nameRef = useRef();
+	const searchRef = useRef();
 	const navigate = useNavigate();
 	const { setAuth } = useAuth();
 	const privateInstance = usePrivateInstance();
@@ -323,48 +328,105 @@ export const MainPage = () => {
 		}
 	};
 
+	const handleSearchClear = () => {
+		setSearchItem("");
+		searchRef.current?.focus();
+	};
+
 	return (
 		// <main className="grid grid-cols-3 grid-rows-[auto_1fr] h-full">
-		<main className="grid grid-cols-[15rem_20rem_1fr] grid-rows-[auto_1fr] h-full">
-			<section className="col-start-2 col-end-4 row-start-1 row-end-2">
+		<main className="grid grid-cols-[10rem_20rem_1fr] grid-rows-[auto_1fr] h-full pl-5">
+			<section className="col-start-2 col-end-4 row-start-1 row-end-2 grid grid-cols-[1fr_10rem] justify-items-center p-2">
 				{/* add search bar here */}
 				{/* <h1>KeyRing</h1> */}
-				<input
-					type="search"
-					name="app-search"
-					id="app-search"
-					// TODO: ADD search react-icon
-					value={searchItem}
-					onChange={(e) => setSearchItem(e.target.value)}
-					placeholder={`🔍 Search ${
-						pageMode === "All"
-							? "vault"
-							: pageMode === "Fav"
-							? "favourites"
-							: pageMode === "Trash"
-							? "trash"
-							: ""
-					}`}
-				/>
-				<button onClick={handleLogout}>Logout</button>
+				<div className="w-full flex justify-center relative">
+					<input
+						type="search"
+						name="app-search"
+						id="app-search"
+						// TODO: ADD search react-icon
+						value={searchItem}
+						onChange={(e) => setSearchItem(e.target.value)}
+						placeholder={`🔍 Search ${
+							pageMode === "All"
+								? "vault"
+								: pageMode === "Fav"
+								? "favourites"
+								: pageMode === "Trash"
+								? "trash"
+								: ""
+						}`}
+						ref={searchRef}
+						className="focus:outline-none p-2 rounded-md border-1 border-gray-400 hover:border-gray-300 focus:border-gray-300 shadow-sm w-[70%] webkit-search-input transition-all"
+					/>
+					<i
+						className={`relative right-7 top-3 cursor-pointer text-gray-100 ${
+							searchItem ? "visible" : "invisible"
+						}`}
+						onClick={handleSearchClear}
+					>
+						<IoMdCloseCircleOutline />
+					</i>
+				</div>
+				<button
+					onClick={handleLogout}
+					className="bg-red-800 hover:bg-red-700 text-slate-200 font-medium py-2 px-6 rounded-xl cursor-pointer shadow-md transition-all"
+				>
+					Logout
+				</button>
 			</section>
 
-			<section className="col-start-1 col-end-2 row-start-1 row-end-3">
-				<ul>
-					<li onClick={() => setPageMode("All")}>All Items</li>
-					<li onClick={() => setPageMode("Fav")}>Favourites</li>
-					<li onClick={() => setPageMode("Trash")}>Trash</li>
+			<section className="col-start-1 col-end-2 row-start-1 row-end-3 content-center">
+				<ul className="flex flex-col gap-y-1.5">
+					<li
+						className={`flex items-center gap-x-1.5 hover:text-blue-500 ${
+							pageMode === "All" ? "text-blue-400 font-medium" : ""
+						} cursor-pointer`}
+						onClick={() => setPageMode("All")}
+					>
+						<TbBorderAll className="text-lg" />
+						<span>All Items</span>
+					</li>
+					<li
+						className={`flex items-center gap-x-1.5 hover:text-blue-500 ${
+							pageMode === "Fav" ? "text-blue-400 font-medium" : ""
+						} cursor-pointer`}
+						onClick={() => setPageMode("Fav")}
+					>
+						<LuStar className="text-lg" />
+						<span>Favourites</span>
+					</li>
+					<li
+						className={`flex items-center gap-x-1.5 hover:text-blue-500 ${
+							pageMode === "Trash" ? "text-blue-400 font-medium" : ""
+						} cursor-pointer`}
+						onClick={() => setPageMode("Trash")}
+					>
+						<HiOutlineTrash className="text-lg" />
+						<span>Trash</span>
+					</li>
 				</ul>
 			</section>
 
-			<section className="col-start-2 col-end-3 row-start-2 row-end-3 flex flex-col justify-between">
+			<section className="col-start-2 col-end-3 row-start-2 row-end-3 flex flex-col justify-between p-2">
 				{/* Display all passwd list here */}
 				<div>
 					{/* {passwdList.length !== 0 ? ( */}
 					{filteredList.length !== 0 ? (
-						<ul>
+						<ul className="flex flex-col gap-1">
 							{filteredList.map((item) => (
-								<li key={item.id} onClick={() => handleClickItem(item.id)}>
+								<li
+									className={`hover:bg-slate-700 px-2 py-2 h-12 flex items-center gap-x-1 border-l-4  active:border-l-slate-400 ${
+										item.id === passwdList[itemIndex]?.id && itemIndex !== null
+											? "border-l-blue-400 bg-slate-700"
+											: "border-l-transparent"
+									}`}
+									key={item.id}
+									onClick={() => handleClickItem(item.id)}
+								>
+									<span className="w-8 h-8 bg-slate-500 rounded-full flex justify-center items-center font-medium text-slate-200">
+										{item.name.charAt(0).toUpperCase()}
+									</span>
 									{item.name}
 								</li>
 							))}
@@ -373,78 +435,129 @@ export const MainPage = () => {
 						<h2>Empty List</h2>
 					)}
 				</div>
-				<div className="self-center">
-					<button onClick={handleAddItem} disabled={pageMode === "Trash"}>
+				<div className="self-center w-full">
+					<button
+						className="bg-blue-400 hover:bg-blue-300 text-slate-800 font-medium py-2 px-4 w-full rounded-xl shadow-md cursor-pointer transition-all"
+						onClick={handleAddItem}
+						disabled={pageMode === "Trash"}
+					>
 						Add
 					</button>
 				</div>
 			</section>
 
-			<section className="col-start-3 col-end-4 row-start-2 row-end-3">
-				<div>
+			<section className="col-start-3 col-end-4 row-start-2 row-end-3 bg-slate-900 py-5 px-7 pl-7 overflow-y-auto h-full">
+				<div className="">
 					{/* Display view of passwd and edition of them here */}
 					{(mode === "View" || mode === "Edit" || mode === "Add") && (
 						<>
-							{mode === "View" ? (
-								<h3>ITEM INFORMATION</h3>
-							) : mode === "Edit" ? (
-								<h3>EDIT ITEM</h3>
-							) : mode === "Add" ? (
-								<h3>ADD ITEM</h3>
-							) : null}
-							<div>
-								<label htmlFor="name">Name</label>
-								<input
-									type="text"
-									name="name"
-									id="name"
-									value={
-										mode === "View"
-											? passwdList[itemIndex].name || ""
-											: focusItem.name || ""
-									}
-									onChange={handleInputChange}
-									readOnly={mode === "View"}
-									ref={nameRef}
-								/>
+							<p className="text-slate-300">
+								{mode === "View" ? (
+									<h3>ITEM INFORMATION</h3>
+								) : mode === "Edit" ? (
+									<h3>EDIT ITEM</h3>
+								) : mode === "Add" ? (
+									<h3>ADD ITEM</h3>
+								) : null}
+							</p>
 
-								<label htmlFor="user">Username</label>
-								<input
-									type="text"
-									name="user"
-									id="user"
-									value={
-										mode === "View"
-											? passwdList[itemIndex].user || ""
-											: focusItem.user || ""
-									}
-									onChange={handleInputChange}
-									readOnly={mode === "View"}
-								/>
+							<div className="bg-slate-700 flex flex-col">
+								<div className="flex flex-col border-b-1 border-slate-500 hover:bg-slate-600 py-3 px-3.5">
+									<label
+										className="text-slate-300 text-sm
+									"
+										htmlFor="name"
+									>
+										Name
+									</label>
+									<input
+										type="text"
+										name="name"
+										id="name"
+										value={
+											mode === "View"
+												? passwdList[itemIndex]?.name || ""
+												: focusItem?.name || ""
+										}
+										onChange={handleInputChange}
+										readOnly={mode === "View"}
+										ref={nameRef}
+										className={`${
+											mode === "View" ? "focus:outline-none" : ""
+										} cursor-default`}
+									/>
+								</div>
 
-								<label htmlFor="passwd">Password</label>
-								<input
-									type="password"
-									name="passwd"
-									id="passwd"
-									value={
-										mode === "View"
-											? passwdList[itemIndex].passwd || ""
-											: focusItem.passwd || ""
-									}
-									onChange={handleInputChange}
-									readOnly={mode === "View"}
-								/>
+								<div className="bg-slate-700 flex flex-col">
+									<div className="flex flex-col border-b-1 border-slate-500 hover:bg-slate-600 py-3 px-3.5">
+										<label
+											className="text-slate-300 text-sm
+									"
+											htmlFor="user"
+										>
+											Username
+										</label>
+										<input
+											type="text"
+											name="user"
+											id="user"
+											value={
+												mode === "View"
+													? passwdList[itemIndex].user || ""
+													: focusItem.user || ""
+											}
+											onChange={handleInputChange}
+											readOnly={mode === "View"}
+											className={`${
+												mode === "View" ? "focus:outline-none" : ""
+											} cursor-default`}
+										/>
+									</div>
+								</div>
+
+								<div className="bg-slate-700 flex flex-col">
+									<div className="flex flex-col border-b-1 border-slate-500 hover:bg-slate-600 py-3 px-3.5">
+										<label
+											className="text-slate-300 text-sm
+									"
+											htmlFor="passwd"
+										>
+											Password
+										</label>
+										<input
+											type="password"
+											name="passwd"
+											id="passwd"
+											value={
+												mode === "View"
+													? passwdList[itemIndex].passwd || ""
+													: focusItem.passwd || ""
+											}
+											onChange={handleInputChange}
+											readOnly={mode === "View"}
+											className={`${
+												mode === "View" ? "focus:outline-none" : ""
+											} cursor-default`}
+										/>
+									</div>
+								</div>
 							</div>
 
-							<div>
+							<div className="bg-slate-700 flex flex-col my-7">
 								{/* View Mode URI List */}
 								{passwdList.length !== 0 &&
 									mode === "View" &&
 									itemIndex !== null &&
 									passwdList[itemIndex].uri.map((item, i) => (
-										<React.Fragment key={`uri-${i}`}>
-											<label htmlFor={`uri-${i}`}>{`URI ${i + 1}`}</label>
+										<div
+											className="flex flex-col border-b-1 border-slate-500 hover:bg-slate-600 py-3 px-3.5"
+											key={`uri-${i}`}
+										>
+											<label
+												className="text-slate-300 text-sm
+									"
+												htmlFor={`uri-${i}`}
+											>{`URI ${i + 1}`}</label>
 											<input
 												type="text"
 												name={`uri-${i}`}
@@ -452,8 +565,11 @@ export const MainPage = () => {
 												// value={mode === "View" ? item : null}
 												value={item || ""}
 												readOnly
+												className={`${
+													mode === "View" ? "focus:outline-none" : ""
+												} cursor-default`}
 											/>
-										</React.Fragment>
+										</div>
 									))}
 								{/* Add mode URI List and Edit mode */}
 								{focusItem.uri.length !== 0 &&
@@ -485,12 +601,15 @@ export const MainPage = () => {
 							</div>
 							{mode === "View" && passwdList[itemIndex]?.note ? (
 								<div>
-									<h3>NOTES</h3>
+									<h3 className="text-slate-300">NOTES</h3>
 									<textarea
 										name="item-notes"
 										id="item-notes"
 										value={passwdList[itemIndex]?.note || ""}
 										readOnly
+										className={`${
+											mode === "View" ? "focus:outline-none" : ""
+										} cursor-default w-full h-60`}
 									></textarea>
 								</div>
 							) : null}
