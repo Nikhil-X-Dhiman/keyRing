@@ -10,6 +10,12 @@ import { LuStar } from "react-icons/lu";
 import { HiOutlineTrash } from "react-icons/hi2";
 import { FcSearch } from "react-icons/fc";
 import { IoMdAddCircleOutline } from "react-icons/io";
+import { TbRestore } from "react-icons/tb";
+import { IoClose } from "react-icons/io5";
+import { MdModeEdit } from "react-icons/md";
+import { LuSave } from "react-icons/lu";
+import { MdCloseFullscreen } from "react-icons/md";
+import { MdOutlineAdd } from "react-icons/md";
 
 export const MainPage = () => {
 	const defaultEmpty = {
@@ -33,6 +39,7 @@ export const MainPage = () => {
 	// all, fav, trash
 	const nameRef = useRef();
 	const searchRef = useRef();
+	const areaRef = useRef();
 	const navigate = useNavigate();
 	const { setAuth } = useAuth();
 	const privateInstance = usePrivateInstance();
@@ -42,6 +49,17 @@ export const MainPage = () => {
 			nameRef.current.focus();
 		}
 	}, [mode]);
+
+	useEffect(() => {
+		const textArea = areaRef?.current;
+		if (textArea && mode === "View") {
+			textArea.style.height = "auto";
+			textArea.style.height = `${textArea.scrollHeight + 5}px`;
+		} else if (textArea && (mode === "Edit" || mode === "Add")) {
+			textArea.style.height = "auto";
+			textArea.style.height = "175px";
+		}
+	}, [itemIndex, mode]);
 
 	useEffect(() => {
 		// TODO: Add created and updated time
@@ -117,7 +135,18 @@ export const MainPage = () => {
 		}
 	};
 
-	const handleFavourite = () => {
+	const handleFavouriteDiv = (e) => {
+		if (e.target.type === "checkbox") {
+			e.stopPropagation();
+			console.log("checkbox");
+			return;
+		}
+		if (mode === "Edit" || mode === "Add") {
+			setFocusItem((prev) => ({ ...prev, favourite: !prev.favourite }));
+		}
+	};
+
+	const handleFavouriteCheckbox = () => {
 		if (mode === "Edit" || mode === "Add") {
 			setFocusItem((prev) => ({ ...prev, favourite: !prev.favourite }));
 		}
@@ -213,6 +242,7 @@ export const MainPage = () => {
 		}
 
 		setMode(null);
+		setItemIndex(null);
 	};
 
 	const handleRestore = () => {
@@ -338,7 +368,7 @@ export const MainPage = () => {
 	return (
 		// <main className="grid grid-cols-3 grid-rows-[auto_1fr] h-full">
 		<main className="grid grid-cols-[10rem_20rem_1fr] grid-rows-[auto_1fr] h-full pl-5">
-			<section className="col-start-2 col-end-4 row-start-1 row-end-2 grid grid-cols-[1fr_10rem] justify-items-center p-2 border-b border-slate-700">
+			<section className="col-start-2 col-end-4 row-start-1 row-end-2 grid grid-cols-[1fr_10rem] justify-items-center p-2 border-b border-slate-950">
 				{/* add search bar here */}
 				{/* <h1>KeyRing</h1> */}
 				<div className="w-full flex justify-center relative">
@@ -379,7 +409,7 @@ export const MainPage = () => {
 				</button>
 			</section>
 
-			<section className="col-start-1 col-end-2 row-start-1 row-end-3 content-center border-r border-slate-700">
+			<section className="col-start-1 col-end-2 row-start-1 row-end-3 content-center border-r border-slate-950">
 				<ul className="flex flex-col gap-y-1.5">
 					<li
 						className={`flex items-center gap-x-1.5 hover:text-blue-500 ${
@@ -411,7 +441,7 @@ export const MainPage = () => {
 				</ul>
 			</section>
 
-			<section className="col-start-2 col-end-3 row-start-2 row-end-3 flex flex-col justify-between p-2 min-h-0">
+			<section className="col-start-2 col-end-3 row-start-2 row-end-3 flex flex-col justify-between min-h-0">
 				{/* min-h-0 for flex and grid to bend them to will of overflow */}
 				{/* Display all passwd list here */}
 				<div className="overflow-auto h-full">
@@ -444,19 +474,30 @@ export const MainPage = () => {
 						</div>
 					)}
 				</div>
-				<div className="self-center w-full">
-					<button
-						className="bg-blue-400 hover:bg-blue-300 text-slate-800 font-medium py-2 px-4 w-full rounded-xl shadow-md cursor-pointer transition-all"
-						onClick={handleAddItem}
-						disabled={pageMode === "Trash"}
-					>
-						Add
-					</button>
+				<div className="self-center w-full px-5 py-1.5 bg-slate-700 border-1 border-slate-950">
+					{pageMode !== "Trash" ? (
+						<button
+							className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 flex justify-center font-medium py-2 w-full rounded shadow-2xl cursor-pointer  transition-all"
+							onClick={handleAddItem}
+							// disabled={pageMode === "Trash"}
+							title="Add Item"
+						>
+							<MdOutlineAdd className="text-blue-400 text-xl" size={32} />
+						</button>
+					) : (
+						<button
+							className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 flex justify-center font-medium py-3.5 w-full rounded shadow-2xl cursor-pointer  transition-all text-sm"
+							onClick={handleEmptyTrash}
+							title="Add Item"
+						>
+							Empty Trash
+						</button>
+					)}
 				</div>
 			</section>
 
-			<section className="col-start-3 col-end-4 row-start-2 row-end-3 bg-slate-900 py-5 px-7 pl-7 overflow-y-auto h-full min-h-0">
-				<div className="">
+			<section className="col-start-3 col-end-4 row-start-2 row-end-3 bg-slate-900 pt-5 h-full min-h-0 flex flex-col justify-between">
+				<div className="px-7 overflow-y-auto">
 					{/* Display view of passwd and edition of them here */}
 					{(mode === "View" || mode === "Edit" || mode === "Add") && (
 						<>
@@ -474,7 +515,7 @@ export const MainPage = () => {
 								{(mode === "View" && passwdList[itemIndex]?.name) ||
 								mode === "Add" ||
 								mode === "Edit" ? (
-									<div className="flex flex-col border-b-1 border-slate-500 hover:bg-slate-600 py-3 px-3.5">
+									<div className="flex flex-col border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5">
 										<label
 											className="text-slate-300 text-sm
 									"
@@ -502,68 +543,62 @@ export const MainPage = () => {
 								) : (
 									""
 								)}
-
 								{(mode === "View" && passwdList[itemIndex]?.user) ||
 								mode === "Add" ||
 								mode === "Edit" ? (
-									<div className="bg-slate-700 flex flex-col">
-										<div className="flex flex-col border-b-1 border-slate-500 hover:bg-slate-600 py-3 px-3.5">
-											<label
-												className="text-slate-300 text-sm
+									<div className="flex flex-col border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5">
+										<label
+											className="text-slate-300 text-sm
 									"
-												htmlFor="user"
-											>
-												Username
-											</label>
-											<input
-												type="text"
-												name="user"
-												id="user"
-												value={
-													mode === "View"
-														? passwdList[itemIndex].user || ""
-														: focusItem.user || ""
-												}
-												onChange={handleInputChange}
-												readOnly={mode === "View"}
-												className={`${
-													mode === "View" ? "focus:outline-none" : ""
-												} cursor-default`}
-											/>
-										</div>
+											htmlFor="user"
+										>
+											Username
+										</label>
+										<input
+											type="text"
+											name="user"
+											id="user"
+											value={
+												mode === "View"
+													? passwdList[itemIndex].user || ""
+													: focusItem.user || ""
+											}
+											onChange={handleInputChange}
+											readOnly={mode === "View"}
+											className={`${
+												mode === "View" ? "focus:outline-none" : ""
+											} cursor-default`}
+										/>
 									</div>
 								) : (
 									""
 								)}
-
 								{(mode === "View" && passwdList[itemIndex]?.passwd) ||
 								mode === "Add" ||
 								mode === "Edit" ? (
-									<div className="bg-slate-700 flex flex-col">
-										<div className="flex flex-col border-b-1 border-slate-500 hover:bg-slate-600 py-3 px-3.5">
-											<label
-												className="text-slate-300 text-sm
+									<div className="flex flex-col border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5">
+										<label
+											className="text-slate-300 text-sm
 									"
-												htmlFor="passwd"
-											>
-												Password
-											</label>
-											<input
-												type="password"
-												name="passwd"
-												id="passwd"
-												value={
-													mode === "View"
-														? passwdList[itemIndex].passwd || ""
-														: focusItem.passwd || ""
-												}
-												onChange={handleInputChange}
-												readOnly={mode === "View"}
-												className={`${
-													mode === "View" ? "focus:outline-none" : ""
-												} cursor-default`}
-											/>
-										</div>
+											htmlFor="passwd"
+										>
+											Password
+										</label>
+										<input
+											type="password"
+											name="passwd"
+											id="passwd"
+											value={
+												mode === "View"
+													? passwdList[itemIndex].passwd || ""
+													: focusItem.passwd || ""
+											}
+											onChange={handleInputChange}
+											readOnly={mode === "View"}
+											className={`${
+												mode === "View" ? "focus:outline-none" : ""
+											} cursor-default`}
+										/>
 									</div>
 								) : (
 									""
@@ -580,7 +615,7 @@ export const MainPage = () => {
 											""
 										) : (
 											<div
-												className="flex flex-col border-b-1 last:border-b-0 border-slate-500 hover:bg-slate-600 py-3 px-3.5"
+												className="flex flex-col border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5"
 												key={`uri-${i}`}
 											>
 												<label
@@ -610,9 +645,11 @@ export const MainPage = () => {
 												className="flex flex-col border-b-1 border-slate-500 hover:bg-slate-600 last:border-b-0 py-3 px-3.5"
 												key={`uri-${i}`}
 											>
-												<label htmlFor={`edit-uri-${i}`}>{`URI ${
-													i + 1
-												}`}</label>
+												<label
+													className="text-slate-300 text-sm
+									"
+													htmlFor={`edit-uri-${i}`}
+												>{`URI ${i + 1}`}</label>
 												<input
 													type="text"
 													name={`edit-uri-${i}`}
@@ -631,7 +668,7 @@ export const MainPage = () => {
 									: null}
 								{mode === "Add" || mode === "Edit" ? (
 									<button
-										className="flex items-center gap-1.5 border-b-1 border-slate-500 hover:bg-slate-600 py-2 px-3.5 cursor-pointer"
+										className="flex items-center gap-1.5 hover:bg-slate-600 py-2 px-3.5 cursor-pointer"
 										onClick={handleNewURI}
 									>
 										<IoMdAddCircleOutline className="text-2xl" />
@@ -647,32 +684,49 @@ export const MainPage = () => {
 										id="item-notes"
 										value={passwdList[itemIndex]?.note || ""}
 										readOnly
+										ref={areaRef}
 										className={`${
 											mode === "View" ? "focus:outline-none" : ""
-										} cursor-default w-full h-60`}
+										} cursor-default w-full bg-slate-700 py-1 px-3`}
 									></textarea>
 								</div>
 							) : null}
 							{mode === "Edit" || mode === "Add" ? (
 								<div>
-									<h3>NOTES</h3>
+									<h3 className="text-slate-300">NOTES</h3>
 									<textarea
 										name="item-notes"
 										id="item-notes"
 										value={focusItem.note || ""}
+										ref={areaRef}
 										onChange={(e) => {
 											setFocusItem((prev) => {
 												return { ...prev, note: e.target.value };
 											});
 										}}
+										className={`${
+											mode === "Edit" || mode === "Add"
+												? "focus:outline-none"
+												: ""
+										} cursor-default w-full bg-slate-700 p-2`}
 									></textarea>
 								</div>
 							) : null}
+							{/* Favourite Btn Here */}
 							{mode === "Add" ||
 							mode === "Edit" ||
 							(mode === "View" && passwdList[itemIndex]?.favourite) ? (
-								<>
-									<label htmlFor="favourite">Favourite</label>
+								<div
+									className="flex items-center justify-between gap-1.5 bg-slate-700 hover:bg-slate-600 py-2 px-3.5 cursor-pointer mt-5 mb-3"
+									onClick={handleFavouriteDiv}
+								>
+									<label
+										htmlFor="favourite"
+										className="cursor-pointer"
+										onClick={handleFavouriteCheckbox}
+									>
+										Favourite
+									</label>
 									<input
 										type="checkbox"
 										name="favourite"
@@ -684,45 +738,106 @@ export const MainPage = () => {
 												? focusItem.favourite
 												: false
 										}
-										onChange={handleFavourite}
+										onChange={handleFavouriteCheckbox}
 										readOnly={mode === "View"}
+										className="cursor-pointer scale-130"
 									/>
-								</>
+								</div>
 							) : null}
 						</>
 					)}
 				</div>
-				<div>
+				<div
+					className={`bg-slate-700 ${
+						mode === null ? "" : "px-7 py-1.5"
+					} border-1 border-slate-950`}
+				>
 					{mode === "View" && (
 						// TODO: Refactor Code here
-						<>
-							{pageMode === "Trash" ? null : (
-								<button onClick={handleEditItem}>Edit</button>
-							)}
+						<div className="flex justify-between">
+							<div className="flex gap-4">
+								{pageMode === "Trash" ? null : (
+									<button
+										className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
+										title="Edit"
+										onClick={handleEditItem}
+									>
+										<MdModeEdit className="text-blue-400 text-xl" />
+									</button>
+								)}
+								{pageMode === "Trash" && (
+									<button
+										className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
+										title="Restore"
+										onClick={handleRestore}
+									>
+										<TbRestore className="text-blue-400 text-xl" />
+									</button>
+								)}
 
-							{pageMode === "Trash" && (
-								<button onClick={handleEmptyTrash}>Empty Trash</button>
-							)}
-							<button onClick={handleDeleteItem}>Delete</button>
-							{pageMode === "Trash" && (
-								<button onClick={handleRestore}>Restore</button>
-							)}
+								<button
+									className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
+									title="Close"
+									onClick={handleClose}
+								>
+									<MdCloseFullscreen className="text-blue-400 text-xl" />
+								</button>
+							</div>
 
-							<button onClick={handleClose}>Close</button>
-						</>
+							<button
+								className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
+								title="Delete"
+								onClick={handleDeleteItem}
+							>
+								<HiOutlineTrash className="text-red-600 hover-red-700 text-xl font-extrabold" />
+							</button>
+						</div>
 					)}
 					{mode === "Edit" && (
-						<>
-							<button onClick={handleSaveItem}>Save</button>
-							<button onClick={handleCancel}>Cancel</button>
-							<button onClick={handleDeleteItem}>Delete</button>
-						</>
+						<div className="flex justify-between">
+							<div className="flex gap-4">
+								<button
+									className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 font-medium text-blue-400 py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all "
+									title="Save"
+									onClick={handleSaveItem}
+								>
+									<LuSave className="text-blue-400 text-xl" />
+								</button>
+								<button
+									className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
+									title="Cancel"
+									onClick={handleCancel}
+								>
+									<IoClose className="text-blue-400 text-xl" />
+								</button>
+							</div>
+
+							<button
+								className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
+								title="Delete"
+								onClick={handleDeleteItem}
+							>
+								<HiOutlineTrash className="text-red-600 hover-red-700 text-xl" />
+							</button>
+						</div>
 					)}
 					{mode === "Add" && (
-						<>
-							<button onClick={handleSaveItem}>Save</button>
-							<button onClick={handleCancel}>Cancel</button>
-						</>
+						<div className="flex gap-4">
+							<button
+								className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
+								title="Save"
+								onClick={handleSaveItem}
+							>
+								<LuSave className="text-blue-400 text-xl" />
+							</button>
+							<button
+								className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
+								title="Cancel"
+								onClick={handleCancel}
+							>
+								<IoClose className="text-blue-400 text-xl" />
+							</button>
+						</div>
 					)}
 				</div>
 			</section>
