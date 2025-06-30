@@ -8,8 +8,6 @@ import { IoMdCloseCircleOutline } from "react-icons/io";
 import { TbBorderAll } from "react-icons/tb";
 import { LuStar } from "react-icons/lu";
 import { HiOutlineTrash } from "react-icons/hi2";
-import { FcSearch } from "react-icons/fc";
-import { IoMdAddCircleOutline } from "react-icons/io";
 
 export const MainPage = () => {
 	const defaultEmpty = {
@@ -337,7 +335,7 @@ export const MainPage = () => {
 
 	return (
 		// <main className="grid grid-cols-3 grid-rows-[auto_1fr] h-full">
-		<main className="grid grid-cols-[10rem_20rem_1fr] grid-rows-[auto_1fr] h-full pl-5">
+		<main className="grid grid-cols-[10rem_20rem_1fr] grid-rows-[auto_1fr] h-full min-h-0">
 			<section className="col-start-2 col-end-4 row-start-1 row-end-2 grid grid-cols-[1fr_10rem] justify-items-center p-2 border-b border-slate-700">
 				{/* add search bar here */}
 				{/* <h1>KeyRing</h1> */}
@@ -349,7 +347,7 @@ export const MainPage = () => {
 						// TODO: ADD search react-icon
 						value={searchItem}
 						onChange={(e) => setSearchItem(e.target.value)}
-						placeholder={`🔍 Search ${
+						placeholder={`Search ${
 							pageMode === "All"
 								? "vault"
 								: pageMode === "Fav"
@@ -358,7 +356,6 @@ export const MainPage = () => {
 								? "trash"
 								: ""
 						}`}
-						autoComplete="off"
 						ref={searchRef}
 						className="focus:outline-none p-2 rounded-md border-1 border-gray-400 hover:border-gray-300 focus:border-gray-300 shadow-sm w-[70%] webkit-search-input transition-all"
 					/>
@@ -373,13 +370,13 @@ export const MainPage = () => {
 				</div>
 				<button
 					onClick={handleLogout}
-					className="bg-red-800 hover:bg-red-700 text-slate-200 font-medium py-2 px-6 rounded-xl cursor-pointer shadow-md transition-all"
+					className="bg-red-800 hover:bg-red-700 text-slate-200 font-medium py-2 px-6 rounded-xs cursor-pointer shadow-md transition-all"
 				>
 					Logout
 				</button>
 			</section>
 
-			<section className="col-start-1 col-end-2 row-start-1 row-end-3 content-center border-r border-slate-700">
+			<section className="col-start-1 col-end-2 row-start-1 row-end-3 content-center p-5 border-r border-slate-700">
 				<ul className="flex flex-col gap-y-1.5">
 					<li
 						className={`flex items-center gap-x-1.5 hover:text-blue-500 ${
@@ -411,16 +408,15 @@ export const MainPage = () => {
 				</ul>
 			</section>
 
-			<section className="col-start-2 col-end-3 row-start-2 row-end-3 flex flex-col justify-between p-2 min-h-0">
-				{/* min-h-0 for flex and grid to bend them to will of overflow */}
+			<section className="col-start-2 col-end-3 row-start-2 row-end-3 flex flex-col p-2 border-r border-slate-700 min-h-0">
 				{/* Display all passwd list here */}
-				<div className="overflow-auto h-full">
+				<div className="grow overflow-y-auto">
 					{/* {passwdList.length !== 0 ? ( */}
 					{filteredList.length !== 0 ? (
 						<ul className="flex flex-col gap-1">
 							{filteredList.map((item) => (
 								<li
-									className={`hover:bg-slate-700 px-2 py-2 h-12 flex items-center gap-x-1 border-l-4  active:border-l-slate-400 cursor-pointer truncate ${
+									className={`hover:bg-slate-700 px-2 py-2 h-12 flex items-center gap-x-1 border-l-4 active:border-l-slate-400 cursor-pointer truncate ${
 										item.id === passwdList[itemIndex]?.id && itemIndex !== null
 											? "border-l-blue-400 bg-slate-700"
 											: "border-l-transparent"
@@ -428,23 +424,18 @@ export const MainPage = () => {
 									key={item.id}
 									onClick={() => handleClickItem(item.id)}
 								>
-									<span className="w-8 h-8 bg-slate-500 rounded-full flex justify-center items-center font-medium text-slate-200 shrink-0">
+									<span className="w-8 h-8 bg-slate-500 rounded-full flex justify-center items-center font-medium text-slate-200 flex-shrink-0">
 										{item.name.charAt(0).toUpperCase()}
 									</span>
-									{item.name.length > 38
-										? item.name.slice(0, 35) + "..."
-										: item.name}
+									<span className="truncate">{item.name}</span>
 								</li>
 							))}
 						</ul>
 					) : (
-						<div className="flex flex-col justify-center items-center h-full gap-3">
-							<FcSearch className="text-7xl" />
-							<h2 className="text-slate-300">Empty List</h2>
-						</div>
+						<h2>Empty List</h2>
 					)}
 				</div>
-				<div className="self-center w-full">
+				<div className="self-center w-full flex-shrink-0 p-2">
 					<button
 						className="bg-blue-400 hover:bg-blue-300 text-slate-800 font-medium py-2 px-4 w-full rounded-xl shadow-md cursor-pointer transition-all"
 						onClick={handleAddItem}
@@ -455,12 +446,12 @@ export const MainPage = () => {
 				</div>
 			</section>
 
-			<section className="col-start-3 col-end-4 row-start-2 row-end-3 bg-slate-900 py-5 px-7 pl-7 overflow-y-auto h-full min-h-0">
-				<div className="">
+			<section className="col-start-3 col-end-4 row-start-2 row-end-3 bg-slate-900 p-5 flex flex-col min-h-0">
+				<div className="grow overflow-y-auto pr-2">
 					{/* Display view of passwd and edition of them here */}
 					{(mode === "View" || mode === "Edit" || mode === "Add") && (
 						<>
-							<p className="text-slate-300 mb-1">
+							<p className="text-slate-300 mb-4">
 								{mode === "View" ? (
 									<h3>ITEM INFORMATION</h3>
 								) : mode === "Edit" ? (
@@ -470,149 +461,111 @@ export const MainPage = () => {
 								) : null}
 							</p>
 
-							<div className="bg-slate-700 flex flex-col">
-								{(mode === "View" && passwdList[itemIndex]?.name) ||
-								mode === "Add" ||
-								mode === "Edit" ? (
-									<div className="flex flex-col border-b-1 border-slate-500 hover:bg-slate-600 py-3 px-3.5">
-										<label
-											className="text-slate-300 text-sm
-									"
-											htmlFor="name"
-										>
-											Name
-										</label>
-										<input
-											type="text"
-											name="name"
-											id="name"
-											value={
-												mode === "View"
-													? passwdList[itemIndex]?.name || ""
-													: focusItem?.name || ""
-											}
-											onChange={handleInputChange}
-											readOnly={mode === "View"}
-											ref={nameRef}
-											className={`${
-												mode === "View" ? "focus:outline-none" : ""
-											} cursor-default`}
-										/>
-									</div>
-								) : (
-									""
-								)}
+							<div className="bg-slate-700 flex flex-col rounded-md overflow-hidden">
+								<div className="flex flex-col border-b-1 border-slate-500 hover:bg-slate-600 py-3 px-3.5">
+									<label className="text-slate-300 text-sm mb-1" htmlFor="name">
+										Name
+									</label>
+									<input
+										type="text"
+										name="name"
+										id="name"
+										value={
+											mode === "View"
+												? passwdList[itemIndex]?.name || ""
+												: focusItem?.name || ""
+										}
+										onChange={handleInputChange}
+										readOnly={mode === "View"}
+										ref={nameRef}
+										className={`${
+											mode === "View" ? "focus:outline-none" : ""
+										} cursor-default bg-transparent border-none text-white w-full`}
+									/>
+								</div>
 
-								{(mode === "View" && passwdList[itemIndex]?.user) ||
-								mode === "Add" ||
-								mode === "Edit" ? (
-									<div className="bg-slate-700 flex flex-col">
-										<div className="flex flex-col border-b-1 border-slate-500 hover:bg-slate-600 py-3 px-3.5">
-											<label
-												className="text-slate-300 text-sm
-									"
-												htmlFor="user"
-											>
-												Username
-											</label>
-											<input
-												type="text"
-												name="user"
-												id="user"
-												value={
-													mode === "View"
-														? passwdList[itemIndex].user || ""
-														: focusItem.user || ""
-												}
-												onChange={handleInputChange}
-												readOnly={mode === "View"}
-												className={`${
-													mode === "View" ? "focus:outline-none" : ""
-												} cursor-default`}
-											/>
-										</div>
-									</div>
-								) : (
-									""
-								)}
+								<div className="flex flex-col border-b-1 border-slate-500 hover:bg-slate-600 py-3 px-3.5">
+									<label className="text-slate-300 text-sm mb-1" htmlFor="user">
+										Username
+									</label>
+									<input
+										type="text"
+										name="user"
+										id="user"
+										value={
+											mode === "View"
+												? passwdList[itemIndex]?.user || ""
+												: focusItem?.user || ""
+										}
+										onChange={handleInputChange}
+										readOnly={mode === "View"}
+										className={`${
+											mode === "View" ? "focus:outline-none" : ""
+										} cursor-default bg-transparent border-none text-white w-full`}
+									/>
+								</div>
 
-								{(mode === "View" && passwdList[itemIndex]?.passwd) ||
-								mode === "Add" ||
-								mode === "Edit" ? (
-									<div className="bg-slate-700 flex flex-col">
-										<div className="flex flex-col border-b-1 border-slate-500 hover:bg-slate-600 py-3 px-3.5">
-											<label
-												className="text-slate-300 text-sm
-									"
-												htmlFor="passwd"
-											>
-												Password
-											</label>
-											<input
-												type="password"
-												name="passwd"
-												id="passwd"
-												value={
-													mode === "View"
-														? passwdList[itemIndex].passwd || ""
-														: focusItem.passwd || ""
-												}
-												onChange={handleInputChange}
-												readOnly={mode === "View"}
-												className={`${
-													mode === "View" ? "focus:outline-none" : ""
-												} cursor-default`}
-											/>
-										</div>
-									</div>
-								) : (
-									""
-								)}
+								<div className="flex flex-col border-b-1 border-slate-500 hover:bg-slate-600 py-3 px-3.5">
+									<label
+										className="text-slate-300 text-sm mb-1"
+										htmlFor="passwd"
+									>
+										Password
+									</label>
+									<input
+										type="password"
+										name="passwd"
+										id="passwd"
+										value={
+											mode === "View"
+												? passwdList[itemIndex]?.passwd || ""
+												: focusItem?.passwd || ""
+										}
+										onChange={handleInputChange}
+										readOnly={mode === "View"}
+										className={`${
+											mode === "View" ? "focus:outline-none" : ""
+										} cursor-default bg-transparent border-none text-white w-full`}
+									/>
+								</div>
 							</div>
 
-							<div className="bg-slate-700 flex flex-col my-7">
+							<div className="bg-slate-700 flex flex-col my-7 rounded-md overflow-hidden">
 								{/* View Mode URI List */}
 								{passwdList.length !== 0 &&
 									mode === "View" &&
 									itemIndex !== null &&
-									passwdList[itemIndex].uri.map((item, i) => {
-										return item === "" ? (
-											""
-										) : (
-											<div
-												className="flex flex-col border-b-1 last:border-b-0 border-slate-500 hover:bg-slate-600 py-3 px-3.5"
-												key={`uri-${i}`}
-											>
-												<label
-													className="text-slate-300 text-sm
-									"
-													htmlFor={`uri-${i}`}
-												>{`URI ${i + 1}`}</label>
-												<input
-													type="text"
-													name={`uri-${i}`}
-													id={`uri-${i}`}
-													// value={mode === "View" ? item : null}
-													value={item || ""}
-													readOnly
-													className={`${
-														mode === "View" ? "focus:outline-none" : ""
-													} cursor-default`}
-												/>
-											</div>
-										);
-									})}
+									passwdList[itemIndex].uri.map((item, i) => (
+										<div
+											className="flex flex-col border-b-1 border-slate-500 hover:bg-slate-600 py-3 px-3.5"
+											key={`uri-${i}`}
+										>
+											<label
+												className="text-slate-300 text-sm mb-1"
+												htmlFor={`uri-${i}`}
+											>{`URI ${i + 1}`}</label>
+											<input
+												type="text"
+												name={`uri-${i}`}
+												id={`uri-${i}`}
+												value={item || ""}
+												readOnly
+												className="focus:outline-none cursor-default bg-transparent border-none text-white w-full break-all"
+											/>
+										</div>
+									))}
 								{/* Add mode URI List and Edit mode */}
 								{focusItem.uri.length !== 0 &&
 								(mode === "Edit" || mode === "Add")
 									? focusItem.uri.map((item, i) => (
 											<div
-												className="flex flex-col border-b-1 border-slate-500 hover:bg-slate-600 last:border-b-0 py-3 px-3.5"
+												className="flex flex-col border-b-1 border-slate-500 hover:bg-slate-600 py-3 px-3.5"
 												key={`uri-${i}`}
 											>
-												<label htmlFor={`edit-uri-${i}`}>{`URI ${
-													i + 1
-												}`}</label>
+												<label
+													className="text-slate-300 text-sm mb-1"
+													htmlFor={`edit-uri-${i}`}
+												>{`URI ${i + 1}`}</label>
 												<input
 													type="text"
 													name={`edit-uri-${i}`}
@@ -625,54 +578,50 @@ export const MainPage = () => {
 															return { ...prev, uri: newURIs };
 														});
 													}}
+													className="bg-transparent border-none text-white w-full focus:outline-none focus:ring-1 focus:ring-blue-400 rounded px-2 py-1"
 												/>
 											</div>
 									  ))
 									: null}
 								{mode === "Add" || mode === "Edit" ? (
-									<button
-										className="flex items-center gap-1.5 border-b-1 border-slate-500 hover:bg-slate-600 py-2 px-3.5 cursor-pointer"
-										onClick={handleNewURI}
-									>
-										<IoMdAddCircleOutline className="text-2xl" />
-										New URI
-									</button>
+									<div className="p-3">
+										<button
+											onClick={handleNewURI}
+											className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded text-sm transition-colors"
+										>
+											New URI
+										</button>
+									</div>
 								) : null}
 							</div>
 							{mode === "View" && passwdList[itemIndex]?.note ? (
-								<div>
-									<h3 className="text-slate-300">NOTES</h3>
+								<div className="mb-6">
+									<h3 className="text-slate-300 mb-2">NOTES</h3>
 									<textarea
 										name="item-notes"
 										id="item-notes"
 										value={passwdList[itemIndex]?.note || ""}
 										readOnly
-										className={`${
-											mode === "View" ? "focus:outline-none" : ""
-										} cursor-default w-full h-60`}
+										className="focus:outline-none cursor-default w-full h-60 bg-slate-700 text-white p-3 rounded-md resize-none border-none"
 									></textarea>
 								</div>
 							) : null}
 							{mode === "Edit" || mode === "Add" ? (
-								<div>
-									<h3>NOTES</h3>
+								<div className="mb-6">
+									<h3 className="text-slate-300 mb-2">NOTES</h3>
 									<textarea
-										name="item-notes"
-										id="item-notes"
+										name="note"
+										id="note"
 										value={focusItem.note || ""}
-										onChange={(e) => {
-											setFocusItem((prev) => {
-												return { ...prev, note: e.target.value };
-											});
-										}}
+										onChange={handleInputChange}
+										className="w-full h-60 bg-slate-700 text-white p-3 rounded-md resize-none border-none focus:outline-none focus:ring-1 focus:ring-blue-400"
 									></textarea>
 								</div>
 							) : null}
 							{mode === "Add" ||
 							mode === "Edit" ||
 							(mode === "View" && passwdList[itemIndex]?.favourite) ? (
-								<>
-									<label htmlFor="favourite">Favourite</label>
+								<div className="flex items-center gap-2 mb-6">
 									<input
 										type="checkbox"
 										name="favourite"
@@ -686,42 +635,96 @@ export const MainPage = () => {
 										}
 										onChange={handleFavourite}
 										readOnly={mode === "View"}
+										className="w-4 h-4"
 									/>
-								</>
+									<label htmlFor="favourite" className="text-slate-300">
+										Favourite
+									</label>
+								</div>
 							) : null}
 						</>
 					)}
 				</div>
-				<div>
+				<div className="flex-shrink-0 flex flex-wrap gap-2 pt-4 border-t border-slate-700">
 					{mode === "View" && (
 						// TODO: Refactor Code here
 						<>
 							{pageMode === "Trash" ? null : (
-								<button onClick={handleEditItem}>Edit</button>
+								<button
+									onClick={handleEditItem}
+									className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded transition-colors"
+								>
+									Edit
+								</button>
 							)}
 
 							{pageMode === "Trash" && (
-								<button onClick={handleEmptyTrash}>Empty Trash</button>
+								<button
+									onClick={handleEmptyTrash}
+									className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded transition-colors"
+								>
+									Empty Trash
+								</button>
 							)}
-							<button onClick={handleDeleteItem}>Delete</button>
+							<button
+								onClick={handleDeleteItem}
+								className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded transition-colors"
+							>
+								Delete
+							</button>
 							{pageMode === "Trash" && (
-								<button onClick={handleRestore}>Restore</button>
+								<button
+									onClick={handleRestore}
+									className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded transition-colors"
+								>
+									Restore
+								</button>
 							)}
 
-							<button onClick={handleClose}>Close</button>
+							<button
+								onClick={handleClose}
+								className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded transition-colors"
+							>
+								Close
+							</button>
 						</>
 					)}
 					{mode === "Edit" && (
 						<>
-							<button onClick={handleSaveItem}>Save</button>
-							<button onClick={handleCancel}>Cancel</button>
-							<button onClick={handleDeleteItem}>Delete</button>
+							<button
+								onClick={handleSaveItem}
+								className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded transition-colors"
+							>
+								Save
+							</button>
+							<button
+								onClick={handleCancel}
+								className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded transition-colors"
+							>
+								Cancel
+							</button>
+							<button
+								onClick={handleDeleteItem}
+								className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded transition-colors"
+							>
+								Delete
+							</button>
 						</>
 					)}
 					{mode === "Add" && (
 						<>
-							<button onClick={handleSaveItem}>Save</button>
-							<button onClick={handleCancel}>Cancel</button>
+							<button
+								onClick={handleSaveItem}
+								className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded transition-colors"
+							>
+								Save
+							</button>
+							<button
+								onClick={handleCancel}
+								className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded transition-colors"
+							>
+								Cancel
+							</button>
 						</>
 					)}
 				</div>
