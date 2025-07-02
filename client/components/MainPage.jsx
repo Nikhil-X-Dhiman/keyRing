@@ -16,6 +16,11 @@ import { MdModeEdit } from "react-icons/md";
 import { LuSave } from "react-icons/lu";
 import { MdCloseFullscreen } from "react-icons/md";
 import { MdOutlineAdd } from "react-icons/md";
+import { GiRoundStar } from "react-icons/gi";
+import { BiSolidCopy } from "react-icons/bi";
+import { PiEyeDuotone } from "react-icons/pi";
+import { PiEyeSlash } from "react-icons/pi";
+import { MdOutlineLaunch } from "react-icons/md";
 
 export const MainPage = () => {
 	const defaultEmpty = {
@@ -33,6 +38,7 @@ export const MainPage = () => {
 	const [passwdList, setPasswdList] = useState([]); //
 	const [itemIndex, setItemIndex] = useState(null); // index for add, edit and view
 	const [focusItem, setFocusItem] = useState(defaultEmpty); // passwd item for edit and add mode
+	const [passReveal, setPassReveal] = useState(false);
 	const [mode, setMode] = useState(null); // modes for different view selection (null, view, edit, add)
 	const [searchItem, setSearchItem] = useState("");
 	const [pageMode, setPageMode] = useState("All");
@@ -103,6 +109,36 @@ export const MainPage = () => {
 
 		return matchesSearch && matchesMode;
 	});
+
+	const handlePassReveal = () => {
+		setPassReveal((prev) => !prev);
+	};
+
+	const handleCopy = async (field) => {
+		try {
+			await navigator.clipboard.writeText(passwdList[itemIndex][field]);
+		} catch (error) {
+			console.error("Error Copying: ", error);
+		}
+	};
+
+	const handleLinkOpen = (i) => {
+		try {
+			let url = passwdList[itemIndex].uri[i];
+			url = "http://" + url;
+			window.open(url, "_blank", "noopener noreferrer");
+		} catch (error) {
+			console.error("Error Link Opening: ", error);
+		}
+	};
+
+	const handleURICopy = async (i) => {
+		try {
+			await navigator.clipboard.writeText(passwdList[itemIndex].uri[i]);
+		} catch (error) {
+			console.error("Error Copying: ", error);
+		}
+	};
 
 	const handleAddItem = () => {
 		// Adding new passwd entry btn
@@ -273,6 +309,10 @@ export const MainPage = () => {
 
 	const handleSaveItem = async () => {
 		// TODO: Add created and updated time
+		if (focusItem.name === "") {
+			console.error("Name field cannot be empty!!!");
+			return;
+		}
 		if (mode === "Edit") {
 			const itemID = passwdList[itemIndex].id;
 			try {
@@ -367,8 +407,8 @@ export const MainPage = () => {
 
 	return (
 		// <main className="grid grid-cols-3 grid-rows-[auto_1fr] h-full">
-		<main className="grid grid-cols-[10rem_20rem_1fr] grid-rows-[auto_1fr] h-full pl-5">
-			<section className="col-start-2 col-end-4 row-start-1 row-end-2 grid grid-cols-[1fr_10rem] justify-items-center p-2 border-b border-slate-950">
+		<main className="grid grid-cols-[10rem_24rem_1fr] grid-rows-[auto_1fr] h-full select-none">
+			<section className="col-start-1 col-end-4 row-start-1 row-end-2 grid grid-cols-[1fr_10rem] justify-items-center p-2 border border-l-0 border-slate-950">
 				{/* add search bar here */}
 				{/* <h1>KeyRing</h1> */}
 				<div className="w-full flex justify-center relative">
@@ -403,14 +443,14 @@ export const MainPage = () => {
 				</div>
 				<button
 					onClick={handleLogout}
-					className="bg-red-800 hover:bg-red-700 text-slate-200 font-medium py-2 px-6 rounded-xl cursor-pointer shadow-md transition-all"
+					className="bg-red-800 hover:bg-red-700 text-slate-200 font-medium py-2.5 px-4 rounded  cursor-pointer shadow-md border-1 border-slate-600 hover:border-slate-400 transition-all"
 				>
 					Logout
 				</button>
 			</section>
 
-			<section className="col-start-1 col-end-2 row-start-1 row-end-3 content-center border-r border-slate-950">
-				<ul className="flex flex-col gap-y-1.5">
+			<section className="col-start-1 col-end-2 row-start-2 row-end-3 content-center border-r border-slate-950 pl-3">
+				<ul className="flex flex-col gap-y-1.5 relative bottom-[10%]">
 					<li
 						className={`flex items-center gap-x-1.5 hover:text-blue-500 ${
 							pageMode === "All" ? "text-blue-400 font-medium" : ""
@@ -441,16 +481,16 @@ export const MainPage = () => {
 				</ul>
 			</section>
 
-			<section className="col-start-2 col-end-3 row-start-2 row-end-3 flex flex-col justify-between min-h-0">
+			<section className="col-start-2 col-end-3 row-start-2 row-end-3 flex flex-col justify-between min-h-0 ">
 				{/* min-h-0 for flex and grid to bend them to will of overflow */}
 				{/* Display all passwd list here */}
-				<div className="overflow-auto h-full">
+				<div className="overflow-y-scroll h-full">
 					{/* {passwdList.length !== 0 ? ( */}
 					{filteredList.length !== 0 ? (
-						<ul className="flex flex-col gap-1">
+						<ul className="flex flex-col">
 							{filteredList.map((item) => (
 								<li
-									className={`hover:bg-slate-700 px-2 py-2 h-12 flex items-center gap-x-1 border-l-4  active:border-l-slate-400 cursor-pointer truncate ${
+									className={`hover:bg-slate-700 pl-2 py-2 flex items-center pr-3 justify-between gap-x-1 border-l-4  active:border-l-slate-400 cursor-pointer truncate ${
 										item.id === passwdList[itemIndex]?.id && itemIndex !== null
 											? "border-l-blue-400 bg-slate-700"
 											: "border-l-transparent"
@@ -458,12 +498,22 @@ export const MainPage = () => {
 									key={item.id}
 									onClick={() => handleClickItem(item.id)}
 								>
-									<span className="w-8 h-8 bg-slate-500 rounded-full flex justify-center items-center font-medium text-slate-200 shrink-0">
-										{item.name.charAt(0).toUpperCase()}
-									</span>
-									{item.name.length > 38
-										? item.name.slice(0, 35) + "..."
-										: item.name}
+									<div className="flex items-center gap-2">
+										<span className="w-10 h-10 bg-slate-500 rounded-full flex justify-center items-center font-medium text-slate-200 shrink-0 text-xl">
+											{item.name.charAt(0).toUpperCase()}
+										</span>
+										<div>
+											<p>
+												{item.name.length > 40
+													? item.name.slice(0, 37) + "..."
+													: item.name}
+											</p>
+											<p>{item.user}</p>
+										</div>
+									</div>
+									{item.favourite && (
+										<GiRoundStar className="text-yellow-300" />
+									)}
 								</li>
 							))}
 						</ul>
@@ -496,7 +546,11 @@ export const MainPage = () => {
 				</div>
 			</section>
 
-			<section className="col-start-3 col-end-4 row-start-2 row-end-3 bg-slate-900 pt-5 h-full min-h-0 flex flex-col justify-between">
+			<section
+				className={`col-start-3 col-end-4 row-start-2 row-end-3 ${
+					mode === null ? "" : "bg-slate-900"
+				} pt-5 h-full min-h-0 flex flex-col justify-between border-1 border-slate-950`}
+			>
 				<div className="px-7 overflow-y-auto">
 					{/* Display view of passwd and edition of them here */}
 					{(mode === "View" || mode === "Edit" || mode === "Add") && (
@@ -535,9 +589,11 @@ export const MainPage = () => {
 											onChange={handleInputChange}
 											readOnly={mode === "View"}
 											ref={nameRef}
+											autoComplete="off"
+											required
 											className={`${
-												mode === "View" ? "focus:outline-none" : ""
-											} cursor-default`}
+												mode === "View" ? "focus:outline-none" : "outline-none"
+											} cursor-default text-[1.2rem]`}
 										/>
 									</div>
 								) : (
@@ -546,29 +602,39 @@ export const MainPage = () => {
 								{(mode === "View" && passwdList[itemIndex]?.user) ||
 								mode === "Add" ||
 								mode === "Edit" ? (
-									<div className="flex flex-col border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5">
-										<label
-											className="text-slate-300 text-sm
-									"
-											htmlFor="user"
-										>
-											Username
-										</label>
-										<input
-											type="text"
-											name="user"
-											id="user"
-											value={
-												mode === "View"
-													? passwdList[itemIndex].user || ""
-													: focusItem.user || ""
-											}
-											onChange={handleInputChange}
-											readOnly={mode === "View"}
-											className={`${
-												mode === "View" ? "focus:outline-none" : ""
-											} cursor-default`}
-										/>
+									<div className="flex items-center justify-between border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5">
+										<div className="flex flex-col grow">
+											<label className="text-slate-300 text-sm" htmlFor="user">
+												Username
+											</label>
+											<input
+												type="text"
+												name="user"
+												id="user"
+												value={
+													mode === "View"
+														? passwdList[itemIndex].user || ""
+														: focusItem.user || ""
+												}
+												onChange={handleInputChange}
+												readOnly={mode === "View"}
+												autoComplete="off"
+												className={`${
+													mode === "View"
+														? "focus:outline-none"
+														: "outline-none"
+												} cursor-default text-[1.2rem]`}
+											/>
+										</div>
+										<div>
+											{mode === "View" && (
+												<BiSolidCopy
+													className="text-2xl cursor-pointer opacity-40 hover:opacity-100 transition-all"
+													title="Copy Username"
+													onClick={() => handleCopy("user")}
+												/>
+											)}
+										</div>
 									</div>
 								) : (
 									""
@@ -576,29 +642,57 @@ export const MainPage = () => {
 								{(mode === "View" && passwdList[itemIndex]?.passwd) ||
 								mode === "Add" ||
 								mode === "Edit" ? (
-									<div className="flex flex-col border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5">
-										<label
-											className="text-slate-300 text-sm
-									"
-											htmlFor="passwd"
-										>
-											Password
-										</label>
-										<input
-											type="password"
-											name="passwd"
-											id="passwd"
-											value={
-												mode === "View"
-													? passwdList[itemIndex].passwd || ""
-													: focusItem.passwd || ""
-											}
-											onChange={handleInputChange}
-											readOnly={mode === "View"}
-											className={`${
-												mode === "View" ? "focus:outline-none" : ""
-											} cursor-default`}
-										/>
+									<div className="flex items-center justify-between border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5">
+										<div className="flex flex-col grow">
+											<label
+												className="text-slate-300 text-sm"
+												htmlFor="passwd"
+											>
+												Password
+											</label>
+											<input
+												// type="password"
+												type={passReveal ? "text" : "password"}
+												name="passwd"
+												id="passwd"
+												value={
+													mode === "View"
+														? passwdList[itemIndex].passwd || ""
+														: focusItem.passwd || ""
+												}
+												onChange={handleInputChange}
+												readOnly={mode === "View"}
+												autoComplete="off"
+												className={`${
+													mode === "View"
+														? "focus:outline-none"
+														: "outline-none"
+												} cursor-default text-[1.2rem]`}
+											/>
+										</div>
+										<div className="flex gap-3">
+											{passReveal ? (
+												<PiEyeSlash
+													className="text-2xl cursor-pointer hover:opacity-100 opacity-40 transition-opacity duration-200"
+													title="Toggle Visibility"
+													onClick={handlePassReveal}
+												/>
+											) : (
+												<PiEyeDuotone
+													className="text-2xl cursor-pointer opacity-75 hover:opacity-100 transition-opacity duration-200"
+													title="Toggle Visibility"
+													onClick={handlePassReveal}
+												/>
+											)}
+
+											{mode === "View" && (
+												<BiSolidCopy
+													className="text-2xl cursor-pointer opacity-40 hover:opacity-100 transition-all"
+													title="Copy Password"
+													onClick={() => handleCopy("passwd")}
+												/>
+											)}
+										</div>
 									</div>
 								) : (
 									""
@@ -615,25 +709,42 @@ export const MainPage = () => {
 											""
 										) : (
 											<div
-												className="flex flex-col border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5"
+												className="flex items-center justify-between border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5"
 												key={`uri-${i}`}
 											>
-												<label
-													className="text-slate-300 text-sm
-									"
-													htmlFor={`uri-${i}`}
-												>{`URI ${i + 1}`}</label>
-												<input
-													type="text"
-													name={`uri-${i}`}
-													id={`uri-${i}`}
-													// value={mode === "View" ? item : null}
-													value={item || ""}
-													readOnly
-													className={`${
-														mode === "View" ? "focus:outline-none" : ""
-													} cursor-default`}
-												/>
+												<div className="flex flex-col">
+													<label
+														className="text-slate-300 text-sm"
+														htmlFor={`uri-${i}`}
+													>{`URI ${i + 1}`}</label>
+													<input
+														type="text"
+														name={`uri-${i}`}
+														id={`uri-${i}`}
+														// value={mode === "View" ? item : null}
+														value={item || ""}
+														readOnly
+														autoComplete="off"
+														className={`${
+															mode === "View"
+																? "focus:outline-none"
+																: "outline-none"
+														} cursor-default text-[1.2rem]`}
+													/>
+												</div>
+												<div className="flex gap-3">
+													<MdOutlineLaunch
+														className="text-2xl cursor-pointer opacity-40 hover:opacity-100 transition-all"
+														title="Open Link"
+														onClick={() => handleLinkOpen(i)}
+													/>
+
+													<BiSolidCopy
+														className="text-2xl cursor-pointer opacity-40 hover:opacity-100 transition-all"
+														title="Copy Link"
+														onClick={() => handleURICopy(i)}
+													/>
+												</div>
 											</div>
 										);
 									})}
@@ -655,6 +766,7 @@ export const MainPage = () => {
 													name={`edit-uri-${i}`}
 													id={`edit-uri-${i}`}
 													value={item || ""}
+													autoComplete="off"
 													onChange={(e) => {
 														setFocusItem((prev) => {
 															const newURIs = [...prev.uri];
@@ -662,6 +774,7 @@ export const MainPage = () => {
 															return { ...prev, uri: newURIs };
 														});
 													}}
+													className="outline-none text-[1.2rem]"
 												/>
 											</div>
 									  ))
@@ -678,13 +791,16 @@ export const MainPage = () => {
 							</div>
 							{mode === "View" && passwdList[itemIndex]?.note ? (
 								<div>
-									<h3 className="text-slate-300">NOTES</h3>
+									<h3 className="text-slate-300 my-1">NOTES</h3>
 									<textarea
 										name="item-notes"
 										id="item-notes"
 										value={passwdList[itemIndex]?.note || ""}
 										readOnly
 										ref={areaRef}
+										autoComplete="off"
+										autoCapitalize="off"
+										autoCorrect="off"
 										className={`${
 											mode === "View" ? "focus:outline-none" : ""
 										} cursor-default w-full bg-slate-700 py-1 px-3`}
