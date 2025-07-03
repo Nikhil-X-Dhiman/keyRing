@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { usePrivateInstance } from "../hooks/usePrivateInstance";
+import KeyRingIcon from "../public/keyring.svg?react";
 import { IoMdCloseCircleOutline } from "react-icons/io";
 import { TbBorderAll } from "react-icons/tb";
 import { LuStar } from "react-icons/lu";
@@ -21,6 +22,7 @@ import { BiSolidCopy } from "react-icons/bi";
 import { PiEyeDuotone } from "react-icons/pi";
 import { PiEyeSlash } from "react-icons/pi";
 import { MdOutlineLaunch } from "react-icons/md";
+import { FiMinusCircle } from "react-icons/fi";
 
 export const MainPage = () => {
 	const defaultEmpty = {
@@ -138,6 +140,14 @@ export const MainPage = () => {
 		} catch (error) {
 			console.error("Error Copying: ", error);
 		}
+	};
+
+	const handleURIRemove = (i) => {
+		setFocusItem((prev) => {
+			let uriList = prev.uri;
+			const updateURIList = uriList.filter((item, index) => i !== index);
+			return { ...prev, uri: updateURIList };
+		});
 	};
 
 	const handleAddItem = () => {
@@ -450,7 +460,7 @@ export const MainPage = () => {
 			</section>
 
 			<section className="col-start-1 col-end-2 row-start-2 row-end-3 content-center border-r border-slate-950 pl-3">
-				<ul className="flex flex-col gap-y-1.5 relative bottom-[10%]">
+				<ul className="flex flex-col gap-y-1.5 relative bottom-[10%] text-lg">
 					<li
 						className={`flex items-center gap-x-1.5 hover:text-blue-500 ${
 							pageMode === "All" ? "text-blue-400 font-medium" : ""
@@ -527,7 +537,7 @@ export const MainPage = () => {
 				<div className="self-center w-full px-5 py-1.5 bg-slate-700 border-1 border-slate-950">
 					{pageMode !== "Trash" ? (
 						<button
-							className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 flex justify-center font-medium py-2 w-full rounded shadow-2xl cursor-pointer  transition-all"
+							className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 flex justify-center font-medium py-2 w-full rounded shadow-2xl cursor-pointer  transition-colors"
 							onClick={handleAddItem}
 							// disabled={pageMode === "Trash"}
 							title="Add Item"
@@ -536,7 +546,7 @@ export const MainPage = () => {
 						</button>
 					) : (
 						<button
-							className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 flex justify-center font-medium py-3.5 w-full rounded shadow-2xl cursor-pointer  transition-all text-sm"
+							className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 flex justify-center font-medium py-3.5 w-full rounded shadow-2xl cursor-pointer  transition-colors text-sm"
 							onClick={handleEmptyTrash}
 							title="Add Item"
 						>
@@ -549,13 +559,21 @@ export const MainPage = () => {
 			<section
 				className={`col-start-3 col-end-4 row-start-2 row-end-3 ${
 					mode === null ? "" : "bg-slate-900"
-				} pt-5 h-full min-h-0 flex flex-col justify-between border-1 border-slate-950`}
+				} h-full min-h-0 flex flex-col justify-between border-1 border-slate-950`}
 			>
+				{mode === null && (
+					<div className="text-slate-400 flex gap-x-2 justify-center h-full items-center relative bottom-[7%]">
+						<KeyRingIcon className="w-17 h-17" />
+						<span className="font-thin text-5xl">
+							<span className="font-bold">key</span>Ring
+						</span>
+					</div>
+				)}
 				<div className="px-7 overflow-y-auto">
 					{/* Display view of passwd and edition of them here */}
 					{(mode === "View" || mode === "Edit" || mode === "Add") && (
 						<>
-							<p className="text-slate-300 mb-1">
+							<p className="text-slate-300 mb-1 mt-4">
 								{mode === "View" ? (
 									<h3>ITEM INFORMATION</h3>
 								) : mode === "Edit" ? (
@@ -721,7 +739,6 @@ export const MainPage = () => {
 														type="text"
 														name={`uri-${i}`}
 														id={`uri-${i}`}
-														// value={mode === "View" ? item : null}
 														value={item || ""}
 														readOnly
 														autoComplete="off"
@@ -752,30 +769,38 @@ export const MainPage = () => {
 								{focusItem.uri.length !== 0 &&
 								(mode === "Edit" || mode === "Add")
 									? focusItem.uri.map((item, i) => (
-											<div
-												className="flex flex-col border-b-1 border-slate-500 hover:bg-slate-600 last:border-b-0 py-3 px-3.5"
-												key={`uri-${i}`}
-											>
-												<label
-													className="text-slate-300 text-sm
-									"
-													htmlFor={`edit-uri-${i}`}
-												>{`URI ${i + 1}`}</label>
-												<input
-													type="text"
-													name={`edit-uri-${i}`}
-													id={`edit-uri-${i}`}
-													value={item || ""}
-													autoComplete="off"
-													onChange={(e) => {
-														setFocusItem((prev) => {
-															const newURIs = [...prev.uri];
-															newURIs[i] = e.target.value;
-															return { ...prev, uri: newURIs };
-														});
-													}}
-													className="outline-none text-[1.2rem]"
-												/>
+											<div className="flex items-center border-b-1 border-slate-500 hover:bg-slate-600 last:border-b-0">
+												<div className="px-3.5">
+													<FiMinusCircle
+														title="Remove"
+														className="text-2xl text-red-500 cursor-pointer"
+														onClick={() => handleURIRemove(i)}
+													/>
+												</div>
+												<div
+													className="flex flex-col   py-3 grow"
+													key={`uri-${i}`}
+												>
+													<label
+														className="text-slate-300 text-sm"
+														htmlFor={`edit-uri-${i}`}
+													>{`URI ${i + 1}`}</label>
+													<input
+														type="text"
+														name={`edit-uri-${i}`}
+														id={`edit-uri-${i}`}
+														value={item || ""}
+														autoComplete="off"
+														onChange={(e) => {
+															setFocusItem((prev) => {
+																const newURIs = [...prev.uri];
+																newURIs[i] = e.target.value;
+																return { ...prev, uri: newURIs };
+															});
+														}}
+														className="outline-none text-[1.2rem]"
+													/>
+												</div>
 											</div>
 									  ))
 									: null}
