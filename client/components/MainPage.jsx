@@ -539,7 +539,6 @@ export const MainPage = () => {
 						<button
 							className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 flex justify-center font-medium py-2 w-full rounded shadow-2xl cursor-pointer  transition-colors"
 							onClick={handleAddItem}
-							// disabled={pageMode === "Trash"}
 							title="Add Item"
 						>
 							<MdOutlineAdd className="text-blue-400 text-xl" size={32} />
@@ -691,15 +690,16 @@ export const MainPage = () => {
 										<div className="flex gap-3">
 											{passReveal ? (
 												<PiEyeSlash
-													className="text-2xl cursor-pointer hover:opacity-100 opacity-40 transition-opacity duration-200"
+													className="text-2xl cursor-pointer opacity-70  duration-200"
 													title="Toggle Visibility"
 													onClick={handlePassReveal}
 												/>
 											) : (
 												<PiEyeDuotone
-													className="text-2xl cursor-pointer opacity-75 hover:opacity-100 transition-opacity duration-200"
+													className="text-2xl cursor-pointer opacity-70 duration-200"
 													title="Toggle Visibility"
 													onClick={handlePassReveal}
+													onmou
 												/>
 											)}
 
