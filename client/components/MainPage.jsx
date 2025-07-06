@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router";
 import { useAuth } from "../hooks/useAuth";
@@ -23,6 +23,7 @@ import { PiEyeDuotone } from "react-icons/pi";
 import { PiEyeSlash } from "react-icons/pi";
 import { MdOutlineLaunch } from "react-icons/md";
 import { FiMinusCircle } from "react-icons/fi";
+import { useCrypto } from "../hooks/useCrypto";
 
 export const MainPage = () => {
 	const defaultEmpty = {
@@ -50,6 +51,7 @@ export const MainPage = () => {
 	const areaRef = useRef();
 	const navigate = useNavigate();
 	const { setAuth } = useAuth();
+	const { clearSessionKey, handleEncrypt, handleDecrypt } = useCrypto();
 	const privateInstance = usePrivateInstance();
 
 	useEffect(() => {
@@ -78,15 +80,16 @@ export const MainPage = () => {
 				if (success) {
 					const updatedList = result.map((item) => {
 						const { itemID, name, user, passwd, uri, note, fav, trash } = item;
+						// Decrypt Data upon arrival
 						return {
 							id: itemID,
-							name,
-							user,
-							passwd,
-							uri,
-							note,
-							favourite: fav,
-							trash,
+							name: handleDecrypt(JSON.parse(name)),
+							user: handleDecrypt(JSON.parse(user)),
+							passwd: handleDecrypt(JSON.parse(passwd)),
+							uri: handleDecrypt(JSON.parse(uri)),
+							note: handleDecrypt(JSON.parse(note)),
+							favourite: JSON.parse(handleDecrypt(JSON.parse(fav))),
+							trash: handleDecrypt(JSON.parse(trash)),
 						};
 					});
 					setPasswdList(updatedList);
@@ -96,7 +99,6 @@ export const MainPage = () => {
 			}
 		};
 		getAllItems();
-		// setPasswdList()
 	}, []);
 
 	const filteredList = passwdList.filter((item) => {
@@ -145,7 +147,7 @@ export const MainPage = () => {
 	const handleURIRemove = (i) => {
 		setFocusItem((prev) => {
 			let uriList = prev.uri;
-			const updateURIList = uriList.filter((item, index) => i !== index);
+			const updateURIList = uriList.filter((_, index) => i !== index);
 			return { ...prev, uri: updateURIList };
 		});
 	};
@@ -214,7 +216,8 @@ export const MainPage = () => {
 			const itemID = passwdList[itemIndex].id;
 			try {
 				const response = await privateInstance.patch(`/api/v1/item/${itemID}`, {
-					trash: !passwdList[itemIndex].trash,
+					trash: JSON.stringify(handleEncrypt(!passwdList[itemIndex].trash)),
+					// trash: !passwdList[itemIndex].trash,
 				});
 				if (response.status === 200 && response.data.success) {
 					setPasswdList((prev) => {
@@ -325,10 +328,22 @@ export const MainPage = () => {
 		}
 		if (mode === "Edit") {
 			const itemID = passwdList[itemIndex].id;
+			// Apply Encryption to data
+			const uriString = JSON.stringify(focusItem.uri);
+			const encryptedFocusItem = {
+				id: focusItem.id,
+				name: JSON.stringify(handleEncrypt(focusItem.name)),
+				user: JSON.stringify(handleEncrypt(focusItem.user)),
+				passwd: JSON.stringify(handleEncrypt(focusItem.passwd)),
+				uri: JSON.stringify(handleEncrypt(uriString)),
+				note: JSON.stringify(handleEncrypt(focusItem.note)),
+				favourite: JSON.stringify(handleEncrypt(focusItem.favourite)),
+				trash: JSON.stringify(handleEncrypt(focusItem.trash)),
+			};
 			try {
 				const response = await privateInstance.put(
 					`/api/v1/item/${itemID}`,
-					focusItem
+					encryptedFocusItem
 				);
 				if (response.status === 200 && response.data.success === true) {
 					setPasswdList((prev) => {
@@ -347,12 +362,25 @@ export const MainPage = () => {
 			}
 		} else if (mode === "Add") {
 			const itemID = uuidv4();
+			// Encrypt Data
+			const uriString = JSON.stringify(focusItem.uri);
+			const encryptedFocusItem = {
+				id: itemID,
+				name: JSON.stringify(handleEncrypt(focusItem.name)),
+				user: JSON.stringify(handleEncrypt(focusItem.user)),
+				passwd: JSON.stringify(handleEncrypt(focusItem.passwd)),
+				uri: JSON.stringify(handleEncrypt(uriString)),
+				note: JSON.stringify(handleEncrypt(focusItem.note)),
+				favourite: JSON.stringify(handleEncrypt(focusItem.favourite)),
+				trash: JSON.stringify(handleEncrypt(focusItem.trash)),
+			};
 			const item = { ...focusItem, id: itemID };
-			console.log("item: ", item);
+			console.log("item: ", encryptedFocusItem);
 			try {
 				const response = await privateInstance.post(
 					`/api/v1/item/${itemID}`,
-					item
+					encryptedFocusItem
+					// item
 				);
 				if (response.status === 201 && response.data.success === true) {
 					setPasswdList((prev) => {
@@ -407,6 +435,7 @@ export const MainPage = () => {
 			localStorage.setItem("isLogged", JSON.stringify(false));
 			navigate("/login/email");
 			setAuth(null);
+			clearSessionKey();
 		}
 	};
 

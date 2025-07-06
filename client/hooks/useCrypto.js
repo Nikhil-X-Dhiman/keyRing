@@ -1,11 +1,11 @@
+import { useRef } from "react";
 import { useAuth } from "./useAuth";
 import {
 	CryptoBytesRequirement,
 	UnmatchedPayloadParams,
 } from "../errors/customError";
-import { useRef } from "react";
 
-const PBKDF2_ITERATIONS = 500000; // Recommended iterations (adjust based on performance vs. security)
+const PBKDF2_ITERATIONS = 500000; // Recommended iterations
 const PBKDF2_HASH_ALGORITHM = "SHA-256";
 const AES_KEY_LENGTH = 256; // bits (128, 192, or 256)
 const AES_ALGORITHM_NAME = "AES-GCM";
