@@ -16,6 +16,7 @@ export const AuthProvider = ({ children }) => {
 	});
 	const [validEmail, setValidEmail] = useState(false);
 	const [validPasswd, setValidPasswd] = useState(false);
+	const [masterKey, setMasterKey] = useState("");
 
 	return (
 		<AuthContext.Provider
@@ -35,6 +36,8 @@ export const AuthProvider = ({ children }) => {
 				setUserRegister,
 				validPasswd,
 				setValidPasswd,
+				masterKey,
+				setMasterKey,
 			}}
 		>
 			{children}
