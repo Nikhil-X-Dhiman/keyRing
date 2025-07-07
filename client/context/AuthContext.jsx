@@ -13,6 +13,7 @@ export const AuthProvider = ({ children }) => {
 		email: "",
 		name: "",
 		passwd: "",
+		masterSalt: "",
 	});
 	const [validEmail, setValidEmail] = useState(false);
 	const [validPasswd, setValidPasswd] = useState(false);

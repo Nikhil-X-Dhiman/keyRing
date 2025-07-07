@@ -60,9 +60,10 @@ export const handleLogin = async (req, res) => {
 		}
 	} catch (error) {
 		console.error("handleLogin: ", error);
-		return res
-			.status(400)
-			.json({ success: false, msg: "Error Occured: Authentication" });
+		return res.status(400).json({
+			success: false,
+			msg: "Error Occured: Authentication",
+		});
 	}
 	// payload created for access token
 	const payload = {
@@ -85,6 +86,7 @@ export const handleLogin = async (req, res) => {
 		});
 	}
 	// insert refresh token into db to track user session
+	// TODO: check for already using refresh token for current user
 	await insertRefreshToken(refreshToken, payload?.id);
 
 	res.cookie("refresh_token", refreshToken, {
@@ -98,6 +100,7 @@ export const handleLogin = async (req, res) => {
 		success: true,
 		access_token: accessToken,
 		publicKey: publicKey,
+		master_salt: result?.auth?.salt,
 		msg: "Log In Successful!!!",
 	});
 };
@@ -105,9 +108,13 @@ export const handleLogin = async (req, res) => {
 // Register by Creating a new User Account
 export const handleRegister = async (req, res) => {
 	// extract fields from request body
-	const { email, name, passwd } = req.body;
+	console.log("Register Initialised");
+
+	const { email, name, passwd, masterSalt } = req.body.payload;
+	console.log(req.body);
+
 	// check if all fields are present
-	if (!email || !name || !passwd) {
+	if (!email || !name || !passwd || !masterSalt) {
 		return res.status(400).json({
 			success: false,
 			msg: "Missing Required Fields!!!",
@@ -123,16 +130,26 @@ export const handleRegister = async (req, res) => {
 			msg: "Proper Format of the Fields are Required!!!",
 		});
 	}
+	console.log("Check 1: ", email, name, passwd, masterSalt);
+	console.log("Register Check Complete");
+
 	// Create hash from passwd
 	const hashPasswd = await genPasswdHash(passwd);
 	// Insert User Credential into db
-	const result = await insertUserByCredential(email, name, hashPasswd);
+	const result = await insertUserByCredential(
+		email,
+		name,
+		hashPasswd,
+		masterSalt
+	);
+	console.log("Check 2: ", result);
 	if (result) {
 		// success to register new user
 		return res
 			.status(201)
 			.json({ success: true, msg: "User Account is Created!!!" });
 	}
+	console.log("Check 2");
 	// failed to register new user
 	return res.status(409).json({
 		success: false,
@@ -152,6 +169,62 @@ export const handleGetPublicKey = async (req, res) => {
 		return res
 			.status(404)
 			.json({ success: false, msg: "Public Key Not Available!!!" });
+	}
+};
+
+export const handleGetMasterSalt = async (req, res) => {
+	if (!req.user) {
+		return res
+			.status(400)
+			.json({ success: false, msg: "You are not Logged In!!!" });
+	}
+	console.log("Getting Salt Initiated");
+
+	const { email, passwd } = req.body;
+	console.log("Email & passwd: ", email, passwd);
+
+	if (!email || !passwd) {
+		// checks if email or password is present
+		return res.status(400).json({
+			success: false,
+			msg: "Email or Password is required!!!",
+		});
+	}
+	const { success, data } = emailSchema.safeParse(email);
+	if (!success) {
+		// checks if the format of the email is correct
+		return res.status(400).json({
+			success: false,
+			msg: "Legal format of Email or Password is required!!!",
+		});
+	}
+
+	let result;
+	try {
+		// get user details from db
+		[result] = await getUserByCredentials(email, passwd);
+
+		// compare passwd with its hash from db
+		let passwdVerification = result
+			? verifyPasswd(passwd, result?.auth?.passwordHash)
+			: false;
+		if (!passwdVerification || !result) {
+			// no email found or passwd is incorrect
+			return res
+				.status(403)
+				.json({ success: false, msg: "Email or Password is Incorrect!!!" });
+		}
+		res.status(200).json({
+			success: true,
+			msg: "Salt is Sent!!!",
+			master_salt: result?.auth?.salt,
+		});
+	} catch (error) {
+		console.error("handleLogin: ", error);
+		return res.status(400).json({
+			success: false,
+			msg: "Error Occured: Salt Retrival Failed",
+		});
 	}
 };
 

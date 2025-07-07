@@ -44,6 +44,7 @@ export const userAuthTable = mysqlTable("auth", {
 	resetPasswordTokenExpiry: timestamp("reset_password_token_expiry", {
 		withTimezone: true,
 	}),
+	salt: varchar("salt", { length: 255 }).unique().notNull(),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updateAt: timestamp("updated_at")
 		.defaultNow()

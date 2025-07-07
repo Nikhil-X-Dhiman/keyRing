@@ -8,6 +8,10 @@ import { instance } from "../api/axios";
 import PasswdVisibleOnIcon from "../public/visibility.svg?react";
 import PasswdVisibleOffIcon from "../public/visibility-off.svg?react";
 import CrossIcon from "../public/cross.svg?react";
+import {
+	bufferToBase64,
+	generateCryptoRandomValue,
+} from "../hooks/useCrypto.js";
 
 export const Register = () => {
 	const navigate = useNavigate();
@@ -112,26 +116,32 @@ export const Register = () => {
 
 	const handleRegisterForm = async (e) => {
 		e.preventDefault();
+
 		if (validEmail && validName && validPasswd && !confirmPasswdReq) {
 			try {
-				const response = await instance.post(
-					"/api/v1/auth/register",
-					userRegister
-				);
+				const masterSalt = await bufferToBase64(generateCryptoRandomValue(16));
+				console.log("Generated MasterSalt: ", masterSalt);
+				const payload = { ...userRegister, masterSalt };
+				const response = await instance.post("/api/v1/auth/register", {
+					payload,
+				});
+				setUserRegister((prev) => ({ ...prev, masterSalt }));
 				if (response.status === 201) {
 					setUserRegister((prev) => ({ ...prev, passwd: "" }));
 					navigate("/login/email", { replace: true });
 				}
 			} catch (error) {
 				if (!error?.response) {
-					console.error("No Server Response!!!");
+					console.error("No Server Response!!!", error);
 				} else {
-					if (error.response.status === 409) {
-						setErrorMsg("Email Already Exist!!!");
+					if (error.response?.status === 409) {
+						setErrorMsg("Email Already Exist Or User Creation Failed!!!");
 					} else {
-						console.error(`Server Response: ${error.response.status}`);
-						// console.error("Something Went Wrong!!!");
+						console.error(
+							`Server Response: ${error.response?.status}, ${error.response?.data?.msg}`
+						);
 						setErrorMsg("Something Went Wrong!!!");
+						// TODO: Create style for Error Msg
 					}
 				}
 			}

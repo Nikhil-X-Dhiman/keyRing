@@ -9,7 +9,7 @@ import WaveIcon from "../public/wave.svg?react";
 import PasswdVisibleOnIcon from "../public/visibility.svg?react";
 import PasswdVisibleOffIcon from "../public/visibility-off.svg?react";
 import CrossIcon from "../public/cross.svg?react";
-import { useCrypto } from "../hooks/useCrypto.js";
+import { base64ToBuffer, useCrypto } from "../hooks/useCrypto.js";
 
 export const LoginPasswd = () => {
 	const PASSWD_REGEX =
@@ -38,7 +38,7 @@ export const LoginPasswd = () => {
 		setPublicKey,
 	} = useAuth();
 
-	const { generateCryptoKey } = useCrypto();
+	const { initialiseCrypto } = useCrypto();
 
 	useEffect(() => {
 		passwdRef.current?.focus();
@@ -98,8 +98,9 @@ export const LoginPasswd = () => {
 					userLogin
 				);
 
-				const access_token = response.data.access_token;
-				const masterSalt = response.data.master_salt;
+				const access_token = response.data?.access_token;
+				const masterSalt = base64ToBuffer(response.data?.master_salt);
+
 				if (response.status === 200) {
 					setAuth((prev) => ({ ...prev, accessToken: access_token }));
 					console.log("Access Token: ", access_token);
@@ -108,7 +109,7 @@ export const LoginPasswd = () => {
 
 					if (isValid) {
 						setAuth((prev) => ({ ...prev, user: payload }));
-						generateCryptoKey(userLogin.passwd, masterSalt);
+						await initialiseCrypto(userLogin.passwd, masterSalt);
 						setUserLogin((prev) => ({ ...prev, passwd: "" }));
 						localStorage.setItem("isLogged", JSON.stringify(true));
 						navigate(from, { replace: true });

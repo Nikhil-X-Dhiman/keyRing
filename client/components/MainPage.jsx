@@ -50,7 +50,7 @@ export const MainPage = () => {
 	const searchRef = useRef();
 	const areaRef = useRef();
 	const navigate = useNavigate();
-	const { setAuth } = useAuth();
+	const { auth, setAuth } = useAuth();
 	const { clearSessionKey, handleEncrypt, handleDecrypt } = useCrypto();
 	const privateInstance = usePrivateInstance();
 
@@ -72,39 +72,47 @@ export const MainPage = () => {
 	}, [itemIndex, mode]);
 
 	useEffect(() => {
+		if (!auth.masterKey) {
+			console.log("MainPage: Master Key not available, redirecting to /locked");
+			navigate("/locked", { replace: true });
+			return;
+		}
 		// TODO: Add created and updated time
 		const getAllItems = async () => {
 			try {
 				const response = await privateInstance.get("/api/v1/all");
 				const { success, result } = response.data;
 				if (success) {
-					const updatedList = result.map((item) => {
+					const updatedListPromises = result.map(async (item) => {
 						const { itemID, name, user, passwd, uri, note, fav, trash } = item;
 						// Decrypt Data upon arrival
 						return {
 							id: itemID,
-							name: handleDecrypt(JSON.parse(name)),
-							user: handleDecrypt(JSON.parse(user)),
-							passwd: handleDecrypt(JSON.parse(passwd)),
-							uri: handleDecrypt(JSON.parse(uri)),
-							note: handleDecrypt(JSON.parse(note)),
-							favourite: JSON.parse(handleDecrypt(JSON.parse(fav))),
-							trash: handleDecrypt(JSON.parse(trash)),
+							name: await handleDecrypt(JSON.parse(name)),
+							user: await handleDecrypt(JSON.parse(user)),
+							passwd: await handleDecrypt(JSON.parse(passwd)),
+							uri: JSON.parse(await handleDecrypt(JSON.parse(uri))),
+							note: await handleDecrypt(JSON.parse(note)),
+							favourite: await handleDecrypt(JSON.parse(fav)),
+							trash,
 						};
 					});
+					const updatedList = await Promise.all(updatedListPromises);
 					setPasswdList(updatedList);
 				}
 			} catch (error) {
-				console.error(error.response.data.msg);
+				console.error(error.response?.data?.msg, error);
 			}
 		};
 		getAllItems();
-	}, []);
+	}, [auth.masterKey]);
 
 	const filteredList = passwdList.filter((item) => {
+		console.log("item: ", item);
+
 		const matchesSearch =
-			item.name.toLowerCase().includes(searchItem.toLowerCase()) ||
-			item.user.toLowerCase().includes(searchItem.toLowerCase());
+			item?.name?.toLowerCase().includes(searchItem?.toLowerCase()) ||
+			item?.user?.toLowerCase().includes(searchItem?.toLowerCase());
 
 		const matchesMode =
 			(pageMode === "All" && item.trash === false) || // Only show if not in trash for "View"
@@ -216,8 +224,7 @@ export const MainPage = () => {
 			const itemID = passwdList[itemIndex].id;
 			try {
 				const response = await privateInstance.patch(`/api/v1/item/${itemID}`, {
-					trash: JSON.stringify(handleEncrypt(!passwdList[itemIndex].trash)),
-					// trash: !passwdList[itemIndex].trash,
+					trash: !passwdList[itemIndex].trash,
 				});
 				if (response.status === 200 && response.data.success) {
 					setPasswdList((prev) => {
@@ -294,14 +301,25 @@ export const MainPage = () => {
 		setItemIndex(null);
 	};
 
-	const handleRestore = () => {
-		setPasswdList((prev) => {
-			const updatedList = [...prev];
-			const item = updatedList[itemIndex];
-			const updatedItem = { ...item, trash: false };
-			updatedList[itemIndex] = updatedItem;
-			return updatedList;
-		});
+	const handleRestore = async () => {
+		const itemID = passwdList[itemIndex].id;
+		try {
+			const response = await privateInstance.patch(`/api/v1/item/${itemID}`, {
+				trash: false,
+			});
+			if (response.status === 200 && response.data.success) {
+				setPasswdList((prev) => {
+					const updatedList = [...prev];
+					const item = updatedList[itemIndex];
+					const updatedItem = { ...item, trash: false };
+					updatedList[itemIndex] = updatedItem;
+					return updatedList;
+				});
+			}
+		} catch (error) {
+			console.error("Restore Failed: ", error, error?.response?.data?.msg) ||
+				"Unknown Error!!!";
+		}
 	};
 
 	const handleCancel = () => {
@@ -332,14 +350,16 @@ export const MainPage = () => {
 			const uriString = JSON.stringify(focusItem.uri);
 			const encryptedFocusItem = {
 				id: focusItem.id,
-				name: JSON.stringify(handleEncrypt(focusItem.name)),
-				user: JSON.stringify(handleEncrypt(focusItem.user)),
-				passwd: JSON.stringify(handleEncrypt(focusItem.passwd)),
-				uri: JSON.stringify(handleEncrypt(uriString)),
-				note: JSON.stringify(handleEncrypt(focusItem.note)),
-				favourite: JSON.stringify(handleEncrypt(focusItem.favourite)),
-				trash: JSON.stringify(handleEncrypt(focusItem.trash)),
+				name: JSON.stringify(await handleEncrypt(focusItem.name)),
+				user: JSON.stringify(await handleEncrypt(focusItem.user)),
+				passwd: JSON.stringify(await handleEncrypt(focusItem.passwd)),
+				uri: JSON.stringify(await handleEncrypt(uriString)),
+				note: JSON.stringify(await handleEncrypt(focusItem.note)),
+				favourite: JSON.stringify(await handleEncrypt(focusItem.favourite)),
+				trash: focusItem.trash,
 			};
+			console.log("Encrypted Data to upload: ", encryptedFocusItem);
+
 			try {
 				const response = await privateInstance.put(
 					`/api/v1/item/${itemID}`,
@@ -366,16 +386,15 @@ export const MainPage = () => {
 			const uriString = JSON.stringify(focusItem.uri);
 			const encryptedFocusItem = {
 				id: itemID,
-				name: JSON.stringify(handleEncrypt(focusItem.name)),
-				user: JSON.stringify(handleEncrypt(focusItem.user)),
-				passwd: JSON.stringify(handleEncrypt(focusItem.passwd)),
-				uri: JSON.stringify(handleEncrypt(uriString)),
-				note: JSON.stringify(handleEncrypt(focusItem.note)),
-				favourite: JSON.stringify(handleEncrypt(focusItem.favourite)),
-				trash: JSON.stringify(handleEncrypt(focusItem.trash)),
+				name: JSON.stringify(await handleEncrypt(focusItem.name)),
+				user: JSON.stringify(await handleEncrypt(focusItem.user)),
+				passwd: JSON.stringify(await handleEncrypt(focusItem.passwd)),
+				uri: JSON.stringify(await handleEncrypt(uriString)),
+				note: JSON.stringify(await handleEncrypt(focusItem.note)),
+				favourite: JSON.stringify(await handleEncrypt(focusItem.favourite)),
+				trash: focusItem.trash,
 			};
 			const item = { ...focusItem, id: itemID };
-			console.log("item: ", encryptedFocusItem);
 			try {
 				const response = await privateInstance.post(
 					`/api/v1/item/${itemID}`,
@@ -590,18 +609,18 @@ export const MainPage = () => {
 				} h-full min-h-0 flex flex-col justify-between border-1 border-slate-950`}
 			>
 				{mode === null && (
-					<div className="text-slate-400 flex gap-x-2 justify-center h-full items-center relative bottom-[7%]">
-						<KeyRingIcon className="w-17 h-17" />
-						<span className="font-thin text-5xl">
+					<div className="text-slate-400 flex gap-x-2 justify-center items-center h-full ">
+						<KeyRingIcon className="w-17 h-17 relative bottom-[7%]" />
+						<span className="font-thin text-5xl relative bottom-[7%]">
 							<span className="font-bold">key</span>Ring
 						</span>
 					</div>
 				)}
-				<div className="px-7 overflow-y-auto">
+				<div className="px-7 overflow-y-auto pb-2">
 					{/* Display view of passwd and edition of them here */}
 					{(mode === "View" || mode === "Edit" || mode === "Add") && (
 						<>
-							<p className="text-slate-300 mb-1 mt-4">
+							<div className="text-slate-300 mb-1 mt-4">
 								{mode === "View" ? (
 									<h3>ITEM INFORMATION</h3>
 								) : mode === "Edit" ? (
@@ -609,7 +628,7 @@ export const MainPage = () => {
 								) : mode === "Add" ? (
 									<h3>ADD ITEM</h3>
 								) : null}
-							</p>
+							</div>
 
 							<div className="bg-slate-700 flex flex-col">
 								{(mode === "View" && passwdList[itemIndex]?.name) ||
@@ -728,7 +747,6 @@ export const MainPage = () => {
 													className="text-2xl cursor-pointer opacity-70 duration-200"
 													title="Toggle Visibility"
 													onClick={handlePassReveal}
-													onmou
 												/>
 											)}
 
@@ -856,7 +874,7 @@ export const MainPage = () => {
 										autoCapitalize="off"
 										autoCorrect="off"
 										className={`${
-											mode === "View" ? "focus:outline-none" : ""
+											mode === "View" ? "focus:outline-none" : "cursor-text"
 										} cursor-default w-full bg-slate-700 py-1 px-3`}
 									></textarea>
 								</div>
@@ -878,7 +896,7 @@ export const MainPage = () => {
 											mode === "Edit" || mode === "Add"
 												? "focus:outline-none"
 												: ""
-										} cursor-default w-full bg-slate-700 p-2`}
+										} cursor-text w-full bg-slate-700 p-2`}
 									></textarea>
 								</div>
 							) : null}
@@ -923,10 +941,9 @@ export const MainPage = () => {
 					} border-1 border-slate-950`}
 				>
 					{mode === "View" && (
-						// TODO: Refactor Code here
 						<div className="flex justify-between">
 							<div className="flex gap-4">
-								{pageMode === "Trash" ? null : (
+								{passwdList[itemIndex].trash === true ? null : (
 									<button
 										className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
 										title="Edit"
@@ -935,7 +952,7 @@ export const MainPage = () => {
 										<MdModeEdit className="text-blue-400 text-xl" />
 									</button>
 								)}
-								{pageMode === "Trash" && (
+								{passwdList[itemIndex].trash === true && (
 									<button
 										className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
 										title="Restore"

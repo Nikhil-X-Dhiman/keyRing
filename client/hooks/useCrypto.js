@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import { useAuth } from "./useAuth";
 import {
 	CryptoBytesRequirement,
@@ -22,7 +21,7 @@ export const generateCryptoRandomValue = (numBytes) => {
 };
 
 // Convert ArrayBuffer to Base64 String
-const bufferToBase64 = (buffer) => {
+export const bufferToBase64 = (buffer) => {
 	const bytes = new Uint8Array(buffer);
 	let binaryString = "";
 	bytes.forEach((byte) => {
@@ -32,7 +31,7 @@ const bufferToBase64 = (buffer) => {
 };
 
 // Convert Base64 to ArrayBuffer
-const base64ToBuffer = (base64) => {
+export const base64ToBuffer = (base64) => {
 	const binaryString = atob(base64);
 	const len = binaryString.length;
 	const bytes = new Uint8Array(len);
@@ -73,18 +72,20 @@ const deriveKey = async (passwd, salt) => {
 };
 
 export const useCrypto = () => {
-	const { userLogin, setUserLogin } = useAuth();
-	const masterKeyRef = useRef(null);
+	const { userLogin, setUserLogin, auth, setAuth } = useAuth();
+	// const masterKeyRef = useRef(null);
 	// Encrypt the data using the master key
 
-	const generateCryptoKey = async (masterPasswd, masterSalt) => {
+	const initialiseCrypto = async (masterPasswd, masterSalt) => {
 		if (!masterPasswd || !masterSalt) {
 			throw new Error("Error: Password or Salt Not Provided.");
 		}
 		try {
 			// const sessionSalt = generateCryptoRandomValue(SALT_LENGTH_BYTES);
 			const masterKey = await deriveKey(masterPasswd, masterSalt);
-			masterKeyRef.current = masterKey;
+			// masterKeyRef.current = masterKey;
+			setAuth((prev) => ({ ...prev, masterKey }));
+
 			console.log("Master Key Created.");
 
 			return true;
@@ -99,21 +100,36 @@ export const useCrypto = () => {
 	};
 
 	const handleEncrypt = async (plainData) => {
-		if (!masterKeyRef.current || !plainData) {
-			console.error("Encryption Error: No Master Key or Data to encrypt.");
-			throw new Error("Encryption Failed: Data or Key not found.");
+		// console.log("inside encrypt: ", plainData, masterKeyRef.current);
+		console.log("inside encrypt: ", plainData, auth.masterKey);
+
+		// if (!masterKeyRef.current) {
+		if (!auth.masterKey) {
+			console.error("Encryption Error: No Master Key to encrypt.");
+			throw new Error("Encryption Failed: Key not found.");
 		}
+		if (!plainData) {
+			console.log("Not Data To Encrypt");
+
+			return null;
+		}
+		console.log("pre Encryption: ", plainData);
+
 		try {
 			// random IV for AES_GCM (12 Bytes)
 			const iv = generateCryptoRandomValue(IV_LENGTH_BYTES);
 			// convert to buffer
 			const dataBytes = new TextEncoder().encode(plainData);
 			// encrypt the data here
+			console.log("Pre Encryption Plain Text: ", plainData);
+
 			const encryptedBuffer = await window.crypto.subtle.encrypt(
 				{ name: AES_ALGORITHM_NAME, iv },
-				masterKeyRef.current,
+				// masterKeyRef.current,
+				auth.masterKey,
 				dataBytes
 			);
+			console.log("Post Encryption Encrypted Buffer: ", encryptedBuffer);
 			// prepare data for transmission
 			const payload = {
 				encryptedData: bufferToBase64(encryptedBuffer),
@@ -128,10 +144,14 @@ export const useCrypto = () => {
 	};
 	// Decrypt the Data from the server using master key
 	const handleDecrypt = async (payload) => {
+		if (!payload?.encryptedData) {
+			return null;
+		}
 		if (
-			!masterKeyRef.current ||
+			// !masterKeyRef.current ||
+			!auth.masterKey ||
 			!payload ||
-			payload.encryptedData ||
+			!payload.encryptedData ||
 			!payload.iv
 		) {
 			throw new Error("Error: Decrypt Failed, Requirements are not met.");
@@ -144,13 +164,15 @@ export const useCrypto = () => {
 			// Decrypt Data here
 			const decryptedBuffer = await window.crypto.subtle.decrypt(
 				{ name: AES_ALGORITHM_NAME, iv },
-				masterKeyRef.current,
+				// masterKeyRef.current,
+				auth.masterKey,
 				encryptedData
 			);
 
 			// convert buffer to string
 			const plainData = new TextDecoder().decode(decryptedBuffer);
 			console.log("Decrypted Data: ", plainData);
+			return plainData;
 		} catch (error) {
 			console.error("Decryption Failed!!!");
 			if (error instanceof UnmatchedPayloadParams) {
@@ -160,11 +182,11 @@ export const useCrypto = () => {
 	};
 
 	const clearSessionKey = () => {
-		masterKeyRef.current = null;
+		setAuth((prev) => ({ ...prev, masterKey: "" }));
 		console.log("Session Key Cleared");
 	};
 
 	// generateSessionKey: call when signing in
 	// clearSessionKey: call when signing out
-	return { generateCryptoKey, handleEncrypt, handleDecrypt, clearSessionKey };
+	return { initialiseCrypto, handleEncrypt, handleDecrypt, clearSessionKey };
 };

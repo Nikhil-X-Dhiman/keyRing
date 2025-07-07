@@ -1,5 +1,6 @@
 import e from "express";
 import {
+	handleGetMasterSalt,
 	handleGetPublicKey,
 	handleLogin,
 	handleLogout,
@@ -14,6 +15,8 @@ router.route("/login").post(handleLogin);
 router.route("/register").post(handleRegister);
 
 router.route("/public").get(handleGetPublicKey);
+
+router.route("/salt").post(handleGetMasterSalt);
 
 router.route("/refresh").get(handleRefreshToken);
 

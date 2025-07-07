@@ -25,7 +25,7 @@ export const getUserByID = async (id) => {
 	}
 };
 
-export const insertUserByCredential = async (email, name, passwd) => {
+export const insertUserByCredential = async (email, name, passwd, salt) => {
 	try {
 		// insert email & name to user table
 		const [query1] = await db
@@ -35,7 +35,7 @@ export const insertUserByCredential = async (email, name, passwd) => {
 		// insert passwd hash into user auth table and primary key from prev. insertion from query 1
 		const [query2] = await db
 			.insert(userAuthTable)
-			.values({ userID: query1.id, passwordHash: passwd })
+			.values({ userID: query1.id, passwordHash: passwd, salt })
 			.$returningId();
 
 		return query2;

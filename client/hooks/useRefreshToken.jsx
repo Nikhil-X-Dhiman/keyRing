@@ -4,7 +4,7 @@ import { useAuth } from "./useAuth";
 import { useVerifyAccessToken } from "./useVerifyJWT";
 
 export const useRefreshToken = () => {
-	const { setAuth, setPublicKey } = useAuth();
+	const { setAuth, setPublicKey, setUserLogin } = useAuth();
 	const verifyToken = useVerifyAccessToken();
 
 	const refreshToken = async () => {
@@ -18,6 +18,7 @@ export const useRefreshToken = () => {
 			const { isValid, payload } = await verifyToken(accessToken, publicKey);
 			if (isValid) {
 				setAuth({ accessToken, user: payload });
+				setUserLogin((prev) => ({ ...prev, email: payload.email }));
 			}
 			return accessToken;
 		} catch (error) {
