@@ -1,17 +1,21 @@
 import { useState } from "react";
+import { PiEyeDuotone, PiEyeSlash } from "react-icons/pi";
+import { ImCancelCircle } from "react-icons/im";
 
-export const InputText = (
+export const InputField = (
 	{
+		label,
 		type,
 		title,
 		name,
+		id,
 		value,
+		placeholder,
 		onchange,
-		onclick,
 		error = "",
 		required = false,
 		disabled = false,
-		autofocus = false,
+		autoFocus = false,
 		showToggle = false,
 		className = "",
 		...props
@@ -26,5 +30,53 @@ export const InputText = (
 		setVisible((prev) => !prev);
 	};
 
-	return <input />;
+	return (
+		<fieldset
+			className={`w-full px-2 pb-2 mb-3 rounded-md border-1 relative ${
+				error && value ? "border-red-500" : "border-gray-400"
+			} focus-within:border-blue-500 hover:border-blue-300
+	focus-within:hover:border-blue-500 transition-all`}
+		>
+			<legend className="text-[.8rem] text-gray-400">
+				{label} {required && <span>(required)</span>}
+			</legend>
+			<input
+				type={showPasswdToggle && visible ? "text" : type}
+				name={name}
+				title={title}
+				id={id}
+				ref={ref}
+				value={value}
+				placeholder={placeholder}
+				onchange={onchange}
+				disabled={disabled}
+				required={required}
+				autoFocus={autoFocus}
+				className={`w-full bg-transparent border-0 focus:outline-0 ${
+					disabled ? "cursor-not-allowed text-gray-500" : ""
+				} ${className}`}
+				{...props}
+			/>
+			{showPasswdToggle && (
+				<button
+					onClick={handleToggleVisibility}
+					className="absolute right-4 top-1 cursor-pointer"
+				>
+					{visible ? (
+						<PiEyeSlash className="text-2xl cursor-pointer opacity-70  duration-200" />
+					) : (
+						<PiEyeDuotone className="text-2xl cursor-pointer opacity-70 duration-200" />
+					)}
+				</button>
+			)}
+			{error && (
+				<div className="flex items-center gap-1 mt-1.5 text-red-500 text-[.75rem] font-semibold">
+					<ImCancelCircle className="w-3 h-3 shrink-0 relative top-1" />
+					<p>{error}</p>
+				</div>
+			)}
+		</fieldset>
+	);
 };
+
+InputField.displayName = "InputField";
