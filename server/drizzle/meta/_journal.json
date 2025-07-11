@@ -5,43 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1748000154484,
-      "tag": "0000_nosy_grey_gargoyle",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1748151555861,
-      "tag": "0001_bright_lord_hawal",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1750874449810,
-      "tag": "0002_bumpy_steve_rogers",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1750909963780,
-      "tag": "0003_loving_meltdown",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1750910095655,
-      "tag": "0004_pale_queen_noir",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "5",
-      "when": 1751822929584,
-      "tag": "0005_curvy_onslaught",
+      "when": 1752181218766,
+      "tag": "0000_wonderful_lilandra",
       "breakpoints": true
     }
   ]

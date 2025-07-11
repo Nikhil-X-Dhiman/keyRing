@@ -1,1 +1,0 @@
-ALTER TABLE `refresh_token` MODIFY COLUMN `token` varchar(500) NOT NULL;

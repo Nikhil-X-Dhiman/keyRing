@@ -1,1 +1,0 @@
-ALTER TABLE `login` RENAME COLUMN `notes` TO `note`;

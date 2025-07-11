@@ -1,12 +1,14 @@
 CREATE TABLE `login` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`user_id` int,
+	`item_id` varchar(255) NOT NULL,
 	`name` varchar(255),
 	`username` varchar(255),
 	`password` varchar(255),
 	`uri` json,
 	`favorite` boolean NOT NULL DEFAULT false,
-	`notes` text,
+	`note` text,
+	`trash` boolean NOT NULL DEFAULT false,
 	`created_at` timestamp NOT NULL DEFAULT (now()),
 	`updated_at` timestamp NOT NULL DEFAULT (now()),
 	CONSTRAINT `login_id` PRIMARY KEY(`id`)
@@ -15,7 +17,7 @@ CREATE TABLE `login` (
 CREATE TABLE `refresh_token` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`user_id` int,
-	`token` varchar(255) NOT NULL,
+	`token` varchar(500) NOT NULL,
 	`token_expiry` timestamp,
 	`ip_address` varchar(50),
 	`user_agent` varchar(255),
@@ -34,12 +36,14 @@ CREATE TABLE `auth` (
 	`verify_token_expiry` timestamp,
 	`reset_password_token` varchar(255),
 	`reset_password_token_expiry` timestamp,
+	`salt` varchar(255) NOT NULL,
 	`created_at` timestamp NOT NULL DEFAULT (now()),
 	`updated_at` timestamp NOT NULL DEFAULT (now()),
 	CONSTRAINT `auth_id` PRIMARY KEY(`id`),
 	CONSTRAINT `auth_password_hash_unique` UNIQUE(`password_hash`),
 	CONSTRAINT `auth_verify_token_unique` UNIQUE(`verify_token`),
-	CONSTRAINT `auth_reset_password_token_unique` UNIQUE(`reset_password_token`)
+	CONSTRAINT `auth_reset_password_token_unique` UNIQUE(`reset_password_token`),
+	CONSTRAINT `auth_salt_unique` UNIQUE(`salt`)
 );
 --> statement-breakpoint
 CREATE TABLE `users` (

@@ -1,1 +1,0 @@
-ALTER TABLE `login` ADD `trash` boolean DEFAULT false NOT NULL;

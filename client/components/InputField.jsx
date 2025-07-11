@@ -60,12 +60,12 @@ export const InputField = (
 			{showPasswdToggle && (
 				<button
 					onClick={handleToggleVisibility}
-					className="absolute right-4 top-1 cursor-pointer"
+					className="absolute right-4 top-[2px] cursor-pointer"
 				>
 					{visible ? (
-						<PiEyeSlash className="text-2xl cursor-pointer opacity-70  duration-200" />
+						<PiEyeSlash className="text-2xl cursor-pointer opacity-70  duration-200 w-5 h-5" />
 					) : (
-						<PiEyeDuotone className="text-2xl cursor-pointer opacity-70 duration-200" />
+						<PiEyeDuotone className="text-2xl cursor-pointer opacity-70 duration-200 w-5 h-5" />
 					)}
 				</button>
 			)}

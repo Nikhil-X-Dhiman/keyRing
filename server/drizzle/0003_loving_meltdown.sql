@@ -1,1 +1,0 @@
-ALTER TABLE `login` ADD `item_id` varchar(255) NOT NULL;
