@@ -11,7 +11,7 @@ export const InputField = (
 		id,
 		value,
 		placeholder,
-		onchange,
+		onChange,
 		error = "",
 		required = false,
 		disabled = false,
@@ -48,7 +48,7 @@ export const InputField = (
 				ref={ref}
 				value={value}
 				placeholder={placeholder}
-				onchange={onchange}
+				onChange={onChange}
 				disabled={disabled}
 				required={required}
 				autoFocus={autoFocus}
