@@ -73,7 +73,7 @@ export const InputField = (
 					)}
 				</button>
 			)}
-			{error && (
+			{error && value && (
 				<div className="flex items-center gap-1 mt-1.5 text-red-500 text-[.75rem] font-semibold relative">
 					<ImCancelCircle className="w-3 h-3 shrink-0 self-start" />
 					<p className="relative bottom-0.5">{error}</p>

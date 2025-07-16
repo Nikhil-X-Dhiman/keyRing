@@ -10,12 +10,12 @@ import { useLocation, useNavigate } from "react-router";
 import { InputField } from "../InputField";
 import { Button } from "../Button";
 import { ErrorModal } from "../ErrorModal";
+import { AuthFormHeader } from "../AuthFormHeader";
 export const UnLock = () => {
 	const {
 		auth,
 		setAuth,
 		userLogin,
-		validEmail,
 		validPasswd,
 		setUserLogin,
 		setValidPasswd,
@@ -25,7 +25,6 @@ export const UnLock = () => {
 	const privateInstance = usePrivateInstance();
 	const [modalError, setModalError] = useState("");
 	const [inputError, setInputError] = useState("");
-	const [touched, setTouched] = useState(false);
 	const passwdRef = useRef(null);
 
 	const location = useLocation();
@@ -93,8 +92,6 @@ export const UnLock = () => {
 
 	const handleSubmitBtn = async (e) => {
 		e.preventDefault();
-		// setIsLoading(true);
-		setTouched(true);
 		if (!userLogin.passwd) {
 			setModalError("Password Field Cannot be Empty.");
 		}
@@ -112,8 +109,6 @@ export const UnLock = () => {
 					await initialiseCrypto(userLogin.passwd, masterSalt);
 					console.log("UnLock: initialiseCrypto completed.");
 					setUserLogin((prev) => ({ ...prev, passwd: "" }));
-					setTouched(false);
-					// navigate(from, { replace: true });
 				}
 			} catch (error) {
 				if (!error?.response) {
@@ -164,11 +159,11 @@ export const UnLock = () => {
 	return (
 		<main className="flex flex-col justify-center items-center pt-15 select-none">
 			<ErrorModal isOpen={modalError} message={modalError} onClose={onClose} />
-			<figure className="flex flex-col items-center gap-y-2 p-2 select-none text-white">
-				<LockIcon className="w-26 h-26 text-light-grey scale-x-[-1]" />
-				<figcaption>Your Vault is Locked</figcaption>
-			</figure>
+
+			<AuthFormHeader title="Your Vault is Locked" Icon={LockIcon} />
+
 			{userLogin.email}
+
 			<form className="flex flex-col items-center gap-y-1 border-1 border-gray-400 rounded-2xl m-5 p-7  bg-slate-800 w-md mt-7">
 				<InputField
 					label="Password"

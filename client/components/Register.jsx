@@ -5,23 +5,21 @@ import { Link, useNavigate } from "react-router";
 import { useAuth } from "../hooks/useAuth.js";
 import { emailSchema, nameSchema, passwdSchema } from "../utils/authSchema";
 import { instance } from "../api/axios";
-import PasswdVisibleOnIcon from "../public/visibility.svg?react";
-import PasswdVisibleOffIcon from "../public/visibility-off.svg?react";
-import CrossIcon from "../public/cross.svg?react";
 import {
 	bufferToBase64,
 	generateCryptoRandomValue,
 } from "../hooks/useCrypto.js";
+import { ErrorModal } from "./ErrorModal.jsx";
+import { InputField } from "./InputField.jsx";
+import { Button } from "./Button.jsx";
+import { AuthFormHeader } from "./AuthFormHeader.jsx";
 
 export const Register = () => {
 	const navigate = useNavigate();
 	const emailRef = useRef();
-	const nameRef = useRef();
-	const passwdRef = useRef();
-	const confirmRef = useRef();
 	const { userRegister, setUserRegister } = useAuth();
 
-	const [errorMsg, setErrorMsg] = useState("");
+	const [pageError, setPageError] = useState("");
 	const [passwdCompare, setPasswdCompare] = useState({
 		passwd: "",
 		confirmPasswd: "",
@@ -35,9 +33,6 @@ export const Register = () => {
 	const [nameReq, setNameReq] = useState("");
 	const [passwdReq, setpasswdReq] = useState("");
 	const [confirmPasswdReq, setconfirmPasswdReq] = useState("");
-
-	const [showPasswd, setShowPasswd] = useState(false);
-	const [showConfirmPasswd, setShowConfirmPasswd] = useState(false);
 
 	useEffect(() => {
 		emailRef.current?.focus();
@@ -133,220 +128,97 @@ export const Register = () => {
 			} catch (error) {
 				if (!error?.response) {
 					console.error("No Server Response!!!", error);
+					setPageError("No Server Response");
 				} else {
 					if (error.response?.status === 409) {
-						setErrorMsg("Email Already Exist Or User Creation Failed!!!");
+						setPageError("Email Already Exist Or User Creation Failed!!!");
 					} else {
 						console.error(
 							`Server Response: ${error.response?.status}, ${error.response?.data?.msg}`
 						);
-						setErrorMsg("Something Went Wrong!!!");
-						// TODO: Create style for Error Msg
+						setPageError("Something Went Wrong!!!");
 					}
 				}
 			}
+		} else {
+			setPageError("Requirements are not met in Registration Form");
 		}
 	};
 
-	const handlePasswdVisibility = (e) => {
-		e.preventDefault();
-		setShowPasswd((prev) => !prev);
-	};
-
-	const handleConfirmPasswdVisibility = (e) => {
-		e.preventDefault();
-		setShowConfirmPasswd((prev) => !prev);
+	const onClose = () => {
+		setPageError("");
 	};
 
 	return (
 		<>
 			<main className="flex flex-col justify-center items-center pt-15 select-none">
-				<figure className="flex flex-col items-center gap-y-2 p-2 select-none">
-					<img src="/add-user.png" alt="add-user-img" className="w-23 h-23" />
-					<figcaption className="text-xl font-semibold mb-2">
-						Create account
-					</figcaption>
-				</figure>
-				{errorMsg}
+				{/* Error Modal */}
+				<ErrorModal message={pageError} isOpen={pageError} onClose={onClose} />
+
+				{/* Form Header */}
+				<AuthFormHeader
+					title="Create Account"
+					imgSrc="../src/assets/add-user.png"
+					imgAlt="add-user-img"
+				/>
+
 				<section className="flex flex-col items-center">
 					<form
 						onSubmit={handleRegisterForm}
 						className="flex flex-col items-center gap-y-1 border-1 border-gray-400 rounded-2xl m-5 p-7  bg-slate-800 w-md"
 					>
 						{/* Email Input Field */}
-						<fieldset
-							className={`w-full px-2 pb-2 mb-2 rounded-md border-1 ${
-								emailReq && userRegister.email
-									? "border-red-500"
-									: "border-gray-400"
-							} focus-within:border-blue-500 hover:border-blue-300
-					focus-within:hover:border-blue-500 transition-all`}
-						>
-							<legend className="text-[.8rem] text-gray-400">
-								Email address <span>(required)</span>
-							</legend>
-							<input
-								type="text"
-								name="email"
-								id="email"
-								ref={emailRef}
-								value={userRegister.email}
-								onChange={handleRegisterInput}
-								required
-								className="w-full border-0 focus:outline-0 autofill:bg-gray-800"
-							/>
-							<div ref={emailRef}>
-								{emailReq && userRegister.email ? (
-									<div className="flex items-center gap-1 mb-1.5">
-										<CrossIcon className="w-3 h-3 font-bold relative bottom-1 text-red-500 shrink-0" />
-										<p className="flex items-center gap-1 text-[.7rem] font-semibold text-left text-red-500 mt-1 -mb-1">
-											{emailReq}
-										</p>
-									</div>
-								) : (
-									<p></p>
-								)}
-							</div>
-						</fieldset>
+						<InputField
+							label="Email address"
+							required
+							type="test"
+							name="email"
+							id="email"
+							ref={emailRef}
+							value={userRegister.email}
+							onChange={handleRegisterInput}
+							error={emailReq}
+						/>
+
 						{/* Name Input Field */}
-						<fieldset
-							className={`w-full px-2 pb-2 mb-2 rounded-md border-1 ${
-								nameReq && userRegister.name
-									? "border-red-500"
-									: "border-gray-400"
-							} focus-within:border-blue-500 hover:border-blue-300
-					focus-within:hover:border-blue-500 transition-all`}
-						>
-							<legend className="text-[.8rem] text-gray-400">
-								Name <span>(required)</span>
-							</legend>
-							<input
-								type="text"
-								name="name"
-								id="name"
-								value={userRegister.name}
-								onChange={handleRegisterInput}
-								required
-								className="w-full border-0 focus:outline-0 autofill:bg-gray-800"
-							/>
-							<div ref={nameRef}>
-								{nameReq && userRegister.name ? (
-									<div className="flex items-center gap-1 mb-1.5">
-										<CrossIcon className="w-3 h-3 font-bold relative top-1 text-red-500 shrink-0" />
-										<p className="flex items-center gap-1 text-[.7rem] font-semibold text-left text-red-500 mt-1 -mb-1">
-											{nameReq}
-										</p>
-									</div>
-								) : (
-									<p></p>
-								)}
-							</div>
-						</fieldset>
+						<InputField
+							label="Name"
+							required
+							type="text"
+							name="name"
+							id="name"
+							value={userRegister.name}
+							onChange={handleRegisterInput}
+							error={nameReq}
+						/>
+
 						{/* Passwd Input Field */}
-						<fieldset
-							className={`w-full px-2 pb-2 mb-2 rounded-md border-1 relative ${
-								passwdReq && passwdCompare.passwd
-									? "border-red-500"
-									: "border-gray-400"
-							} focus-within:border-blue-500 hover:border-blue-300
-					focus-within:hover:border-blue-500 transition-all`}
-						>
-							<legend className="text-[.8rem] text-gray-400">
-								Password <span>(required)</span>
-							</legend>
-							<input
-								type={showPasswd ? "text" : "password"}
-								name="passwd"
-								id="passwd"
-								value={passwdCompare.passwd}
-								onChange={handlePasswdInput}
-								required
-								className="w-full border-0 focus:outline-0 autofill:bg-gray-800"
-							/>
-							<button
-								onClick={handlePasswdVisibility}
-								className="absolute right-4 top-1 cursor-pointer"
-							>
-								{showPasswd ? (
-									<PasswdVisibleOffIcon className="w-4 h-4" />
-								) : (
-									<PasswdVisibleOnIcon className="w-4 h-4" />
-								)}
-							</button>
-							<div ref={passwdRef}>
-								{passwdReq && passwdCompare.passwd ? (
-									<div className="flex items-center gap-1 mb-1.5">
-										<CrossIcon className="w-3 h-3 font-bold relative bottom-1 text-red-500 shrink-0" />
-										<p className="flex items-center gap-1 text-[.7rem] font-semibold text-left text-red-500 mt-1 -mb-1">
-											{passwdReq}
-										</p>
-									</div>
-								) : (
-									<p></p>
-								)}
-							</div>
-						</fieldset>
+						<InputField
+							label="Password"
+							required
+							name="passwd"
+							type="password"
+							showToggle={true}
+							id="passwd"
+							value={passwdCompare.passwd}
+							onChange={handlePasswdInput}
+							error={passwdReq}
+						/>
+
 						{/* Comfirm Passwd Input Field */}
-						<fieldset
-							className={`w-full px-2 pb-2 mb-2 rounded-md border-1 relative ${
-								confirmPasswdReq && passwdCompare.confirmPasswd
-									? "border-red-500"
-									: "border-gray-400"
-							} focus-within:border-blue-500 hover:border-blue-300
-					focus-within:hover:border-blue-500 transition-all`}
-						>
-							<legend className="text-[.8rem] text-gray-400">
-								Confirm Password <span>(required)</span>
-							</legend>
-							<input
-								type={showConfirmPasswd ? "text" : "password"}
-								title={
-									!passwdCompare.passwd || !validPasswd
-										? "Please Enter Valid Password"
-										: ""
-								}
-								name="confirmPasswd"
-								id="confirmPasswd"
-								value={passwdCompare.confirmPasswd}
-								onChange={handlePasswdInput}
-								disabled={!passwdCompare.passwd || !validPasswd}
-								required
-								className={`w-full border-0 focus:outline-0 autofill:bg-gray-800 ${
-									!passwdCompare.passwd || !validPasswd
-										? "cursor-not-allowed"
-										: ""
-								}`}
-							/>
-							<button
-								onClick={handleConfirmPasswdVisibility}
-								className="absolute right-4 top-1 cursor-pointer"
-							>
-								{showConfirmPasswd ? (
-									<PasswdVisibleOffIcon
-										className={`w-4 h-4 ${!validPasswd ? "hidden" : ""}`}
-									/>
-								) : (
-									<PasswdVisibleOnIcon
-										className={`w-4 h-4 ${!validPasswd ? "hidden" : ""}`}
-									/>
-								)}
-							</button>
-							<div ref={confirmRef}>
-								{confirmPasswdReq && passwdCompare.confirmPasswd ? (
-									<div className="flex items-center gap-1 mb-1.5">
-										<CrossIcon className="w-3 h-3 font-bold relative top-1 text-red-500 shrink-0" />
-										<p className="flex items-center gap-1 text-[.7rem] font-semibold text-left text-red-500 mt-1 -mb-1">
-											{confirmPasswdReq}
-										</p>
-									</div>
-								) : (
-									<p></p>
-								)}
-							</div>
-						</fieldset>
-						<button className="bg-blue-400 hover:bg-blue-300 text-slate-800 font-medium py-2 px-4 mt-2 w-full rounded-3xl shadow-md cursor-pointer transition duration-200 ease-in-out">
-							Register
-						</button>
+						<InputField
+							label="Confirm Password"
+							required
+							name="confirmPasswd"
+							id="confirmPasswd"
+							type="password"
+							showToggle={validPasswd && passwdCompare.passwd}
+							value={passwdCompare.confirmPasswd}
+							onChange={handlePasswdInput}
+							disabled={!passwdCompare.passwd || !validPasswd}
+							error={confirmPasswdReq}
+						/>
+						<Button>Register</Button>
 					</form>
 					<div>
 						<p>

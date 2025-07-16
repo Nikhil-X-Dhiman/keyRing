@@ -13,6 +13,7 @@ import { base64ToBuffer, useCrypto } from "../hooks/useCrypto.js";
 import { InputField } from "./InputField.jsx";
 import { ErrorModal } from "./ErrorModal.jsx";
 import { Button } from "./Button.jsx";
+import { AuthFormHeader } from "./AuthFormHeader.jsx";
 
 export const LoginPasswd = () => {
 	const PASSWD_REGEX =
@@ -159,13 +160,11 @@ export const LoginPasswd = () => {
 		<>
 			<main className="flex flex-col justify-center items-center pt-15 select-none">
 				<ErrorModal isOpen={pageError} message={pageError} onClose={onClose} />
-				<figure className="flex flex-col items-center gap-y-2 p-2 select-none text-white">
-					<WaveIcon className="w-26 h-26 text-light-grey scale-x-[-1]" />
-					<figcaption className="text-xl font-semibold">
-						Welcome Back
-					</figcaption>
-				</figure>
-				{userLogin.email}
+
+				<AuthFormHeader title="Welcome Back" Icon={WaveIcon} />
+
+				<p className="font-light">{userLogin.email}</p>
+
 				<form
 					onSubmit={handleSubmitBtn}
 					className="flex flex-col items-center gap-y-1 border-1 border-gray-400 rounded-2xl m-5 p-7  bg-slate-800 w-md mt-7"

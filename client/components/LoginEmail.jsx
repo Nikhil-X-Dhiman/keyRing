@@ -8,6 +8,7 @@ import { InputError } from "./InputError.jsx";
 import { InputField } from "./InputField.jsx";
 import { Button } from "./Button.jsx";
 import { CheckboxField } from "./CheckboxField.jsx";
+import { AuthFormHeader } from "./AuthFormHeader.jsx";
 
 export const LoginEmail = () => {
 	const EMAIL_REGEX =
@@ -110,12 +111,12 @@ export const LoginEmail = () => {
 	) : (
 		<>
 			<main className="flex flex-col justify-center items-center pt-15 select-none">
-				<figure className="flex flex-col items-center gap-y-2 p-2 select-none">
-					<img src="/vault.png" alt="vault-img" className="w-26 h-23" />
-					<figcaption className="text-xl font-semibold mb-2">
-						Log in to KeyRing
-					</figcaption>
-				</figure>
+				<AuthFormHeader
+					title="Log in to KeyRing"
+					imgSrc="../src/assets/vault.png"
+					imgAlt="vault-img"
+				/>
+
 				<form
 					onSubmit={handleEmailSubmit}
 					className="flex flex-col items-center gap-y-1 border-1 border-gray-400 rounded-2xl m-5 p-7  bg-slate-800 w-md"
