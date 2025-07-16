@@ -18,6 +18,8 @@ export const InputField = (
 		autoFocus = false,
 		showToggle = false,
 		className = "",
+		onFocus,
+		onBlur,
 		...props
 	},
 	ref
@@ -49,10 +51,12 @@ export const InputField = (
 				value={value}
 				placeholder={placeholder}
 				onChange={onChange}
+				onFocus={onFocus}
+				onBlur={onBlur}
 				disabled={disabled}
 				required={required}
 				autoFocus={autoFocus}
-				className={`w-full bg-transparent border-0 focus:outline-0 ${
+				className={`w-full font-base bg-transparent border-0 focus:outline-0 ${
 					disabled ? "cursor-not-allowed text-gray-500" : ""
 				} ${className}`}
 				{...props}
@@ -70,9 +74,9 @@ export const InputField = (
 				</button>
 			)}
 			{error && (
-				<div className="flex items-center gap-1 mt-1.5 text-red-500 text-[.75rem] font-semibold">
-					<ImCancelCircle className="w-3 h-3 shrink-0 relative top-1" />
-					<p>{error}</p>
+				<div className="flex items-center gap-1 mt-1.5 text-red-500 text-[.75rem] font-semibold relative">
+					<ImCancelCircle className="w-3 h-3 shrink-0 self-start" />
+					<p className="relative bottom-0.5">{error}</p>
 				</div>
 			)}
 		</fieldset>

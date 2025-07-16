@@ -49,9 +49,12 @@ export const handleLogin = async (req, res) => {
 		[result] = await getUserByCredentials(email, passwd);
 
 		// compare passwd with its hash from db
+		console.log("Pre Pass Verify: ", result);
+
 		let passwdVerification = result
-			? verifyPasswd(passwd, result?.auth?.passwordHash)
+			? await verifyPasswd(passwd, result?.auth?.passwordHash)
 			: false;
+		console.log("Post Pass Verify: ", passwdVerification);
 		if (!passwdVerification || !result) {
 			// no email found or passwd is incorrect
 			return res
@@ -206,7 +209,7 @@ export const handleGetMasterSalt = async (req, res) => {
 
 		// compare passwd with its hash from db
 		let passwdVerification = result
-			? verifyPasswd(passwd, result?.auth?.passwordHash)
+			? await verifyPasswd(passwd, result?.auth?.passwordHash)
 			: false;
 		if (!passwdVerification || !result) {
 			// no email found or passwd is incorrect

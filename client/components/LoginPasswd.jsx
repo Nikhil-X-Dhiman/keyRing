@@ -10,6 +10,7 @@ import PasswdVisibleOnIcon from "../public/visibility.svg?react";
 import PasswdVisibleOffIcon from "../public/visibility-off.svg?react";
 import CrossIcon from "../public/cross.svg?react";
 import { base64ToBuffer, useCrypto } from "../hooks/useCrypto.js";
+import { InputField } from "./InputField.jsx";
 
 export const LoginPasswd = () => {
 	const PASSWD_REGEX =
@@ -20,6 +21,9 @@ export const LoginPasswd = () => {
 
 	const passwdRef = useRef();
 	const errRef = useRef();
+
+	const [inputError, setInputError] = useState("");
+	const [pageError, setPageError] = useState("");
 
 	const [err, setErr] = useState(undefined);
 	const [maidenInput, setMaidenInput] = useState(false);
@@ -188,6 +192,17 @@ export const LoginPasswd = () => {
 							)}
 						</button>
 					</fieldset>
+					<InputField
+						label="Password"
+						required
+						type="password"
+						showToggle={true}
+						ref={passwdRef}
+						value={userLogin.passwd}
+						onChange={(e) =>
+							setUserLogin((prev) => ({ ...prev, passwd: e.target.value }))
+						}
+					/>
 					<div className="" ref={errRef}>
 						{err && maidenInput ? (
 							<p className="flex items-center gap-1 text-[.7rem] font-semibold text-left text-red-500 mt-1 -mb-1">

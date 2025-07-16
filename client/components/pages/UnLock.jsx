@@ -3,16 +3,13 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { base64ToBuffer, useCrypto } from "../../hooks/useCrypto";
 import LockIcon from "../../src/assets/lock.svg?react";
-import PasswdVisibleOnIcon from "../../public/visibility.svg?react";
-import PasswdVisibleOffIcon from "../../public/visibility-off.svg?react";
-import CrossIcon from "../../public/cross.svg?react";
 import { usePrivateInstance } from "../../hooks/usePrivateInstance";
-// import { replace } from "react-router";
 import { passwdSchema } from "../../utils/authSchema";
 import { instance } from "../../api/axios";
 import { useLocation, useNavigate } from "react-router";
 import { InputField } from "../InputField";
 import { Button } from "../Button";
+import { ErrorModal } from "../ErrorModal";
 export const UnLock = () => {
 	const {
 		auth,
@@ -26,8 +23,9 @@ export const UnLock = () => {
 	} = useAuth();
 	const { initialiseCrypto, clearSessionKey } = useCrypto();
 	const privateInstance = usePrivateInstance();
-	const [err, setErr] = useState(undefined);
-	const [maidenInput, setMaidenInput] = useState(false);
+	const [modalError, setModalError] = useState("");
+	const [inputError, setInputError] = useState("");
+	const [touched, setTouched] = useState(false);
 	const passwdRef = useRef(null);
 
 	const location = useLocation();
@@ -46,18 +44,24 @@ export const UnLock = () => {
 	}, [auth.masterKey]);
 
 	useEffect(() => {
-		setMaidenInput(true);
+		if (validPasswd === true) {
+			setInputError("");
+		}
+	}, [validPasswd]);
+
+	useEffect(() => {
 		if (userLogin.passwd) {
 			const { success } = passwdSchema.safeParse(userLogin.passwd);
 			// success, error & data
 			if (success) {
 				setValidPasswd(true);
-				setErr("");
+				setInputError("");
 			} else {
 				setValidPasswd(false);
+				setInputError("Incorrect Password Format.");
 			}
 		} else {
-			setErr("");
+			setInputError("Password Field is Empty");
 		}
 	}, [userLogin.passwd]);
 
@@ -71,10 +75,11 @@ export const UnLock = () => {
 					// console.log("Public Key: ", response.data.publicKey);
 				} else if (response.status === 204) {
 					console.log("Public Key: Not Found!!!");
-					setErr("Error: Public Key Not Found");
+					setModalError("Error: Public Key Not Found");
 				}
 			} catch (error) {
 				console.error("Public Key: Unable to send or receive data", error);
+				setModalError("Public Key Not Available");
 			}
 		}
 		publicKeyRequest();
@@ -89,9 +94,10 @@ export const UnLock = () => {
 	const handleSubmitBtn = async (e) => {
 		e.preventDefault();
 		// setIsLoading(true);
-		console.log("hello");
-		console.log("Valid: ", validPasswd);
-
+		setTouched(true);
+		if (!userLogin.passwd) {
+			setModalError("Password Field Cannot be Empty.");
+		}
 		if (validPasswd) {
 			try {
 				const response = await privateInstance.post(
@@ -100,32 +106,36 @@ export const UnLock = () => {
 				);
 				console.log("Present 1");
 
-				const masterSalt = await base64ToBuffer(response.data?.master_salt);
-				console.log("Present 2");
-
 				if (response.status === 200) {
+					const masterSalt = await base64ToBuffer(response.data?.master_salt);
+					console.log("Present 2");
 					await initialiseCrypto(userLogin.passwd, masterSalt);
 					console.log("UnLock: initialiseCrypto completed.");
+					setUserLogin((prev) => ({ ...prev, passwd: "" }));
+					setTouched(false);
 					// navigate(from, { replace: true });
 				}
 			} catch (error) {
 				if (!error?.response) {
 					console.error("No Server Response", error);
+					setModalError("No Server Response.");
+				} else if (error?.response?.status === 403) {
+					console.error("Error: Failed to Unlock.");
+
+					setModalError("Failed to Unlock.");
 				} else {
 					console.error("Server Error: Unlock Failed!!!: ", error);
-					setErr(error?.response?.data?.msg);
+					setModalError(
+						"Error: ",
+						error?.response?.data?.msg || "Error: Failed to Unlock!!!"
+					);
 				}
-			} finally {
-				setUserLogin((prev) => ({ ...prev, passwd: "" }));
-				// setIsLoading(false);
 			}
-		} else if (!validEmail) {
-			navigate("/login/email", { replace: true });
-		} else if (!validPasswd) {
-			setErr("Incorrect Password!!!");
-			// passwdRef.current?.focus();
+		} else if (userLogin.passwd === "") {
+			setModalError("Password Field is Empty.");
+		} else {
+			setModalError("Incorrect Password.");
 		}
-		// setIsLoading(false);
 	};
 
 	const handleLogout = async () => {
@@ -147,8 +157,13 @@ export const UnLock = () => {
 		}
 	};
 
+	const onClose = () => {
+		setModalError("");
+	};
+
 	return (
 		<main className="flex flex-col justify-center items-center pt-15 select-none">
+			<ErrorModal isOpen={modalError} message={modalError} onClose={onClose} />
 			<figure className="flex flex-col items-center gap-y-2 p-2 select-none text-white">
 				<LockIcon className="w-26 h-26 text-light-grey scale-x-[-1]" />
 				<figcaption>Your Vault is Locked</figcaption>
@@ -163,21 +178,12 @@ export const UnLock = () => {
 					showToggle="true"
 					ref={passwdRef}
 					value={userLogin.passwd}
+					error={inputError}
 					onChange={(e) =>
 						setUserLogin((prev) => ({ ...prev, passwd: e.target.value }))
 					}
 				/>
 
-				<div className="">
-					{err && maidenInput ? (
-						<p className="flex items-center gap-1 text-[.7rem] font-semibold text-left text-red-500 mt-1 -mb-1">
-							<CrossIcon className="w-3 h-3 font-bold" />
-							{err}
-						</p>
-					) : (
-						<p></p>
-					)}
-				</div>
 				<Button
 					title="Unlock the Vaule"
 					variant="primary"
@@ -185,13 +191,9 @@ export const UnLock = () => {
 				>
 					Unlock
 				</Button>
-				{/* <button
-					className="bg-blue-400 hover:bg-blue-300 text-slate-800 font-medium py-2 px-4 w-full rounded-3xl cursor-pointer shadow-md transition-color duration-200 mt-2"
-					onClick={handleSubmitBtn}
-				>
-					Unlock
-				</button> */}
+
 				<p>or</p>
+
 				<Button
 					title="Logs you out of this device"
 					variant="outline"
@@ -199,12 +201,6 @@ export const UnLock = () => {
 				>
 					Logout
 				</Button>
-				{/* <button
-					className="border-2 border-blue-400 hover:bg-blue-400 text-blue-400 hover:text-slate-800 font-medium py-2 px-4 w-full rounded-3xl cursor-pointer shadow-md transition duration-200 ease-in-out"
-					onClick={handleLogout}
-				>
-					Logout
-				</button> */}
 			</form>
 		</main>
 	);
