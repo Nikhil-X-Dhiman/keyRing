@@ -151,7 +151,7 @@ export const Register = () => {
 
 	return (
 		<>
-			<main className="flex flex-col justify-center items-center pt-15 select-none">
+			<main className="flex flex-col justify-center items-center pt-15 pb-5 select-none overflow-y-auto">
 				{/* Error Modal */}
 				<ErrorModal message={pageError} isOpen={pageError} onClose={onClose} />
 

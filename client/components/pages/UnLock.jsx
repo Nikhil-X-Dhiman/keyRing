@@ -164,7 +164,7 @@ export const UnLock = () => {
 
 			{userLogin.email}
 
-			<form className="flex flex-col items-center gap-y-1 border-1 border-gray-400 rounded-2xl m-5 p-7  bg-slate-800 w-md mt-7">
+			<form className="flex flex-col items-center gap-y-1 border-1 border-gray-400 rounded-2xl m-5 p-7  bg-slate-800 w-md mt-7 overflow-y-auto">
 				<InputField
 					label="Password"
 					id="lock-passwd"

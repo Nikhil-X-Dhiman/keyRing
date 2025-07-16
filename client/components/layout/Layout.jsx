@@ -12,7 +12,7 @@ export const Layout = () => {
 					<span className="font-bold text-2xl">key</span>Ring
 				</span>
 			</header>
-			<div className="grow min-h-0">
+			<div className="grow min-h-0 h-full flex flex-col">
 				<Outlet />
 			</div>
 			{/* Footer */}
