@@ -2,6 +2,7 @@ export const Button = ({
 	children,
 	onClick,
 	title,
+	type,
 	variant = "primary",
 	disabled = false,
 	className = "",
@@ -22,6 +23,7 @@ export const Button = ({
 	return (
 		<button
 			title={title}
+			type={type}
 			className={finalClass}
 			disabled={disabled}
 			onClick={onClick}
