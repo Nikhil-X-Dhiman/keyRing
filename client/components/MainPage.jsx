@@ -1,13 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { usePrivateInstance } from "../hooks/usePrivateInstance";
-import KeyRingIcon from "../public/keyring.svg?react";
+
 import { IoMdCloseCircleOutline } from "react-icons/io";
-import { TbBorderAll } from "react-icons/tb";
-import { LuStar } from "react-icons/lu";
 import { HiOutlineTrash } from "react-icons/hi2";
 import { FcSearch } from "react-icons/fc";
 import { IoMdAddCircleOutline } from "react-icons/io";
@@ -24,6 +22,13 @@ import { PiEyeSlash } from "react-icons/pi";
 import { MdOutlineLaunch } from "react-icons/md";
 import { FiMinusCircle } from "react-icons/fi";
 import { useCrypto } from "../hooks/useCrypto";
+import { SearchField } from "./SearchField";
+import { Button } from "./Button";
+import { SideNav } from "./SideNav";
+import { DisplayList } from "./DisplayList";
+import { AddItemBtn } from "./AddItemBtn";
+import { BgBrand } from "./BgBrand";
+import { ItemField } from "./ItemField";
 
 export const MainPage = () => {
 	const defaultEmpty = {
@@ -46,6 +51,8 @@ export const MainPage = () => {
 	const [searchItem, setSearchItem] = useState("");
 	const [pageMode, setPageMode] = useState("All");
 	// all, fav, trash
+	// Errors
+	const [pageError, setPageError] = useState("");
 	const nameRef = useRef();
 	const searchRef = useRef();
 	const areaRef = useRef();
@@ -55,11 +62,14 @@ export const MainPage = () => {
 	const privateInstance = usePrivateInstance();
 
 	useEffect(() => {
+		searchRef.current?.focus();
+	}, []);
+	useEffect(() => {
 		if ((mode === "Add" || mode === "Edit") && nameRef.current) {
-			nameRef.current.focus();
+			nameRef.current?.focus();
 		}
 	}, [mode]);
-
+	// Determine text area size based upon content
 	useEffect(() => {
 		const textArea = areaRef?.current;
 		if (textArea && mode === "View") {
@@ -70,8 +80,8 @@ export const MainPage = () => {
 			textArea.style.height = "175px";
 		}
 	}, [itemIndex, mode]);
-
-	useEffect(() => {
+	// Fetch user data and decrypts it
+	useLayoutEffect(() => {
 		if (!auth.masterKey) {
 			console.log("MainPage: Master Key not available, redirecting to /locked");
 			navigate("/locked", { replace: true });
@@ -102,11 +112,12 @@ export const MainPage = () => {
 				}
 			} catch (error) {
 				console.error(error.response?.data?.msg, error);
+				setPageError("Retrieveing Data & Decrypting Failed");
 			}
 		};
 		getAllItems();
 	}, [auth.masterKey]);
-
+	// Search & filters data based upon user search query & active page
 	const filteredList = passwdList.filter((item) => {
 		console.log("item: ", item);
 
@@ -125,15 +136,16 @@ export const MainPage = () => {
 	const handlePassReveal = () => {
 		setPassReveal((prev) => !prev);
 	};
-
+	// Copy the desired field into os clipboard
 	const handleCopy = async (field) => {
 		try {
 			await navigator.clipboard.writeText(passwdList[itemIndex][field]);
 		} catch (error) {
 			console.error("Error Copying: ", error);
+			setPageError("Copying Item Field Failed");
 		}
 	};
-
+	// Opens the URI link in the browser
 	const handleLinkOpen = (i) => {
 		try {
 			let url = passwdList[itemIndex].uri[i];
@@ -141,17 +153,19 @@ export const MainPage = () => {
 			window.open(url, "_blank", "noopener noreferrer");
 		} catch (error) {
 			console.error("Error Link Opening: ", error);
+			setPageError("Opening Link Failed");
 		}
 	};
-
+	// Copy the URI into the clipboard
 	const handleURICopy = async (i) => {
 		try {
 			await navigator.clipboard.writeText(passwdList[itemIndex].uri[i]);
 		} catch (error) {
 			console.error("Error Copying: ", error);
+			setPageError("Copying Item URI Failed");
 		}
 	};
-
+	// Removes the URI link
 	const handleURIRemove = (i) => {
 		setFocusItem((prev) => {
 			let uriList = prev.uri;
@@ -159,7 +173,7 @@ export const MainPage = () => {
 			return { ...prev, uri: updateURIList };
 		});
 	};
-
+	// opens the view to add new item
 	const handleAddItem = () => {
 		// Adding new passwd entry btn
 		setMode((prev) => {
@@ -173,14 +187,14 @@ export const MainPage = () => {
 		// setNewPasswd(defaultEmpty); // reset newPasswd
 		setFocusItem(defaultEmpty);
 	};
-
+	// takes user input for different fields
 	const handleInputChange = (e) => {
 		if (mode === "Edit" || mode === "Add") {
 			const { name, value } = e.target;
 			setFocusItem((prev) => ({ ...prev, [name]: value }));
 		}
 	};
-
+	// Adds new empty URI entry in view
 	const handleNewURI = () => {
 		if (mode === "Edit" || mode === "Add") {
 			setFocusItem((prev) => {
@@ -190,7 +204,7 @@ export const MainPage = () => {
 			});
 		}
 	};
-
+	// mark fav when clicking the whole component
 	const handleFavouriteDiv = (e) => {
 		if (e.target.type === "checkbox") {
 			e.stopPropagation();
@@ -201,13 +215,13 @@ export const MainPage = () => {
 			setFocusItem((prev) => ({ ...prev, favourite: !prev.favourite }));
 		}
 	};
-
+	// mark fav when clicking on the checkbox itself
 	const handleFavouriteCheckbox = () => {
 		if (mode === "Edit" || mode === "Add") {
 			setFocusItem((prev) => ({ ...prev, favourite: !prev.favourite }));
 		}
 	};
-
+	// open the edit view with copy of the current item in the FocusItem state for edit
 	const handleEditItem = () => {
 		setFocusItem(passwdList[itemIndex] || "");
 		setMode((prev) => {
@@ -218,7 +232,7 @@ export const MainPage = () => {
 			}
 		});
 	};
-
+	// for page all & fav it sends them to trash by marking them so they can be restored, but for trash page it removes them completly & cannot ve recovered...also sends request to server to del it in the cloud too
 	const handleDeleteItem = async () => {
 		if (pageMode === "All" || pageMode === "Fav") {
 			const itemID = passwdList[itemIndex].id;
@@ -241,6 +255,7 @@ export const MainPage = () => {
 					error,
 					error?.response?.data.msg || "Unknown Error!!!"
 				);
+				setPageError("Failed Trash Operation");
 			}
 		} else if (pageMode === "Trash") {
 			console.log("Handle Trash Del");
@@ -268,12 +283,13 @@ export const MainPage = () => {
 					error,
 					error?.response?.data.msg || "Unknown Error!!!"
 				);
+				setPageError("Failed to Remove");
 			}
 		}
 
 		setMode(null);
 	};
-
+	// it removes all the items in the trash both locally & on the cloud & this action is non-recoverable
 	const handleEmptyTrash = async () => {
 		try {
 			const response = await privateInstance.delete(`/api/v1/all/del`);
@@ -295,12 +311,13 @@ export const MainPage = () => {
 				error,
 				error?.response?.data?.msg || "Unknown Error!!!"
 			);
+			setPageError("Emptying Trash Failed");
 		}
 
 		setMode(null);
 		setItemIndex(null);
 	};
-
+	// it restores the items in the trash & can be done one item at a time
 	const handleRestore = async () => {
 		const itemID = passwdList[itemIndex].id;
 		try {
@@ -317,11 +334,15 @@ export const MainPage = () => {
 				});
 			}
 		} catch (error) {
-			console.error("Restore Failed: ", error, error?.response?.data?.msg) ||
-				"Unknown Error!!!";
+			console.error(
+				"Restore Failed: ",
+				error,
+				error?.response?.data?.msg || "Unknown Error!!!"
+			);
+			setPageError("Restoring Item Failed");
 		}
 	};
-
+	// cancel any item being edited or added
 	const handleCancel = () => {
 		if (mode === "Edit") {
 			setFocusItem(defaultEmpty);
@@ -331,54 +352,61 @@ export const MainPage = () => {
 			setMode(null);
 		}
 	};
-
+	// revert the view page to the brand(null page) logo
 	const handleClose = () => {
 		setItemIndex(null);
 		setFocusItem(defaultEmpty);
 		setMode(null);
 	};
-
+	// data is checked, then encrypted to be sent to the cloud and then save in the local
 	const handleSaveItem = async () => {
 		// TODO: Add created and updated time
 		if (focusItem.name === "") {
 			console.error("Name field cannot be empty!!!");
+			setPageError("Name Field is Required");
 			return;
 		}
 		if (mode === "Edit") {
-			const itemID = passwdList[itemIndex].id;
-			// Apply Encryption to data
-			const uriString = JSON.stringify(focusItem.uri);
-			const encryptedFocusItem = {
-				id: focusItem.id,
-				name: JSON.stringify(await handleEncrypt(focusItem.name)),
-				user: JSON.stringify(await handleEncrypt(focusItem.user)),
-				passwd: JSON.stringify(await handleEncrypt(focusItem.passwd)),
-				uri: JSON.stringify(await handleEncrypt(uriString)),
-				note: JSON.stringify(await handleEncrypt(focusItem.note)),
-				favourite: JSON.stringify(await handleEncrypt(focusItem.favourite)),
-				trash: focusItem.trash,
-			};
-			console.log("Encrypted Data to upload: ", encryptedFocusItem);
-
 			try {
-				const response = await privateInstance.put(
-					`/api/v1/item/${itemID}`,
-					encryptedFocusItem
-				);
-				if (response.status === 200 && response.data.success === true) {
-					setPasswdList((prev) => {
-						const updatedList = [...prev];
-						updatedList[itemIndex] = focusItem;
-						return updatedList;
-					});
-					setMode("View");
+				const itemID = passwdList[itemIndex].id;
+				// Apply Encryption to data
+				const uriString = JSON.stringify(focusItem.uri);
+				const encryptedFocusItem = {
+					id: focusItem.id,
+					name: JSON.stringify(await handleEncrypt(focusItem.name)),
+					user: JSON.stringify(await handleEncrypt(focusItem.user)),
+					passwd: JSON.stringify(await handleEncrypt(focusItem.passwd)),
+					uri: JSON.stringify(await handleEncrypt(uriString)),
+					note: JSON.stringify(await handleEncrypt(focusItem.note)),
+					favourite: JSON.stringify(await handleEncrypt(focusItem.favourite)),
+					trash: focusItem.trash,
+				};
+				console.log("Encrypted Data to upload: ", encryptedFocusItem);
+
+				try {
+					const response = await privateInstance.put(
+						`/api/v1/item/${itemID}`,
+						encryptedFocusItem
+					);
+					if (response.status === 200 && response.data.success === true) {
+						setPasswdList((prev) => {
+							const updatedList = [...prev];
+							updatedList[itemIndex] = focusItem;
+							return updatedList;
+						});
+						setMode("View");
+					}
+				} catch (error) {
+					console.error(
+						"Error occured while editing field: ",
+						error,
+						error?.response?.data.msg || "Unknown Error!!!"
+					);
+					setPageError("Uploading Data Failed");
 				}
 			} catch (error) {
-				console.error(
-					"Error occured while editing field: ",
-					error,
-					error?.response?.data.msg || "Unknown Error!!!"
-				);
+				console.error("Error Decrypting: ", error);
+				setPageError("Decryption Failed");
 			}
 		} else if (mode === "Add") {
 			const itemID = uuidv4();
@@ -415,10 +443,11 @@ export const MainPage = () => {
 				}
 			} catch (error) {
 				console.error("Error Occured while adding Item: ", error);
+				setPageError("Adding Item Failed");
 			}
 		}
 	};
-
+	// retreive the index of the item clicked and open its view mode that retrieve data of the item using the index we get from the item clicked
 	const handleClickItem = (id) => {
 		// Display Clicked Passwd View
 		let prevItemIndex = itemIndex; // get old clicked item index
@@ -434,11 +463,12 @@ export const MainPage = () => {
 			) {
 				return "View";
 			} else {
+				setItemIndex(null);
 				return null; // click again to close the view from
 			}
 		});
 	};
-
+	// del the user auth status and the data with it
 	const handleLogout = async () => {
 		const response = await privateInstance.get("/api/v1/auth/logout", {
 			withCredentials: true,
@@ -451,13 +481,22 @@ export const MainPage = () => {
 
 		if (response.status === 200) {
 			console.log("logged out");
+			setItemIndex(null);
+			setFocusItem(defaultEmpty);
+			setSearchItem("");
+			setPasswdList([]);
+			setMode(null);
+			setPageMode("All");
 			localStorage.setItem("isLogged", JSON.stringify(false));
-			navigate("/login/email");
 			setAuth(null);
 			clearSessionKey();
+			navigate("/login/email");
+		} else {
+			console.error("Error: Logging Out");
+			setPageError("Failed to Logout");
 		}
 	};
-
+	// Clears the search field entry
 	const handleSearchClear = () => {
 		setSearchItem("");
 		searchRef.current?.focus();
@@ -467,139 +506,47 @@ export const MainPage = () => {
 		// <main className="grid grid-cols-3 grid-rows-[auto_1fr] h-full">
 		<main className="grid grid-cols-[10rem_24rem_1fr] grid-rows-[auto_1fr] h-full select-none">
 			<section className="col-start-1 col-end-4 row-start-1 row-end-2 grid grid-cols-[1fr_10rem] justify-items-center p-2 border border-l-0 border-slate-950">
-				{/* add search bar here */}
-				{/* <h1>KeyRing</h1> */}
-				<div className="w-full flex justify-center relative">
-					<input
-						type="search"
-						name="app-search"
-						id="app-search"
-						// TODO: ADD search react-icon
-						value={searchItem}
-						onChange={(e) => setSearchItem(e.target.value)}
-						placeholder={`🔍 Search ${
-							pageMode === "All"
-								? "vault"
-								: pageMode === "Fav"
-								? "favourites"
-								: pageMode === "Trash"
-								? "trash"
-								: ""
-						}`}
-						autoComplete="off"
-						ref={searchRef}
-						className="focus:outline-none p-2 rounded-md border-1 border-gray-400 hover:border-gray-300 focus:border-gray-300 shadow-sm w-[70%] webkit-search-input transition-all"
-					/>
-					<i
-						className={`relative right-7 top-3 cursor-pointer text-gray-100 ${
-							searchItem ? "visible" : "invisible"
-						}`}
-						onClick={handleSearchClear}
-					>
-						<IoMdCloseCircleOutline />
-					</i>
-				</div>
-				<button
-					onClick={handleLogout}
-					className="bg-red-800 hover:bg-red-700 text-slate-200 font-medium py-2.5 px-4 rounded  cursor-pointer shadow-md border-1 border-slate-600 hover:border-slate-400 transition-all"
-				>
+				{/* Search Bar */}
+				<SearchField
+					searchItem={searchItem}
+					onChange={(e) => setSearchItem(e.target.value)}
+					pageMode={pageMode}
+					ref={searchRef}
+					onClick={handleSearchClear}
+					Icon={IoMdCloseCircleOutline}
+				/>
+				{/* Logout Button */}
+				<Button onClick={handleLogout} variant="danger">
 					Logout
-				</button>
+				</Button>
 			</section>
 
 			<section className="col-start-1 col-end-2 row-start-2 row-end-3 content-center border-r border-slate-950 pl-3">
-				<ul className="flex flex-col gap-y-1.5 relative bottom-[10%] text-lg">
-					<li
-						className={`flex items-center gap-x-1.5 hover:text-blue-500 ${
-							pageMode === "All" ? "text-blue-400 font-medium" : ""
-						} cursor-pointer`}
-						onClick={() => setPageMode("All")}
-					>
-						<TbBorderAll className="text-lg" />
-						<span>All Items</span>
-					</li>
-					<li
-						className={`flex items-center gap-x-1.5 hover:text-blue-500 ${
-							pageMode === "Fav" ? "text-blue-400 font-medium" : ""
-						} cursor-pointer`}
-						onClick={() => setPageMode("Fav")}
-					>
-						<LuStar className="text-lg" />
-						<span>Favourites</span>
-					</li>
-					<li
-						className={`flex items-center gap-x-1.5 hover:text-blue-500 ${
-							pageMode === "Trash" ? "text-blue-400 font-medium" : ""
-						} cursor-pointer`}
-						onClick={() => setPageMode("Trash")}
-					>
-						<HiOutlineTrash className="text-lg" />
-						<span>Trash</span>
-					</li>
-				</ul>
+				<SideNav
+					pageMode={pageMode}
+					pageModeText="All"
+					setPageMode={setPageMode}
+				/>
 			</section>
 
 			<section className="col-start-2 col-end-3 row-start-2 row-end-3 flex flex-col justify-between min-h-0 ">
-				{/* min-h-0 for flex and grid to bend them to will of overflow */}
+				{/* min-h-0 for flex and grid to bend them to the will of overflow */}
 				{/* Display all passwd list here */}
 				<div className="overflow-y-scroll h-full">
 					{/* {passwdList.length !== 0 ? ( */}
-					{filteredList.length !== 0 ? (
-						<ul className="flex flex-col">
-							{filteredList.map((item) => (
-								<li
-									className={`hover:bg-slate-700 pl-2 py-2 flex items-center pr-3 justify-between gap-x-1 border-l-4  active:border-l-slate-400 cursor-pointer truncate ${
-										item.id === passwdList[itemIndex]?.id && itemIndex !== null
-											? "border-l-blue-400 bg-slate-700"
-											: "border-l-transparent"
-									}`}
-									key={item.id}
-									onClick={() => handleClickItem(item.id)}
-								>
-									<div className="flex items-center gap-2">
-										<span className="w-10 h-10 bg-slate-500 rounded-full flex justify-center items-center font-medium text-slate-200 shrink-0 text-xl">
-											{item.name.charAt(0).toUpperCase()}
-										</span>
-										<div>
-											<p>
-												{item.name.length > 40
-													? item.name.slice(0, 37) + "..."
-													: item.name}
-											</p>
-											<p>{item.user}</p>
-										</div>
-									</div>
-									{item.favourite && (
-										<GiRoundStar className="text-yellow-300" />
-									)}
-								</li>
-							))}
-						</ul>
-					) : (
-						<div className="flex flex-col justify-center items-center h-full gap-3">
-							<FcSearch className="text-7xl" />
-							<h2 className="text-slate-300">Empty List</h2>
-						</div>
-					)}
+					<DisplayList
+						filteredList={filteredList}
+						passwdList={passwdList}
+						itemIndex={itemIndex}
+						handleClickItem={handleClickItem}
+					/>
 				</div>
 				<div className="self-center w-full px-5 py-1.5 bg-slate-700 border-1 border-slate-950">
-					{pageMode !== "Trash" ? (
-						<button
-							className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 flex justify-center font-medium py-2 w-full rounded shadow-2xl cursor-pointer  transition-colors"
-							onClick={handleAddItem}
-							title="Add Item"
-						>
-							<MdOutlineAdd className="text-blue-400 text-xl" size={32} />
-						</button>
-					) : (
-						<button
-							className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 flex justify-center font-medium py-3.5 w-full rounded shadow-2xl cursor-pointer  transition-colors text-sm"
-							onClick={handleEmptyTrash}
-							title="Add Item"
-						>
-							Empty Trash
-						</button>
-					)}
+					<AddItemBtn
+						pageMode={pageMode}
+						handleAddItem={handleAddItem}
+						handleEmptyTrash={handleEmptyTrash}
+					/>
 				</div>
 			</section>
 
@@ -608,14 +555,8 @@ export const MainPage = () => {
 					mode === null ? "" : "bg-slate-900"
 				} h-full min-h-0 flex flex-col justify-between border-1 border-slate-950`}
 			>
-				{mode === null && (
-					<div className="text-slate-400 flex gap-x-2 justify-center items-center h-full ">
-						<KeyRingIcon className="w-17 h-17 relative bottom-[7%]" />
-						<span className="font-thin text-5xl relative bottom-[7%]">
-							<span className="font-bold">key</span>Ring
-						</span>
-					</div>
-				)}
+				{/* Background Brand Image */}
+				{mode === null && <BgBrand />}
 				<div className="px-7 overflow-y-auto pb-2">
 					{/* Display view of passwd and edition of them here */}
 					{(mode === "View" || mode === "Edit" || mode === "Add") && (
@@ -634,15 +575,9 @@ export const MainPage = () => {
 								{(mode === "View" && passwdList[itemIndex]?.name) ||
 								mode === "Add" ||
 								mode === "Edit" ? (
-									<div className="flex flex-col border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5">
-										<label
-											className="text-slate-300 text-sm
-									"
-											htmlFor="name"
-										>
-											Name
-										</label>
-										<input
+									<div className="flex border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5 justify-start w-full">
+										<ItemField
+											label="Name"
 											type="text"
 											name="name"
 											id="name"
@@ -655,10 +590,8 @@ export const MainPage = () => {
 											readOnly={mode === "View"}
 											ref={nameRef}
 											autoComplete="off"
-											required
-											className={`${
-												mode === "View" ? "focus:outline-none" : "outline-none"
-											} cursor-default text-[1.2rem]`}
+											required={true}
+											mode={mode}
 										/>
 									</div>
 								) : (
@@ -667,41 +600,62 @@ export const MainPage = () => {
 								{(mode === "View" && passwdList[itemIndex]?.user) ||
 								mode === "Add" ||
 								mode === "Edit" ? (
-									<div className="flex items-center justify-between border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5">
-										<div className="flex flex-col grow">
-											<label className="text-slate-300 text-sm" htmlFor="user">
-												Username
-											</label>
-											<input
-												type="text"
-												name="user"
-												id="user"
-												value={
-													mode === "View"
-														? passwdList[itemIndex].user || ""
-														: focusItem.user || ""
-												}
-												onChange={handleInputChange}
-												readOnly={mode === "View"}
-												autoComplete="off"
-												className={`${
-													mode === "View"
-														? "focus:outline-none"
-														: "outline-none"
-												} cursor-default text-[1.2rem]`}
-											/>
-										</div>
-										<div>
-											{mode === "View" && (
-												<BiSolidCopy
-													className="text-2xl cursor-pointer opacity-40 hover:opacity-100 transition-all"
-													title="Copy Username"
-													onClick={() => handleCopy("user")}
-												/>
-											)}
-										</div>
+									<div className="flex border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5 justify-start items-center w-full">
+										<ItemField
+											label="Username"
+											type="text"
+											name="user"
+											id="user"
+											value={
+												mode === "View"
+													? passwdList[itemIndex].user || ""
+													: focusItem.user || ""
+											}
+											onChange={handleInputChange}
+											readOnly={mode === "View"}
+											autoComplete="off"
+											mode={mode}
+											cTitle="Copy Username"
+											onClick={() => handleCopy("user")}
+											showCopy={true}
+										/>
 									</div>
 								) : (
+									// <div className="flex items-center justify-between border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5">
+									// 	<div className="flex flex-col grow">
+									// 		<label className="text-slate-300 text-sm" htmlFor="user">
+									// 			Username
+									// 		</label>
+									// 		<input
+									// 			type="text"
+									// 			name="user"
+									// 			id="user"
+									// 			value={
+									// 				mode === "View"
+									// 					? passwdList[itemIndex].user || ""
+									// 					: focusItem.user || ""
+									// 			}
+									// 			onChange={handleInputChange}
+									// 			readOnly={mode === "View"}
+									// 			autoComplete="off"
+									// 			className={`${
+									// 				mode === "View"
+									// 					? "focus:outline-none"
+									// 					: "outline-none"
+									// 			} cursor-default text-[1.2rem]`}
+
+									// 		/>
+									// 	</div>
+									// 	<div>
+									// 		{mode === "View" && (
+									// 			<BiSolidCopy
+									// 				className="text-2xl cursor-pointer opacity-40 hover:opacity-100 transition-all"
+									// 				title="Copy Username"
+									// 				onClick={() => handleCopy("user")}
+									// 			/>
+									// 		)}
+									// 	</div>
+									// </div>
 									""
 								)}
 								{(mode === "View" && passwdList[itemIndex]?.passwd) ||

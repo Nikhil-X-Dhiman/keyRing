@@ -11,15 +11,13 @@ import PasswdVisibleOffIcon from "../public/visibility-off.svg?react";
 import CrossIcon from "../public/cross.svg?react";
 import { base64ToBuffer, useCrypto } from "../hooks/useCrypto.js";
 import { InputField } from "./InputField.jsx";
-import { ErrorModal } from "./ErrorModal.jsx";
-import { Button } from "./Button.jsx";
-import { AuthFormHeader } from "./AuthFormHeader.jsx";
 
 export const LoginPasswd = () => {
 	const PASSWD_REGEX =
 		/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[*#@!$%&]).{8,24}$/;
 
 	const [isLoading, setIsLoading] = useState(false);
+	const [showPasswd, setShowPasswd] = useState(false);
 
 	const passwdRef = useRef();
 	const errRef = useRef();
@@ -27,6 +25,8 @@ export const LoginPasswd = () => {
 	const [inputError, setInputError] = useState("");
 	const [pageError, setPageError] = useState("");
 
+	// const [err, setErr] = useState(undefined);
+	const [maidenInput, setMaidenInput] = useState(false);
 	const location = useLocation();
 	const navigate = useNavigate();
 	const verifyToken = useVerifyAccessToken();
@@ -53,8 +53,7 @@ export const LoginPasswd = () => {
 	}, [inputError]);
 
 	useEffect(() => {
-		console.log("Error: ", inputError);
-
+		setMaidenInput(true);
 		if (userLogin.passwd) {
 			const { success } = passwdSchema.safeParse(userLogin.passwd);
 			// success, error & data
@@ -97,7 +96,6 @@ export const LoginPasswd = () => {
 	const handleSubmitBtn = async (e) => {
 		e.preventDefault();
 		setIsLoading(true);
-		console.log("Passwd: ", userLogin.passwd);
 		if (validPasswd && validEmail) {
 			try {
 				const response = await privateInstance.post(
@@ -142,16 +140,15 @@ export const LoginPasswd = () => {
 		} else if (!validEmail) {
 			console.error("Invalid Email: Redirecting to Email Page");
 			navigate("/login/email", { replace: true });
-		} else if (!userLogin.passwd) {
-			setPageError("Password is Required");
-		} else {
+		} else if (!validPasswd) {
 			setPageError("Incorrect Password!!!");
 		}
 		setIsLoading(false);
 	};
 
-	const onClose = () => {
-		setPageError("");
+	const handlePasswdVisibility = (e) => {
+		e.preventDefault();
+		setShowPasswd((prev) => !prev);
 	};
 
 	return isLoading ? (
@@ -159,16 +156,45 @@ export const LoginPasswd = () => {
 	) : (
 		<>
 			<main className="flex flex-col justify-center items-center pt-15 select-none">
-				<ErrorModal isOpen={pageError} message={pageError} onClose={onClose} />
-
-				<AuthFormHeader title="Welcome Back" Icon={WaveIcon} />
-
-				<p className="font-light">{userLogin.email}</p>
-
-				<form
-					onSubmit={handleSubmitBtn}
-					className="flex flex-col items-center gap-y-1 border-1 border-gray-400 rounded-2xl m-5 p-7  bg-slate-800 w-md mt-7"
-				>
+				<figure className="flex flex-col items-center gap-y-2 p-2 select-none text-white">
+					<WaveIcon className="w-26 h-26 text-light-grey scale-x-[-1]" />
+					<figcaption className="text-xl font-semibold">
+						Welcome Back
+					</figcaption>
+				</figure>
+				{userLogin.email}
+				<form className="flex flex-col items-center gap-y-1 border-1 border-gray-400 rounded-2xl m-5 p-7  bg-slate-800 w-md mt-7">
+					<fieldset
+						className={`w-full px-2 pb-2 rounded-md border-1 ${
+							inputError && maidenInput ? "border-red-500" : "border-gray-400"
+						} focus-within:border-blue-500 hover:border-blue-300
+					focus-within:hover:border-blue-500 transition-all relative `}
+					>
+						<legend className="text-[.8rem] text-gray-400">
+							Password <span>(required)</span>
+						</legend>
+						<input
+							type={showPasswd ? "text" : "password"}
+							id="login-passwd"
+							ref={passwdRef}
+							value={userLogin.passwd}
+							onChange={(e) =>
+								setUserLogin((prev) => ({ ...prev, passwd: e.target.value }))
+							}
+							required
+							className="w-full border-0 focus:outline-0 autofill:bg-gray-800 relative"
+						/>
+						<button
+							onClick={handlePasswdVisibility}
+							className="absolute right-4 top-1 cursor-pointer"
+						>
+							{showPasswd ? (
+								<PasswdVisibleOffIcon className="w-4 h-4" />
+							) : (
+								<PasswdVisibleOnIcon className="w-4 h-4" />
+							)}
+						</button>
+					</fieldset>
 					<InputField
 						label="Password"
 						required
@@ -181,20 +207,30 @@ export const LoginPasswd = () => {
 							setUserLogin((prev) => ({ ...prev, passwd: e.target.value }))
 						}
 					/>
-
-					<Button type="submit" variant="primary">
-						Login
-					</Button>
-
-					<p>or</p>
-
-					<Button
+					<div className="" ref={errRef}>
+						{inputError && maidenInput ? (
+							<p className="flex items-center gap-1 text-[.7rem] font-semibold text-left text-red-500 mt-1 -mb-1">
+								<CrossIcon className="w-3 h-3 font-bold" />
+								{inputError}
+							</p>
+						) : (
+							<p></p>
+						)}
+					</div>
+					<button
 						type="button"
-						variant="outline"
+						className="bg-blue-400 hover:bg-blue-300 text-slate-800 font-medium py-2 px-4 w-full rounded-3xl cursor-pointer shadow-md transition duration-200 ease-in-out mt-2"
+						onClick={handleSubmitBtn}
+					>
+						Login
+					</button>
+					<p>or</p>
+					<button
+						className="border-2 border-blue-400 hover:bg-blue-400 text-blue-400 hover:text-slate-800 font-medium py-2 px-4 w-full rounded-3xl cursor-pointer shadow-md transition duration-200 ease-in-out"
 						onClick={() => navigate("/login/email")}
 					>
 						Back
-					</Button>
+					</button>
 				</form>
 
 				<div>
