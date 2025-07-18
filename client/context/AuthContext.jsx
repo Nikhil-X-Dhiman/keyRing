@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
 	const [validEmail, setValidEmail] = useState(false);
 	const [validPasswd, setValidPasswd] = useState(false);
 	const [masterKey, setMasterKey] = useState("");
+	const [passwdList, setPasswdList] = useState([]);
 
 	return (
 		<AuthContext.Provider
@@ -39,6 +40,8 @@ export const AuthProvider = ({ children }) => {
 				setValidPasswd,
 				masterKey,
 				setMasterKey,
+				passwdList,
+				setPasswdList,
 			}}
 		>
 			{children}

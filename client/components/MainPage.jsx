@@ -4,23 +4,14 @@ import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { usePrivateInstance } from "../hooks/usePrivateInstance";
-
 import { IoMdCloseCircleOutline } from "react-icons/io";
 import { HiOutlineTrash } from "react-icons/hi2";
-// import { FcSearch } from "react-icons/fc";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { TbRestore } from "react-icons/tb";
 import { IoClose } from "react-icons/io5";
 import { MdModeEdit } from "react-icons/md";
 import { LuSave } from "react-icons/lu";
 import { MdCloseFullscreen } from "react-icons/md";
-// import { MdOutlineAdd } from "react-icons/md";
-// import { GiRoundStar } from "react-icons/gi";
-// import { BiSolidCopy } from "react-icons/bi";
-// import { PiEyeDuotone } from "react-icons/pi";
-// import { PiEyeSlash } from "react-icons/pi";
-// import { MdOutlineLaunch } from "react-icons/md";
-// import { FiMinusCircle } from "react-icons/fi";
 import { useCrypto } from "../hooks/useCrypto";
 import { SearchField } from "./SearchField";
 import { Button } from "./Button";
@@ -44,7 +35,7 @@ export const MainPage = () => {
 	};
 
 	// fetch data from the server and save it to the server only then save the to local too
-	const [passwdList, setPasswdList] = useState([]); //
+	// const [passwdList, setPasswdList] = useState([]); //
 	const [itemIndex, setItemIndex] = useState(null); // index for add, edit and view
 	const [focusItem, setFocusItem] = useState(defaultEmpty); // passwd item for edit and add mode
 	const [mode, setMode] = useState(null); // modes for different view selection (null, view, edit, add)
@@ -57,8 +48,8 @@ export const MainPage = () => {
 	const searchRef = useRef();
 	const areaRef = useRef();
 	const navigate = useNavigate();
-	const { auth, setAuth } = useAuth();
-	const { clearSessionKey, handleEncrypt, handleDecrypt } = useCrypto();
+	const { auth, setAuth, passwdList, setPasswdList } = useAuth();
+	const { clearSessionKey, handleEncrypt } = useCrypto();
 	const privateInstance = usePrivateInstance();
 
 	useEffect(() => {
@@ -87,35 +78,6 @@ export const MainPage = () => {
 			navigate("/locked", { replace: true });
 			return;
 		}
-		// TODO: Add created and updated time
-		const getAllItems = async () => {
-			try {
-				const response = await privateInstance.get("/api/v1/all");
-				const { success, result } = response.data;
-				if (success) {
-					const updatedListPromises = result.map(async (item) => {
-						const { itemID, name, user, passwd, uri, note, fav, trash } = item;
-						// Decrypt Data upon arrival
-						return {
-							id: itemID,
-							name: await handleDecrypt(JSON.parse(name)),
-							user: await handleDecrypt(JSON.parse(user)),
-							passwd: await handleDecrypt(JSON.parse(passwd)),
-							uri: JSON.parse(await handleDecrypt(JSON.parse(uri))),
-							note: await handleDecrypt(JSON.parse(note)),
-							favourite: await handleDecrypt(JSON.parse(fav)),
-							trash,
-						};
-					});
-					const updatedList = await Promise.all(updatedListPromises);
-					setPasswdList(updatedList);
-				}
-			} catch (error) {
-				console.error(error.response?.data?.msg, error);
-				setPageError("Retrieveing Data & Decrypting Failed");
-			}
-		};
-		getAllItems();
 	}, [auth.masterKey]);
 	// Search & filters data based upon user search query & active page
 	const filteredList = passwdList.filter((item) => {
