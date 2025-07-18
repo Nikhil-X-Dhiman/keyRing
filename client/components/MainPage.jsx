@@ -7,20 +7,20 @@ import { usePrivateInstance } from "../hooks/usePrivateInstance";
 
 import { IoMdCloseCircleOutline } from "react-icons/io";
 import { HiOutlineTrash } from "react-icons/hi2";
-import { FcSearch } from "react-icons/fc";
+// import { FcSearch } from "react-icons/fc";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { TbRestore } from "react-icons/tb";
 import { IoClose } from "react-icons/io5";
 import { MdModeEdit } from "react-icons/md";
 import { LuSave } from "react-icons/lu";
 import { MdCloseFullscreen } from "react-icons/md";
-import { MdOutlineAdd } from "react-icons/md";
-import { GiRoundStar } from "react-icons/gi";
-import { BiSolidCopy } from "react-icons/bi";
-import { PiEyeDuotone } from "react-icons/pi";
-import { PiEyeSlash } from "react-icons/pi";
-import { MdOutlineLaunch } from "react-icons/md";
-import { FiMinusCircle } from "react-icons/fi";
+// import { MdOutlineAdd } from "react-icons/md";
+// import { GiRoundStar } from "react-icons/gi";
+// import { BiSolidCopy } from "react-icons/bi";
+// import { PiEyeDuotone } from "react-icons/pi";
+// import { PiEyeSlash } from "react-icons/pi";
+// import { MdOutlineLaunch } from "react-icons/md";
+// import { FiMinusCircle } from "react-icons/fi";
 import { useCrypto } from "../hooks/useCrypto";
 import { SearchField } from "./SearchField";
 import { Button } from "./Button";
@@ -46,7 +46,6 @@ export const MainPage = () => {
 	const [passwdList, setPasswdList] = useState([]); //
 	const [itemIndex, setItemIndex] = useState(null); // index for add, edit and view
 	const [focusItem, setFocusItem] = useState(defaultEmpty); // passwd item for edit and add mode
-	const [passReveal, setPassReveal] = useState(false);
 	const [mode, setMode] = useState(null); // modes for different view selection (null, view, edit, add)
 	const [searchItem, setSearchItem] = useState("");
 	const [pageMode, setPageMode] = useState("All");
@@ -133,9 +132,9 @@ export const MainPage = () => {
 		return matchesSearch && matchesMode;
 	});
 
-	const handlePassReveal = () => {
-		setPassReveal((prev) => !prev);
-	};
+	// const handlePassReveal = () => {
+	// 	setPassReveal((prev) => !prev);
+	// };
 	// Copy the desired field into os clipboard
 	const handleCopy = async (field) => {
 		try {
@@ -662,7 +661,27 @@ export const MainPage = () => {
 								mode === "Add" ||
 								mode === "Edit" ? (
 									<div className="flex items-center justify-between border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5">
-										<div className="flex flex-col grow">
+										<ItemField
+											label="Password"
+											type="password"
+											name="passwd"
+											id="passwd"
+											value={
+												mode === "View"
+													? passwdList[itemIndex].passwd || ""
+													: focusItem.passwd || ""
+											}
+											onChange={handleInputChange}
+											readOnly={mode === "View"}
+											autoComplete="off"
+											mode={mode}
+											cTitle="Copy Password"
+											tTitle="Toggle Visibility"
+											onClick={() => handleCopy("passwd")}
+											showCopy={true}
+											showToggle={true}
+										/>
+										{/* <div className="flex flex-col grow">
 											<label
 												className="text-slate-300 text-sm"
 												htmlFor="passwd"
@@ -711,7 +730,7 @@ export const MainPage = () => {
 													onClick={() => handleCopy("passwd")}
 												/>
 											)}
-										</div>
+										</div> */}
 									</div>
 								) : (
 									""
@@ -731,7 +750,22 @@ export const MainPage = () => {
 												className="flex items-center justify-between border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5"
 												key={`uri-${i}`}
 											>
-												<div className="flex flex-col">
+												<ItemField
+													label={`URI ${i + 1}`}
+													type="text"
+													name={`uri-${i}`}
+													id={`uri-${i}`}
+													value={item || ""}
+													onChange={handleInputChange}
+													readOnly={mode === "View"}
+													autoComplete="off"
+													mode={mode}
+													onLinkClick={() => handleLinkOpen(i)}
+													onURICopyClick={() => handleURICopy(i)}
+													showCopyLink={true}
+													showLinkOpen={true}
+												/>
+												{/* <div className="flex flex-col">
 													<label
 														className="text-slate-300 text-sm"
 														htmlFor={`uri-${i}`}
@@ -762,7 +796,7 @@ export const MainPage = () => {
 														title="Copy Link"
 														onClick={() => handleURICopy(i)}
 													/>
-												</div>
+												</div> */}
 											</div>
 										);
 									})}
@@ -770,8 +804,27 @@ export const MainPage = () => {
 								{focusItem.uri.length !== 0 &&
 								(mode === "Edit" || mode === "Add")
 									? focusItem.uri.map((item, i) => (
-											<div className="flex items-center border-b-1 border-slate-500 hover:bg-slate-600 last:border-b-0">
-												<div className="px-3.5">
+											<div className="flex items-center justify-between border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5">
+												<ItemField
+													label={`URI ${i + 1}`}
+													type="text"
+													name={`uri-${i}`}
+													id={`uri-${i}`}
+													value={item || ""}
+													onChange={(e) => {
+														setFocusItem((prev) => {
+															const newURIs = [...prev.uri];
+															newURIs[i] = e.target.value;
+															return { ...prev, uri: newURIs };
+														});
+													}}
+													readOnly={mode === "View"}
+													autoComplete="off"
+													mode={mode}
+													onLinkDel={() => handleURIRemove(i)}
+													showDel={true}
+												/>
+												{/* <div className="px-3.5">
 													<FiMinusCircle
 														title="Remove"
 														className="text-2xl text-red-500 cursor-pointer"
@@ -801,19 +854,26 @@ export const MainPage = () => {
 														}}
 														className="outline-none text-[1.2rem]"
 													/>
-												</div>
+												</div> */}
 											</div>
 									  ))
 									: null}
 								{mode === "Add" || mode === "Edit" ? (
-									<button
-										className="flex items-center gap-1.5 hover:bg-slate-600 py-2 px-3.5 cursor-pointer"
+									<Button
+										Icon={IoMdAddCircleOutline}
 										onClick={handleNewURI}
+										variant="newURI"
 									>
-										<IoMdAddCircleOutline className="text-2xl" />
 										New URI
-									</button>
-								) : null}
+									</Button>
+								) : // <button
+								// 	className="flex items-center gap-1.5 hover:bg-slate-600 py-2 px-3.5 cursor-pointer"
+								// 	onClick={handleNewURI}
+								// >
+								// 	<IoMdAddCircleOutline className="text-2xl" />
+								// 	New URI
+								// </button>
+								null}
 							</div>
 							{mode === "View" && passwdList[itemIndex]?.note ? (
 								<div>
@@ -858,6 +918,7 @@ export const MainPage = () => {
 							{mode === "Add" ||
 							mode === "Edit" ||
 							(mode === "View" && passwdList[itemIndex]?.favourite) ? (
+								// Favourite Button for Item
 								<div
 									className="flex items-center justify-between gap-1.5 bg-slate-700 hover:bg-slate-600 py-2 px-3.5 cursor-pointer mt-5 mb-3"
 									onClick={handleFavouriteDiv}
@@ -898,86 +959,139 @@ export const MainPage = () => {
 						<div className="flex justify-between">
 							<div className="flex gap-4">
 								{passwdList[itemIndex].trash === true ? null : (
-									<button
-										className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
+									<Button
+										Icon={MdModeEdit}
+										variant="diffOps"
 										title="Edit"
 										onClick={handleEditItem}
-									>
-										<MdModeEdit className="text-blue-400 text-xl" />
-									</button>
+									></Button>
+									// <button
+									// 	className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
+									// 	title="Edit"
+									// 	onClick={handleEditItem}
+									// >
+									// 	<MdModeEdit className="text-blue-400 text-xl" />
+									// </button>
 								)}
 								{passwdList[itemIndex].trash === true && (
-									<button
-										className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
+									<Button
+										Icon={TbRestore}
+										variant="diffOps"
 										title="Restore"
 										onClick={handleRestore}
-									>
-										<TbRestore className="text-blue-400 text-xl" />
-									</button>
+									></Button>
+									// <button
+									// 	className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
+									// 	title="Restore"
+									// 	onClick={handleRestore}
+									// >
+									// 	<TbRestore className="text-blue-400 text-xl" />
+									// </button>
 								)}
-
-								<button
+								<Button
+									Icon={MdCloseFullscreen}
+									variant="diffOps"
+									title="Close"
+									onClick={handleClose}
+								></Button>
+								{/* <button
 									className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
 									title="Close"
 									onClick={handleClose}
 								>
 									<MdCloseFullscreen className="text-blue-400 text-xl" />
-								</button>
+								</button> */}
 							</div>
-
-							<button
+							<Button
+								Icon={HiOutlineTrash}
+								IconStyle="text-red-600 hover:text-red-700"
+								variant="diffOps"
+								title="Delete"
+								onClick={handleDeleteItem}
+							></Button>
+							{/* <button
 								className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
 								title="Delete"
 								onClick={handleDeleteItem}
 							>
 								<HiOutlineTrash className="text-red-600 hover-red-700 text-xl font-extrabold" />
-							</button>
+							</button> */}
 						</div>
 					)}
 					{mode === "Edit" && (
 						<div className="flex justify-between">
 							<div className="flex gap-4">
-								<button
+								<Button
+									Icon={LuSave}
+									variant="diffOps"
+									title="Save"
+									onClick={handleSaveItem}
+								></Button>
+								{/* <button
 									className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 font-medium text-blue-400 py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all "
 									title="Save"
 									onClick={handleSaveItem}
 								>
 									<LuSave className="text-blue-400 text-xl" />
-								</button>
-								<button
+								</button> */}
+								<Button
+									Icon={IoClose}
+									variant="diffOps"
+									title="Cancel"
+									onClick={handleCancel}
+								></Button>
+								{/* <button
 									className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
 									title="Cancel"
 									onClick={handleCancel}
 								>
 									<IoClose className="text-blue-400 text-xl" />
-								</button>
+								</button> */}
 							</div>
-
-							<button
+							<Button
+								Icon={HiOutlineTrash}
+								IconStyle="text-red-600 hover:text-red-700"
+								variant="diffOps"
+								title="Delete"
+								onClick={handleDeleteItem}
+							></Button>
+							{/* <button
 								className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
 								title="Delete"
 								onClick={handleDeleteItem}
 							>
 								<HiOutlineTrash className="text-red-600 hover-red-700 text-xl" />
-							</button>
+							</button> */}
 						</div>
 					)}
 					{mode === "Add" && (
 						<div className="flex gap-4">
-							<button
+							<Button
+								Icon={LuSave}
+								variant="diffOps"
+								title="Save"
+								onClick={handleSaveItem}
+							></Button>
+							{/* <button
 								className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
 								title="Save"
 								onClick={handleSaveItem}
 							>
 								<LuSave className="text-blue-400 text-xl" />
-							</button>
-							<button
+							</button> */}
+							<Button
+								Icon={IoClose}
+								variant="diffOps"
+								title="Cancel"
+								onClick={handleCancel}
+							></Button>
+							{/* <button
 								className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
 								title="Cancel"
 								onClick={handleCancel}
 							>
 								<IoClose className="text-blue-400 text-xl" />
-							</button>
+							</button> */}
 						</div>
 					)}
 				</div>

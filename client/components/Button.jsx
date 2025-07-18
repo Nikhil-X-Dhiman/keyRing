@@ -3,6 +3,8 @@ export const Button = ({
 	onClick,
 	title,
 	type,
+	Icon,
+	IconStyle = "",
 	variant = "primary",
 	disabled = false,
 	className = "",
@@ -20,6 +22,10 @@ export const Button = ({
 			"bg-slate-800 hover:bg-slate-900 active:bg-slate-950 flex justify-center font-medium py-2 w-full rounded shadow-2xl cursor-pointer  transition-colors",
 		emptyTrash:
 			"bg-slate-800 hover:bg-slate-900 active:bg-slate-950 flex justify-center font-medium py-3.5 w-full rounded shadow-2xl cursor-pointer  transition-colors text-sm",
+		newURI:
+			"flex items-center gap-1.5 hover:bg-slate-600 py-2 px-3.5 cursor-pointer",
+		diffOps:
+			"bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all",
 	};
 
 	const finalClass = `${className} ${variants[variant]}
@@ -33,6 +39,13 @@ export const Button = ({
 			disabled={disabled}
 			onClick={onClick}
 		>
+			{Icon && (
+				<Icon
+					className={` ${
+						variant === "diffOps" ? "text-blue-400 text-xl" : "text-2xl"
+					} ${IconStyle}`}
+				/>
+			)}
 			{children}
 		</button>
 	);
