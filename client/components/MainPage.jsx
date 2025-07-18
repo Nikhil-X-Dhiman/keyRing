@@ -29,6 +29,7 @@ import { DisplayList } from "./DisplayList";
 import { AddItemBtn } from "./AddItemBtn";
 import { BgBrand } from "./BgBrand";
 import { ItemField } from "./ItemField";
+import { ErrorModal } from "./ErrorModal";
 
 export const MainPage = () => {
 	const defaultEmpty = {
@@ -501,9 +502,18 @@ export const MainPage = () => {
 		searchRef.current?.focus();
 	};
 
+	const handleCloseErrorModal = () => {
+		setPageError("");
+	};
+
 	return (
 		// <main className="grid grid-cols-3 grid-rows-[auto_1fr] h-full">
 		<main className="grid grid-cols-[10rem_24rem_1fr] grid-rows-[auto_1fr] h-full select-none">
+			<ErrorModal
+				message={pageError}
+				onClose={handleCloseErrorModal}
+				isOpen={pageError}
+			/>
 			<section className="col-start-1 col-end-4 row-start-1 row-end-2 grid grid-cols-[1fr_10rem] justify-items-center p-2 border border-l-0 border-slate-950">
 				{/* Search Bar */}
 				<SearchField
@@ -620,41 +630,6 @@ export const MainPage = () => {
 										/>
 									</div>
 								) : (
-									// <div className="flex items-center justify-between border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5">
-									// 	<div className="flex flex-col grow">
-									// 		<label className="text-slate-300 text-sm" htmlFor="user">
-									// 			Username
-									// 		</label>
-									// 		<input
-									// 			type="text"
-									// 			name="user"
-									// 			id="user"
-									// 			value={
-									// 				mode === "View"
-									// 					? passwdList[itemIndex].user || ""
-									// 					: focusItem.user || ""
-									// 			}
-									// 			onChange={handleInputChange}
-									// 			readOnly={mode === "View"}
-									// 			autoComplete="off"
-									// 			className={`${
-									// 				mode === "View"
-									// 					? "focus:outline-none"
-									// 					: "outline-none"
-									// 			} cursor-default text-[1.2rem]`}
-
-									// 		/>
-									// 	</div>
-									// 	<div>
-									// 		{mode === "View" && (
-									// 			<BiSolidCopy
-									// 				className="text-2xl cursor-pointer opacity-40 hover:opacity-100 transition-all"
-									// 				title="Copy Username"
-									// 				onClick={() => handleCopy("user")}
-									// 			/>
-									// 		)}
-									// 	</div>
-									// </div>
 									""
 								)}
 								{(mode === "View" && passwdList[itemIndex]?.passwd) ||
@@ -681,56 +656,6 @@ export const MainPage = () => {
 											showCopy={true}
 											showToggle={true}
 										/>
-										{/* <div className="flex flex-col grow">
-											<label
-												className="text-slate-300 text-sm"
-												htmlFor="passwd"
-											>
-												Password
-											</label>
-											<input
-												// type="password"
-												type={passReveal ? "text" : "password"}
-												name="passwd"
-												id="passwd"
-												value={
-													mode === "View"
-														? passwdList[itemIndex].passwd || ""
-														: focusItem.passwd || ""
-												}
-												onChange={handleInputChange}
-												readOnly={mode === "View"}
-												autoComplete="off"
-												className={`${
-													mode === "View"
-														? "focus:outline-none"
-														: "outline-none"
-												} cursor-default text-[1.2rem]`}
-											/>
-										</div>
-										<div className="flex gap-3">
-											{passReveal ? (
-												<PiEyeSlash
-													className="text-2xl cursor-pointer opacity-70  duration-200"
-													title="Toggle Visibility"
-													onClick={handlePassReveal}
-												/>
-											) : (
-												<PiEyeDuotone
-													className="text-2xl cursor-pointer opacity-70 duration-200"
-													title="Toggle Visibility"
-													onClick={handlePassReveal}
-												/>
-											)}
-
-											{mode === "View" && (
-												<BiSolidCopy
-													className="text-2xl cursor-pointer opacity-40 hover:opacity-100 transition-all"
-													title="Copy Password"
-													onClick={() => handleCopy("passwd")}
-												/>
-											)}
-										</div> */}
 									</div>
 								) : (
 									""
@@ -765,38 +690,6 @@ export const MainPage = () => {
 													showCopyLink={true}
 													showLinkOpen={true}
 												/>
-												{/* <div className="flex flex-col">
-													<label
-														className="text-slate-300 text-sm"
-														htmlFor={`uri-${i}`}
-													>{`URI ${i + 1}`}</label>
-													<input
-														type="text"
-														name={`uri-${i}`}
-														id={`uri-${i}`}
-														value={item || ""}
-														readOnly
-														autoComplete="off"
-														className={`${
-															mode === "View"
-																? "focus:outline-none"
-																: "outline-none"
-														} cursor-default text-[1.2rem]`}
-													/>
-												</div>
-												<div className="flex gap-3">
-													<MdOutlineLaunch
-														className="text-2xl cursor-pointer opacity-40 hover:opacity-100 transition-all"
-														title="Open Link"
-														onClick={() => handleLinkOpen(i)}
-													/>
-
-													<BiSolidCopy
-														className="text-2xl cursor-pointer opacity-40 hover:opacity-100 transition-all"
-														title="Copy Link"
-														onClick={() => handleURICopy(i)}
-													/>
-												</div> */}
 											</div>
 										);
 									})}
@@ -824,37 +717,6 @@ export const MainPage = () => {
 													onLinkDel={() => handleURIRemove(i)}
 													showDel={true}
 												/>
-												{/* <div className="px-3.5">
-													<FiMinusCircle
-														title="Remove"
-														className="text-2xl text-red-500 cursor-pointer"
-														onClick={() => handleURIRemove(i)}
-													/>
-												</div>
-												<div
-													className="flex flex-col   py-3 grow"
-													key={`uri-${i}`}
-												>
-													<label
-														className="text-slate-300 text-sm"
-														htmlFor={`edit-uri-${i}`}
-													>{`URI ${i + 1}`}</label>
-													<input
-														type="text"
-														name={`edit-uri-${i}`}
-														id={`edit-uri-${i}`}
-														value={item || ""}
-														autoComplete="off"
-														onChange={(e) => {
-															setFocusItem((prev) => {
-																const newURIs = [...prev.uri];
-																newURIs[i] = e.target.value;
-																return { ...prev, uri: newURIs };
-															});
-														}}
-														className="outline-none text-[1.2rem]"
-													/>
-												</div> */}
 											</div>
 									  ))
 									: null}
@@ -866,14 +728,7 @@ export const MainPage = () => {
 									>
 										New URI
 									</Button>
-								) : // <button
-								// 	className="flex items-center gap-1.5 hover:bg-slate-600 py-2 px-3.5 cursor-pointer"
-								// 	onClick={handleNewURI}
-								// >
-								// 	<IoMdAddCircleOutline className="text-2xl" />
-								// 	New URI
-								// </button>
-								null}
+								) : null}
 							</div>
 							{mode === "View" && passwdList[itemIndex]?.note ? (
 								<div>
@@ -965,13 +820,6 @@ export const MainPage = () => {
 										title="Edit"
 										onClick={handleEditItem}
 									></Button>
-									// <button
-									// 	className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
-									// 	title="Edit"
-									// 	onClick={handleEditItem}
-									// >
-									// 	<MdModeEdit className="text-blue-400 text-xl" />
-									// </button>
 								)}
 								{passwdList[itemIndex].trash === true && (
 									<Button
@@ -980,13 +828,6 @@ export const MainPage = () => {
 										title="Restore"
 										onClick={handleRestore}
 									></Button>
-									// <button
-									// 	className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
-									// 	title="Restore"
-									// 	onClick={handleRestore}
-									// >
-									// 	<TbRestore className="text-blue-400 text-xl" />
-									// </button>
 								)}
 								<Button
 									Icon={MdCloseFullscreen}
@@ -994,13 +835,6 @@ export const MainPage = () => {
 									title="Close"
 									onClick={handleClose}
 								></Button>
-								{/* <button
-									className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
-									title="Close"
-									onClick={handleClose}
-								>
-									<MdCloseFullscreen className="text-blue-400 text-xl" />
-								</button> */}
 							</div>
 							<Button
 								Icon={HiOutlineTrash}
@@ -1009,13 +843,6 @@ export const MainPage = () => {
 								title="Delete"
 								onClick={handleDeleteItem}
 							></Button>
-							{/* <button
-								className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
-								title="Delete"
-								onClick={handleDeleteItem}
-							>
-								<HiOutlineTrash className="text-red-600 hover-red-700 text-xl font-extrabold" />
-							</button> */}
 						</div>
 					)}
 					{mode === "Edit" && (
@@ -1027,26 +854,12 @@ export const MainPage = () => {
 									title="Save"
 									onClick={handleSaveItem}
 								></Button>
-								{/* <button
-									className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 font-medium text-blue-400 py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all "
-									title="Save"
-									onClick={handleSaveItem}
-								>
-									<LuSave className="text-blue-400 text-xl" />
-								</button> */}
 								<Button
 									Icon={IoClose}
 									variant="diffOps"
 									title="Cancel"
 									onClick={handleCancel}
 								></Button>
-								{/* <button
-									className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
-									title="Cancel"
-									onClick={handleCancel}
-								>
-									<IoClose className="text-blue-400 text-xl" />
-								</button> */}
 							</div>
 							<Button
 								Icon={HiOutlineTrash}
@@ -1055,13 +868,6 @@ export const MainPage = () => {
 								title="Delete"
 								onClick={handleDeleteItem}
 							></Button>
-							{/* <button
-								className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
-								title="Delete"
-								onClick={handleDeleteItem}
-							>
-								<HiOutlineTrash className="text-red-600 hover-red-700 text-xl" />
-							</button> */}
 						</div>
 					)}
 					{mode === "Add" && (
@@ -1072,26 +878,12 @@ export const MainPage = () => {
 								title="Save"
 								onClick={handleSaveItem}
 							></Button>
-							{/* <button
-								className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
-								title="Save"
-								onClick={handleSaveItem}
-							>
-								<LuSave className="text-blue-400 text-xl" />
-							</button> */}
 							<Button
 								Icon={IoClose}
 								variant="diffOps"
 								title="Cancel"
 								onClick={handleCancel}
 							></Button>
-							{/* <button
-								className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all"
-								title="Cancel"
-								onClick={handleCancel}
-							>
-								<IoClose className="text-blue-400 text-xl" />
-							</button> */}
 						</div>
 					)}
 				</div>
