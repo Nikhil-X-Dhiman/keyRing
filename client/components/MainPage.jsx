@@ -21,13 +21,14 @@ import { AddItemBtn } from "./AddItemBtn";
 import { BgBrand } from "./BgBrand";
 import { ItemField } from "./ItemField";
 import { ErrorModal } from "./ErrorModal";
+import { useDB } from "../hooks/useDB";
 
 export const MainPage = () => {
 	const defaultEmpty = {
 		id: undefined,
 		name: "",
-		user: "",
-		passwd: "",
+		custom_user: "",
+		custom_passwd: "",
 		uri: [""],
 		note: "",
 		favourite: false,
@@ -36,6 +37,7 @@ export const MainPage = () => {
 
 	// fetch data from the server and save it to the server only then save the to local too
 	// const [passwdList, setPasswdList] = useState([]); //
+	const { handleAddItem: handleSaveItemDB } = useDB();
 	const [itemIndex, setItemIndex] = useState(null); // index for add, edit and view
 	const [focusItem, setFocusItem] = useState(defaultEmpty); // passwd item for edit and add mode
 	const [mode, setMode] = useState(null); // modes for different view selection (null, view, edit, add)
@@ -374,6 +376,15 @@ export const MainPage = () => {
 			const itemID = uuidv4();
 			// Encrypt Data
 			const uriString = JSON.stringify(focusItem.uri);
+			console.log("Now Adding Item into DB");
+
+			try {
+				const dbOp = await handleSaveItemDB({ itemID, ...focusItem });
+				console.log("DB Operation: ", dbOp);
+			} catch (error) {
+				console.error(error);
+			}
+
 			const encryptedFocusItem = {
 				id: itemID,
 				name: JSON.stringify(await handleEncrypt(focusItem.name)),
