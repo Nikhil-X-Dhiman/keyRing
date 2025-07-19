@@ -96,7 +96,8 @@ export const handleLogin = async (req, res) => {
 		// 14 days (in miliseconds)
 		maxAge: 1000 * 60 * 60 * 24 * 14,
 		httpOnly: true,
-		secure: process.env.PRODUCTION,
+		secure: true,
+		SameSite: "Lax",
 	});
 	// send the success response to login with access token & public key to verify it
 	return res.status(200).json({
@@ -176,11 +177,11 @@ export const handleGetPublicKey = async (req, res) => {
 };
 
 export const handleGetMasterSalt = async (req, res) => {
-	if (!req.user) {
-		return res
-			.status(400)
-			.json({ success: false, msg: "You are not Logged In!!!" });
-	}
+	// if (!req.user) {
+	// 	return res
+	// 		.status(400)
+	// 		.json({ success: false, msg: "You are not Logged In!!!" });
+	// }
 	console.log("Getting Salt Initiated");
 
 	const { email, passwd } = req.body;
@@ -234,6 +235,9 @@ export const handleGetMasterSalt = async (req, res) => {
 export const handleRefreshToken = async (req, res) => {
 	// get user refresh token from req
 	let refreshToken = req.cookies?.refresh_token;
+	console.log("Refresh token called");
+	console.log(refreshToken);
+
 	// verify & decode the refresh token
 	if (!refreshToken) {
 		// send response for no refresh token
@@ -273,6 +277,11 @@ export const handleLogout = async (req, res) => {
 	// remove the session refresh token
 	const [result] = await removeRefreshToken(refreshToken);
 	// remove cookies from client system
-	res.clearCookie("refresh_token", { httpOnly: true, path: "/" });
+	res.clearCookie("refresh_token", {
+		httpOnly: true,
+		secure: true,
+		SameSite: "Lax",
+		path: "/",
+	});
 	return res.status(200).json({ success: true, message: "User Logged Out" });
 };

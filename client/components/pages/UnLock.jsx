@@ -11,6 +11,8 @@ import { InputField } from "../InputField";
 import { Button } from "../Button";
 import { ErrorModal } from "../ErrorModal";
 import { AuthFormHeader } from "../AuthFormHeader";
+import { useFetchData } from "../../hooks/useFetchData";
+import { ClockLoader } from "react-spinners";
 export const UnLock = () => {
 	const {
 		auth,
@@ -23,8 +25,11 @@ export const UnLock = () => {
 	} = useAuth();
 	const { initialiseCrypto, clearSessionKey } = useCrypto();
 	const privateInstance = usePrivateInstance();
+	const { publicKeyRequest, handleFetchList } = useFetchData();
+
 	const [modalError, setModalError] = useState("");
 	const [inputError, setInputError] = useState("");
+	const [loading, setLoading] = useState(false);
 	const passwdRef = useRef(null);
 
 	const location = useLocation();
@@ -36,11 +41,27 @@ export const UnLock = () => {
 	}, []);
 
 	useEffect(() => {
-		if (auth.masterKey) {
+		setLoading(false);
+	}, [modalError]);
+
+	useEffect(() => {
+		if (auth.masterKey && loading === false) {
 			console.log("UnLock: Master Key detected, navigating to /user/home");
-			navigate("/user/home", { replace: true });
+			// navigate("/user/home", { replace: true });
+			navigate(from, { replace: true });
 		}
+	}, [loading]);
+
+	useEffect(() => {
+		async function fetch() {
+			if (auth.masterKey && loading === true) {
+				await handleFetchList();
+				setLoading(false);
+			}
+		}
+		fetch();
 	}, [auth.masterKey]);
+	// }, [auth.masterKey]);
 
 	useEffect(() => {
 		if (validPasswd === true) {
@@ -91,22 +112,30 @@ export const UnLock = () => {
 	}
 
 	const handleSubmitBtn = async (e) => {
+		setLoading(true);
 		e.preventDefault();
 		if (!userLogin.passwd) {
 			setModalError("Password Field Cannot be Empty.");
 		}
+		console.log("pre submit request");
+
 		if (validPasswd) {
 			try {
 				const response = await privateInstance.post(
 					"/api/v1/auth/salt",
 					userLogin
 				);
-				console.log("Present 1");
+				console.log("post submit request");
 
 				if (response.status === 200) {
+					console.log("post post submit request");
 					const masterSalt = await base64ToBuffer(response.data?.master_salt);
-					console.log("Present 2");
+					console.log("post x3 submit request");
+					console.log("UnLock salt: ", masterSalt);
+					console.log("post x4 submit request");
+					await publicKeyRequest();
 					await initialiseCrypto(userLogin.passwd, masterSalt);
+					// await handleFetchList();
 					console.log("UnLock: initialiseCrypto completed.");
 					setUserLogin((prev) => ({ ...prev, passwd: "" }));
 				}
@@ -168,9 +197,9 @@ export const UnLock = () => {
 				<InputField
 					label="Password"
 					id="lock-passwd"
-					required="true"
+					required={true}
 					type="password"
-					showToggle="true"
+					showToggle={true}
 					ref={passwdRef}
 					value={userLogin.passwd}
 					error={inputError}
@@ -183,8 +212,10 @@ export const UnLock = () => {
 					title="Unlock the Vaule"
 					variant="primary"
 					onClick={handleSubmitBtn}
+					className="flex justify-center items-center gap-2"
 				>
-					Unlock
+					{loading && <ClockLoader size={23} />}
+					{loading ? "Processing..." : "Unlock"}
 				</Button>
 
 				<p>or</p>

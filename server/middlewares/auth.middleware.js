@@ -4,6 +4,7 @@ export const authenticateUserRequest = async (req, res, next) => {
 	//extract auth header & get the access token
 	const authHeader = req.headers["authorization"];
 	const accessToken = authHeader?.split(" ")[1];
+	console.log("Access Token: ", accessToken);
 
 	if (!accessToken) {
 		// access token is not present

@@ -11,7 +11,7 @@ const AES_ALGORITHM_NAME = "AES-GCM";
 const IV_LENGTH_BYTES = 12; // 12 bytes (96 bits)
 const SALT_LENGTH_BYTES = 16;
 
-export const generateCryptoRandomValue = (numBytes) => {
+export const generateCryptoRandomValue = (numBytes = SALT_LENGTH_BYTES) => {
 	if (numBytes === undefined || numBytes === null || numBytes <= 0) {
 		throw new CryptoBytesRequirement(
 			"Number of bytes for random generation must be a positive number."
@@ -72,9 +72,9 @@ const deriveKey = async (passwd, salt) => {
 };
 
 export const useCrypto = () => {
+	// Starts Derive Key by suppling passwd and salt
 	const { userLogin, setUserLogin, auth, setAuth } = useAuth();
 	// const masterKeyRef = useRef(null);
-	// Encrypt the data using the master key
 
 	const initialiseCrypto = async (masterPasswd, masterSalt) => {
 		if (!masterPasswd || !masterSalt) {
@@ -94,11 +94,12 @@ export const useCrypto = () => {
 		} finally {
 			if (userLogin?.passwd) {
 				setUserLogin((prev) => ({ ...prev, passwd: "" }));
-				console.log("Password is Cleared");
+				console.log("User Login Password is Cleared");
 			}
 		}
 	};
 
+	// Encrypt the data using the master key
 	const handleEncrypt = async (plainData) => {
 		// console.log("inside encrypt: ", plainData, masterKeyRef.current);
 		console.log("inside encrypt: ", plainData, auth.masterKey);
@@ -121,7 +122,7 @@ export const useCrypto = () => {
 			// convert to buffer
 			const dataBytes = new TextEncoder().encode(plainData);
 			// encrypt the data here
-			console.log("Pre Encryption Plain Text: ", plainData);
+			// console.log("Pre Encryption Plain Text: ", plainData);
 
 			const encryptedBuffer = await window.crypto.subtle.encrypt(
 				{ name: AES_ALGORITHM_NAME, iv },
@@ -129,7 +130,7 @@ export const useCrypto = () => {
 				auth.masterKey,
 				dataBytes
 			);
-			console.log("Post Encryption Encrypted Buffer: ", encryptedBuffer);
+			// console.log("Post Encryption Encrypted Buffer: ", encryptedBuffer);
 			// prepare data for transmission
 			const payload = {
 				encryptedData: bufferToBase64(encryptedBuffer),
@@ -154,7 +155,9 @@ export const useCrypto = () => {
 			!payload.encryptedData ||
 			!payload.iv
 		) {
-			throw new Error("Error: Decrypt Failed, Requirements are not met.");
+			throw new Error(
+				"Error: Decrypt Failed, Requirements are not met (masterkey & payload)."
+			);
 		}
 		try {
 			// convert data into buffer

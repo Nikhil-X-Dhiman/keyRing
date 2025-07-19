@@ -30,10 +30,10 @@ export const handleAllDataRetrieval = async (req, res) => {
 		});
 	}
 	const id = req.user.id;
-	console.log(id);
+	// console.log(id);
 
 	const result = await getAllPasswdById(id);
-	console.log(result);
+	// console.log(result);
 	return res
 		.status(200)
 		.json({ success: true, msg: "All Data Retrieved", result: result });

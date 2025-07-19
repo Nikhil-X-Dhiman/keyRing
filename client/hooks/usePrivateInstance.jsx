@@ -1,9 +1,8 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect } from "react";
 import { privateInstance } from "../api/axios";
 import { useAuth } from "./useAuth";
 import { useRefreshToken } from "./useRefreshToken";
-// use this hook instance for requesting resourses that require authentication not the public ones
+// use this hook instance for requesting resourses that require authentication to access
 export const usePrivateInstance = () => {
 	const refresh = useRefreshToken();
 
@@ -25,7 +24,7 @@ export const usePrivateInstance = () => {
 		const resIntercept = privateInstance.interceptors.response.use(
 			(response) => response,
 			async (error) => {
-				console.log("Response Intercept Error: ", error);
+				console.log("Axios -> Response Intercept Error: ", error);
 
 				const prevRequest = error?.config;
 				if (error?.response?.status === 403 && !prevRequest?.sent) {
@@ -45,7 +44,7 @@ export const usePrivateInstance = () => {
 			privateInstance.interceptors.response.eject(resIntercept);
 			privateInstance.interceptors.request.eject(reqIntercept);
 		};
-	}, [auth, refresh]);
+	}, [auth, refresh, setAuth]);
 
 	return privateInstance;
 };

@@ -17,17 +17,17 @@ export const useVerifyAccessToken = () => {
 			publickey = publicKey;
 		}
 		if (!token) {
-			console.warn("No Token is provided for Verification");
-			return { isValid: false, payload: false, error: "No Token is Available" };
+			console.error("No Token is provided for Verification");
+			return { success: false, payload: false, error: "No Token is Available" };
 		}
 		try {
 			const importedPublicKey = await importSPKI(publickey, "RS256");
 			const { payload } = await jwtVerify(token, importedPublicKey);
-			console.log("Decoded Access Token Payload: ", payload);
-			return { isValid: true, payload, error: null };
+			// console.log("Decoded Access Token Payload: ", payload);
+			return { success: true, payload, error: null };
 		} catch (error) {
 			console.error("Token Verification Failed!!!");
-			return { isValid: false, payload: null, error: error };
+			return { success: false, payload: null, error: error };
 		}
 	};
 	return verifyToken;

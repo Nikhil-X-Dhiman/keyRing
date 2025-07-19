@@ -123,7 +123,7 @@ export const LoginEmail = () => {
 				>
 					<InputField
 						label="Email address"
-						required="true"
+						required={true}
 						id="login-email"
 						ref={emailRef}
 						value={userLogin.email}

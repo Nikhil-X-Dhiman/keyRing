@@ -2,20 +2,23 @@
 import { useLayoutEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useRefreshToken } from "../../hooks/useRefreshToken";
-import { Navigate, Outlet, useLocation } from "react-router";
+import { Navigate, Outlet } from "react-router";
+import { Loading } from "../pages/Loading";
 
 export const PersistLogin = () => {
 	const { auth, setAuth, persist } = useAuth();
 	const refresh = useRefreshToken();
 	const [isLoading, setIsLoading] = useState(true);
-	const location = useLocation();
 
 	useLayoutEffect(() => {
 		let isMounted = true;
 		setIsLoading(true);
 		async function verifyRefreshToken() {
 			try {
-				await refresh();
+				console.log("Inside Persist Login -> called verifyRefreshToken");
+
+				let at = await refresh();
+				console.log("Inside Persist Login -> Post | Access Token Value: ", at);
 			} catch (error) {
 				console.error("Persist Login Refreshing Token: ", error);
 				setAuth(null);
@@ -36,17 +39,8 @@ export const PersistLogin = () => {
 	}, []);
 
 	if (isLoading) {
-		return <p>Loading...</p>;
-	}
-
-	if (auth?.accessToken) {
-		const isAuthPage =
-			location.pathname.startsWith("/login") ||
-			location.pathname.startsWith("/register");
-		if (isAuthPage) {
-			return <Navigate to={"/user/home"} replace />;
-		}
-		return <Outlet />;
+		// return <p>Persit Login: Loading...</p>;
+		return <Loading loading={isLoading} />;
 	}
 
 	return <Outlet />;

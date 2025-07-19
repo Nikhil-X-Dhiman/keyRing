@@ -3,22 +3,25 @@ import { AuthContext } from "./AuthContextObject";
 
 export const AuthProvider = ({ children }) => {
 	const defaultUserValues = { email: "", passwd: "" };
-	const [auth, setAuth] = useState(null);
-	const [persist, setPersist] = useState(
-		JSON.parse(localStorage.getItem("persist")) || false
-	);
-	const [publicKey, setPublicKey] = useState("");
-	const [userLogin, setUserLogin] = useState(defaultUserValues);
-	const [userRegister, setUserRegister] = useState({
+	const defaultAuthValues = { accessToken: "", user: "", masterKey: "" };
+	const defaultRegisterValues = {
 		email: "",
 		name: "",
 		passwd: "",
 		masterSalt: "",
-	});
+	};
+	const [auth, setAuth] = useState(defaultAuthValues);
+	const [userLogin, setUserLogin] = useState(defaultUserValues);
+	const [userRegister, setUserRegister] = useState(defaultRegisterValues);
+	const [persist, setPersist] = useState(
+		JSON.parse(localStorage.getItem("persist")) || false
+	);
+	const [publicKey, setPublicKey] = useState("");
 	const [validEmail, setValidEmail] = useState(false);
 	const [validPasswd, setValidPasswd] = useState(false);
 	const [masterKey, setMasterKey] = useState("");
 	const [passwdList, setPasswdList] = useState([]);
+	const [appLoading, setAppLoading] = useState(false);
 
 	return (
 		<AuthContext.Provider
@@ -42,6 +45,8 @@ export const AuthProvider = ({ children }) => {
 				setMasterKey,
 				passwdList,
 				setPasswdList,
+				appLoading,
+				setAppLoading,
 			}}
 		>
 			{children}

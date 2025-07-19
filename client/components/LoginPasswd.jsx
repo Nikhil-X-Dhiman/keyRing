@@ -10,7 +10,8 @@ import { base64ToBuffer, useCrypto } from "../hooks/useCrypto.js";
 import { InputField } from "./InputField.jsx";
 import { ErrorModal } from "./ErrorModal.jsx";
 import { ClockLoader } from "react-spinners";
-import { usePrivateInstance } from "../hooks/usePrivateInstance.jsx";
+// import { usePrivateInstance } from "../hooks/usePrivateInstance.jsx";
+import { useFetchData } from "../hooks/useFetchData";
 import { AuthFormHeader } from "./AuthFormHeader.jsx";
 import { Button } from "./Button.jsx";
 
@@ -29,7 +30,7 @@ export const LoginPasswd = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const verifyToken = useVerifyAccessToken();
-	const privateInstance = usePrivateInstance();
+	// const privateInstance = usePrivateInstance();
 	const from = location.state?.from?.pathname || "/user/home";
 
 	const {
@@ -40,13 +41,13 @@ export const LoginPasswd = () => {
 		validPasswd,
 		setUserLogin,
 		setValidPasswd,
-		setPublicKey,
-		setPasswdList,
+		// setPublicKey,
+		// setPasswdList,
 	} = useAuth();
 
-	const { handleDecrypt } = useCrypto();
-
 	const { initialiseCrypto } = useCrypto();
+
+	const { publicKeyRequest, handleFetchList } = useFetchData();
 
 	useEffect(() => {
 		passwdRef.current?.focus();
@@ -77,58 +78,59 @@ export const LoginPasswd = () => {
 	}, [userLogin.passwd]);
 
 	useEffect(() => {
-		async function publicKeyRequest() {
-			// Fetch Public Key to Verify Access Token
-			try {
-				const response = await instance.get("/api/v1/auth/public");
-				if (response.status === 200) {
-					await setPublicKey(response.data.publicKey);
-				} else if (response.status === 204) {
-					console.error("Public Key: Not Found!!!");
-					setPageError("Public Key Not Found");
-				}
-			} catch (error) {
-				console.error("Public Key: Unable to send or receive data", error);
-				setPageError("Unable to retrieve data");
-			}
-		}
+		// async function publicKeyRequest() {
+		// 	// Fetch Public Key to Verify Access Token
+		// 	try {
+		// 		const response = await instance.get("/api/v1/auth/public");
+		// 		if (response.status === 200) {
+		// 			await setPublicKey(response.data.publicKey);
+		// 		} else if (response.status === 204) {
+		// 			console.error("Public Key: Not Found!!!");
+		// 			setPageError("Public Key Not Found");
+		// 		}
+		// 	} catch (error) {
+		// 		console.error("Public Key: Unable to send or receive data", error);
+		// 		setPageError("Unable to retrieve data");
+		// 	}
+		// }
+		// publicKeyRequest();
 		publicKeyRequest();
 	}, []);
 
 	useEffect(() => {
 		const fetchData = async () => {
 			if (auth?.masterKey && auth?.accessToken) {
-				const handleFetchData = async () => {
-					try {
-						const response = await privateInstance.get("/api/v1/all");
+				// const handleFetchData = async () => {
+				// 	try {
+				// 		const response = await privateInstance.get("/api/v1/all");
 
-						const { success, result } = response.data;
-						if (success) {
-							const updatedListPromises = result.map(async (item) => {
-								const { itemID, name, user, passwd, uri, note, fav, trash } =
-									item;
-								// Decrypt Data upon arrival
-								return {
-									id: itemID,
-									name: await handleDecrypt(JSON.parse(name)),
-									user: await handleDecrypt(JSON.parse(user)),
-									passwd: await handleDecrypt(JSON.parse(passwd)),
-									uri: JSON.parse(await handleDecrypt(JSON.parse(uri))),
-									note: await handleDecrypt(JSON.parse(note)),
-									favourite: await handleDecrypt(JSON.parse(fav)),
-									trash,
-								};
-							});
-							const updatedList = await Promise.all(updatedListPromises);
-							setPasswdList(updatedList);
-						}
-					} catch (error) {
-						console.error(error.response?.data?.msg, error);
-						setPageError("Retrieving & Decrypting Data Failed");
-					}
-				};
-				await handleFetchData();
-
+				// 		const { success, result } = response.data;
+				// 		if (success) {
+				// 			const updatedListPromises = result.map(async (item) => {
+				// 				const { itemID, name, user, passwd, uri, note, fav, trash } =
+				// 					item;
+				// 				// Decrypt Data upon arrival
+				// 				return {
+				// 					id: itemID,
+				// 					name: await handleDecrypt(JSON.parse(name)),
+				// 					user: await handleDecrypt(JSON.parse(user)),
+				// 					passwd: await handleDecrypt(JSON.parse(passwd)),
+				// 					uri: JSON.parse(await handleDecrypt(JSON.parse(uri))),
+				// 					note: await handleDecrypt(JSON.parse(note)),
+				// 					favourite: await handleDecrypt(JSON.parse(fav)),
+				// 					trash,
+				// 				};
+				// 			});
+				// 			const updatedList = await Promise.all(updatedListPromises);
+				// 			setPasswdList(updatedList);
+				// 		}
+				// 	} catch (error) {
+				// 		console.error(error.response?.data?.msg, error);
+				// 		setPageError("Retrieving & Decrypting Data Failed");
+				// 	}
+				// };
+				// await handleFetchData();
+				await handleFetchList();
 				setLoading(false);
 				navigate(from, { replace: true });
 			}
@@ -147,7 +149,10 @@ export const LoginPasswd = () => {
 		setLoading(true);
 		if (validPasswd && validEmail) {
 			try {
-				const response = await instance.post("/api/v1/auth/login", userLogin);
+				const response = await instance.post("/api/v1/auth/login", userLogin, {
+					headers: { "Content-Type": "application/json" },
+					withCredentials: true,
+				});
 
 				const access_token = response.data?.access_token;
 				const masterSalt = base64ToBuffer(response.data?.master_salt);
@@ -155,9 +160,9 @@ export const LoginPasswd = () => {
 				if (response.status === 200) {
 					setAuth((prev) => ({ ...prev, accessToken: access_token }));
 
-					const { isValid, payload, error } = await verifyToken(access_token);
+					const { success, payload, error } = await verifyToken(access_token);
 
-					if (isValid) {
+					if (success) {
 						setAuth((prev) => ({ ...prev, user: payload }));
 						await initialiseCrypto(userLogin.passwd, masterSalt);
 						setUserLogin((prev) => ({ ...prev, passwd: "" }));
@@ -215,6 +220,7 @@ export const LoginPasswd = () => {
 					}
 				/>
 				<Button
+					title="Login in to your account"
 					variant="primary"
 					onClick={handleSubmitBtn}
 					className="flex justify-center items-center gap-2"
@@ -222,7 +228,9 @@ export const LoginPasswd = () => {
 					{loading && <ClockLoader size={23} />}
 					{loading ? "Processing..." : "Login"}
 				</Button>
+
 				<p>or</p>
+
 				<Button
 					variant="outline"
 					type="reset"
