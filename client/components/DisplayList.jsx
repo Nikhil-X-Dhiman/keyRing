@@ -8,7 +8,7 @@ export const DisplayList = ({
 	handleClickItem,
 }) => {
 	return (
-		<div className="overflow-y-scroll h-full">
+		<div className="h-full">
 			{filteredList.length !== 0 ? (
 				<ul>
 					<ListItem

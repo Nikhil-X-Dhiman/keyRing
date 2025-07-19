@@ -621,7 +621,7 @@ export const MainPage = () => {
 											}
 											onChange={handleInputChange}
 											readOnly={mode === "View"}
-											autoComplete="off"
+											autoComplete="new-password"
 											mode={mode}
 											cTitle="Copy Password"
 											tTitle="Toggle Visibility"
