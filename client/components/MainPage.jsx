@@ -27,8 +27,8 @@ export const MainPage = () => {
 	const defaultEmpty = {
 		id: undefined,
 		name: "",
-		custom_user: "",
-		custom_passwd: "",
+		user: "",
+		passwd: "",
 		uri: [""],
 		note: "",
 		favourite: false,

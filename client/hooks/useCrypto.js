@@ -189,7 +189,33 @@ export const useCrypto = () => {
 		console.log("Session Key Cleared");
 	};
 
+	const handleListToDecrypt = async (list) => {
+		const updatedListPromises = list.map(async (item) => {
+			const { itemID, name, user, passwd, uri, note, fav, trash } = item;
+
+			// Decrypt Data upon arrival
+			return {
+				id: itemID,
+				name: await handleDecrypt(JSON.parse(name)),
+				user: await handleDecrypt(JSON.parse(user)),
+				passwd: await handleDecrypt(JSON.parse(passwd)),
+				uri: JSON.parse(await handleDecrypt(JSON.parse(uri))),
+				note: await handleDecrypt(JSON.parse(note)),
+				favourite: await handleDecrypt(JSON.parse(fav)),
+				trash,
+			};
+		});
+		const updatedList = await Promise.all(updatedListPromises);
+		return updatedList;
+	};
+
 	// generateSessionKey: call when signing in
 	// clearSessionKey: call when signing out
-	return { initialiseCrypto, handleEncrypt, handleDecrypt, clearSessionKey };
+	return {
+		initialiseCrypto,
+		handleEncrypt,
+		handleDecrypt,
+		clearSessionKey,
+		handleListToDecrypt,
+	};
 };

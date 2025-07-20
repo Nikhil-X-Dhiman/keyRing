@@ -2,6 +2,7 @@ import { useAuth } from "./useAuth";
 import { usePrivateInstance } from "./usePrivateInstance";
 import { useCrypto } from "./useCrypto";
 import { instance } from "../api/axios";
+import { useDB } from "./useDB";
 
 export const useFetchData = () => {
 	const {
@@ -13,7 +14,8 @@ export const useFetchData = () => {
 		setPasswdList,
 	} = useAuth();
 	const privateInstance = usePrivateInstance();
-	const { handleDecrypt } = useCrypto();
+	const { handleListToDecrypt } = useCrypto();
+	const { handleAddItemDB, fetchAllItemsDB } = useDB();
 
 	const publicKeyRequest = async () => {
 		// Fetch Public Key to Verify Access Token
@@ -36,27 +38,25 @@ export const useFetchData = () => {
 
 			const { success, result } = response.data;
 			if (success) {
-				const updatedListPromises = result.map(async (item) => {
-					const { itemID, name, user, passwd, uri, note, fav, trash } = item;
-					// Decrypt Data upon arrival
-					return {
-						id: itemID,
-						name: await handleDecrypt(JSON.parse(name)),
-						user: await handleDecrypt(JSON.parse(user)),
-						passwd: await handleDecrypt(JSON.parse(passwd)),
-						uri: JSON.parse(await handleDecrypt(JSON.parse(uri))),
-						note: await handleDecrypt(JSON.parse(note)),
-						favourite: await handleDecrypt(JSON.parse(fav)),
-						trash,
-					};
+				// Add Items to Local DB, can't use bulk coz of different colums name
+				result.forEach(async (item) => {
+					try {
+						await handleAddItemDB(item);
+					} catch (error) {
+						console.error(
+							"Failed to Add Items into IndexedDB. Maybe it already exist: ",
+							error
+						);
+					}
 				});
-				const updatedList = await Promise.all(updatedListPromises);
-				setPasswdList(updatedList);
+				const plainTextCloudList = await handleListToDecrypt(result);
+				console.log("Plain Text Cloud List: ", plainTextCloudList);
+
+				setPasswdList(plainTextCloudList);
 			}
 		} catch (error) {
 			console.error(error.response?.data?.msg, error);
 			throw new Error("Retrieving & Decrypting Data Failed");
-			// setPageError("Retrieving & Decrypting Data Failed");
 		}
 	};
 

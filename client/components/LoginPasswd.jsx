@@ -14,6 +14,7 @@ import { ClockLoader } from "react-spinners";
 import { useFetchData } from "../hooks/useFetchData";
 import { AuthFormHeader } from "./AuthFormHeader.jsx";
 import { Button } from "./Button.jsx";
+import { useDB } from "../hooks/useDB.js";
 
 export const LoginPasswd = () => {
 	const PASSWD_REGEX =

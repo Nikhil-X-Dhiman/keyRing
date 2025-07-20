@@ -3,7 +3,7 @@
 import { db } from "../db/db";
 
 export const useDB = () => {
-	const fetchAllItems = async () => {
+	const fetchAllItemsDB = async () => {
 		// set start loading
 		try {
 			const passwdList = await db.passwdList.toArray();
@@ -14,30 +14,56 @@ export const useDB = () => {
 			throw new Error("Failed to load data");
 		}
 	};
-	const handleAddItem = async (item) => {
-		// e.preventDefault();
-		console.log("RUNNING");
 
+	const handleAddItemDB = async (item) => {
 		if (!item) {
 			console.error("Item cannot be empty");
 			throw new Error("No Data to Store");
 		}
 		try {
+			const {
+				itemID,
+				name,
+				user,
+				passwd,
+				uri,
+				note,
+				favourite,
+				trash,
+				userID,
+				createdAt,
+				updatedAt,
+			} = item;
 			const id = await db.passwdList.add({
-				...item,
-				password: item.passwd, // Map passwd to password to match schema
-				created_at: new Date(),
-				updated_at: new Date(),
+				itemID,
+				name,
+				user,
+				password: passwd,
+				uri,
+				note,
+				favourite,
+				trash,
+				created_at: createdAt,
+				updated_at: updatedAt,
+				userID,
 			});
 			console.log("Item Added with ID: ", id);
 			return id;
-			// TODO: here fetch or upload the item to cloud
 		} catch (error) {
 			console.error("Failed to Add Item: ", error);
 			throw new Error("Failed to Add Item");
 		}
 	};
-	const handleToggleFav = async (id, currentValue) => {
+	const handleBulkAddItemsDB = (itemList) => {
+		try {
+			db.passwdList.bulkAdd(itemList);
+			return true;
+		} catch (error) {
+			console.error("Bulk Add to DB Failed: ", error);
+			throw new Error("Bulk Add to DB Failed");
+		}
+	};
+	const handleToggleFavDB = async (id, currentValue) => {
 		try {
 			const success = await db.passwdList.update(id, {
 				favourite: !currentValue,
@@ -56,7 +82,7 @@ export const useDB = () => {
 		}
 	};
 
-	const handleToggleTrash = async (id, currentValue) => {
+	const handleToggleTrashDB = async (id, currentValue) => {
 		try {
 			const success = await db.passwdList.update(id, {
 				trash: !currentValue,
@@ -75,7 +101,7 @@ export const useDB = () => {
 		}
 	};
 
-	const handleDeleteItem = async (id) => {
+	const handleDeleteItemDB = async (id) => {
 		try {
 			await db.passwdList.delete(id);
 			console.log("Item is deleted");
@@ -86,7 +112,7 @@ export const useDB = () => {
 		}
 	};
 
-	const handleGetItemByID = async (id) => {
+	const handleGetItemByIdDB = async (id) => {
 		try {
 			const item = await db.passwdList.get(id);
 			console.log("Item is Found");
@@ -102,7 +128,7 @@ export const useDB = () => {
 		}
 	};
 
-	const handleEmptyTrash = async () => {
+	const handleEmptyTrashDB = async () => {
 		try {
 			await db.transaction("rw", db.passwdList, async () => {
 				const keysList = await db.passwdList
@@ -119,7 +145,7 @@ export const useDB = () => {
 		}
 	};
 
-	const handleEmptyList = async () => {
+	const handleEmptyListDB = async () => {
 		try {
 			await db.passwdList.clear();
 			console.log("List is now Empty");
@@ -131,13 +157,14 @@ export const useDB = () => {
 	};
 
 	return {
-		fetchAllItems,
-		handleAddItem,
-		handleDeleteItem,
-		handleEmptyList,
-		handleEmptyTrash,
-		handleGetItemByID,
-		handleToggleFav,
-		handleToggleTrash,
+		fetchAllItemsDB,
+		handleAddItemDB,
+		handleDeleteItemDB,
+		handleEmptyListDB,
+		handleEmptyTrashDB,
+		handleGetItemByIdDB,
+		handleToggleFavDB,
+		handleToggleTrashDB,
+		handleBulkAddItemsDB,
 	};
 };

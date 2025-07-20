@@ -23,7 +23,7 @@ export const userTable = mysqlTable("users", {
 	failedLoginAttempts: int("failed_login_attempts").default(0).notNull(),
 	lastLogin: datetime("last_login"),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
-	updateAt: timestamp("updated_at")
+	updatedAt: timestamp("updated_at")
 		.defaultNow()
 		.$onUpdate(() => new Date())
 		.notNull(),
@@ -46,7 +46,7 @@ export const userAuthTable = mysqlTable("auth", {
 	}),
 	salt: varchar("salt", { length: 255 }).unique().notNull(),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
-	updateAt: timestamp("updated_at")
+	updatedAt: timestamp("updated_at")
 		.defaultNow()
 		.$onUpdate(() => new Date())
 		.notNull(),
@@ -66,7 +66,7 @@ export const refreshTokenTable = mysqlTable("refresh_token", {
 	createdAt: timestamp("created_at", { withTimezone: true })
 		.defaultNow()
 		.notNull(),
-	updateAt: timestamp("updated_at", { withTimezone: true })
+	updatedAt: timestamp("updated_at", { withTimezone: true })
 		.defaultNow()
 		.$onUpdate(() => new Date())
 		.notNull(),
@@ -87,7 +87,7 @@ export const loginTable = mysqlTable("login", {
 	note: text("note"),
 	trash: boolean("trash").default(false).notNull(),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
-	updateAt: timestamp("updated_at")
+	updatedAt: timestamp("updated_at")
 		.defaultNow()
 		.$onUpdate(() => new Date())
 		.notNull(),
