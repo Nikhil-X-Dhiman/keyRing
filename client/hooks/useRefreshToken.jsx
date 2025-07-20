@@ -1,11 +1,13 @@
 // import { useEffect } from "react";
 import { instance } from "../api/axios";
 import { useAuth } from "./useAuth";
+import { useDB } from "./useDB";
 import { useVerifyAccessToken } from "./useVerifyJWT";
 
 export const useRefreshToken = () => {
 	const { setAuth, setPublicKey, setUserLogin } = useAuth();
 	const verifyToken = useVerifyAccessToken();
+	const { handleAddNewAccessTokenDB } = useDB();
 
 	const refreshToken = async () => {
 		console.log("Pre Refresh Token RUN");
@@ -18,11 +20,19 @@ export const useRefreshToken = () => {
 			console.log("Post Refresh Token RUN");
 			const accessToken = response.data.access_token;
 			console.log("new access token: ", accessToken);
+			// updating access token with newer one
+			try {
+				await handleAddNewAccessTokenDB(accessToken);
+				console.log("DB updated with new access token");
+			} catch (error) {
+				console.error(error);
+			}
 
 			const publicKey = response.data.publicKey;
 			console.log(accessToken, publicKey);
 
 			setPublicKey(publicKey);
+
 			const { success, payload } = await verifyToken(accessToken, publicKey);
 			if (success) {
 				setAuth((prev) => ({ ...prev, accessToken, user: payload }));

@@ -1,10 +1,24 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "../drizzle/db/index.js";
-import { loginTable } from "../drizzle/db/schema.js";
+import { appDataTable } from "../drizzle/db/schema.js";
 
-export const getAllPasswdById = async (id) => {
+export const getAllPasswdById = async (userID) => {
 	try {
-		return await db.select().from(loginTable).where(eq(loginTable.userID, id));
+		return await db
+			.select({
+				itemID: appDataTable.uuid,
+				name: appDataTable.name,
+				username: appDataTable.username,
+				password: appDataTable.password,
+				uri: appDataTable.uri,
+				note: appDataTable.note,
+				favourite: appDataTable.favourite,
+				trash: appDataTable.trash,
+				createdAt: appDataTable.createdAt,
+				updatedAt: appDataTable.updatedAt,
+			})
+			.from(appDataTable)
+			.where(eq(appDataTable.userID, userID));
 	} catch (error) {
 		console.error(error);
 		return null;
@@ -13,30 +27,31 @@ export const getAllPasswdById = async (id) => {
 
 export const insertPasswdById = async (userID, item) => {
 	try {
-		const { name, user, passwd, uri, note, fav, trash, id } = item;
+		const { name, username, password, uri, note, favourite, trash, uuid } =
+			item;
 		return await db
-			.insert(loginTable)
+			.insert(appDataTable)
 			.values({
-				name: name,
-				userID: userID,
-				user: user,
-				passwd: passwd,
-				fav: fav,
-				note: note,
-				trash: trash,
-				uri: uri,
-				itemID: id,
+				name,
+				userID,
+				username,
+				password,
+				favourite,
+				note,
+				trash,
+				uri,
+				uuid,
 			})
-			.$returningId();
+			.$returning();
 	} catch (error) {
 		console.error(error);
 		return null;
 	}
 };
 
-export const delPasswdByItemID = async (itemID) => {
+export const delPasswdByItemID = async (uuid) => {
 	try {
-		return await db.delete(loginTable).where(eq(loginTable.itemID, itemID));
+		return await db.delete(appDataTable).where(eq(appDataTable.uuid, uuid));
 	} catch (error) {
 		console.error("Delete Passwd: ", error);
 		return null;
@@ -46,47 +61,48 @@ export const delPasswdByItemID = async (itemID) => {
 export const delTrashPasswd = async (userID) => {
 	try {
 		return await db
-			.delete(loginTable)
-			.where(and(eq(loginTable.userID, userID), eq(loginTable.trash, true)));
+			.delete(appDataTable)
+			.where(
+				and(eq(appDataTable.userID, userID), eq(appDataTable.trash, true))
+			);
 	} catch (error) {
 		console.error("Empty Trash Items: ", error);
 		return null;
 	}
 };
 
-export const markPasswdTrashByItemID = async (itemID, payload) => {
-	console.log("inside mdoel: ", payload.trash, itemID);
+export const markPasswdTrashByItemID = async (uuid, payload) => {
+	// console.log("inside mdoel: ", payload.trash, uuid);
 
 	try {
 		return await db
-			.update(loginTable)
+			.update(appDataTable)
 			.set({ trash: payload.trash })
-			.where(eq(loginTable.itemID, itemID));
+			.where(eq(appDataTable.uuid, uuid));
 	} catch (error) {
 		console.error("Mark Passwd Trash Error: ", error);
 		return null;
 	}
 };
 
-export const updatePasswdByItemID = async (itemID, payload) => {
-	const { name, user, passwd, favourite, note, trash, uri } = payload;
-	console.log("Favourite Value: ", payload);
+export const updatePasswdByItemUUID = async (uuid, payload) => {
+	const { name, username, password, favourite, note, trash, uri } = payload;
 
 	try {
 		return await db
-			.update(loginTable)
+			.update(appDataTable)
 			.set({
-				name: name,
-				user: user,
-				passwd: passwd,
-				fav: favourite,
-				note: note,
-				trash: trash,
-				uri: uri,
+				name,
+				username,
+				password,
+				favourite,
+				note,
+				trash,
+				uri,
 			})
-			.where(eq(loginTable.itemID, itemID));
+			.where(eq(appDataTable.uuid, uuid));
 	} catch (error) {
-		console.error("Editing Passwd Field Error: ", error);
+		console.error("Editing Password Field Error: ", error);
 		return null;
 	}
 };

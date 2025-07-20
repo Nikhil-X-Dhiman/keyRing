@@ -1,14 +1,14 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "e77f0a70-e9b1-49fa-84b7-13204e8d3fda",
+  "id": "7aa4b6f0-b8be-475d-9e44-f4813ec26dd3",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "login": {
-      "name": "login",
+    "app_data": {
+      "name": "app_data",
       "columns": {
-        "id": {
-          "name": "id",
+        "data_id": {
+          "name": "data_id",
           "type": "int",
           "primaryKey": false,
           "notNull": true,
@@ -21,30 +21,30 @@
           "notNull": false,
           "autoincrement": false
         },
-        "item_id": {
-          "name": "item_id",
-          "type": "varchar(255)",
+        "uuid": {
+          "name": "uuid",
+          "type": "varchar(512)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
         "name": {
           "name": "name",
-          "type": "varchar(255)",
+          "type": "varchar(512)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
         "username": {
           "name": "username",
-          "type": "varchar(255)",
+          "type": "varchar(512)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
         "password": {
           "name": "password",
-          "type": "varchar(255)",
+          "type": "varchar(512)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -56,8 +56,8 @@
           "notNull": false,
           "autoincrement": false
         },
-        "favorite": {
-          "name": "favorite",
+        "favourite": {
+          "name": "favourite",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
@@ -98,25 +98,25 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "login_user_id_users_id_fk": {
-          "name": "login_user_id_users_id_fk",
-          "tableFrom": "login",
+        "app_data_user_id_users_user_id_fk": {
+          "name": "app_data_user_id_users_user_id_fk",
+          "tableFrom": "app_data",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
           "columnsTo": [
-            "id"
+            "user_id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
-        "login_id": {
-          "name": "login_id",
+        "app_data_data_id": {
+          "name": "app_data_data_id",
           "columns": [
-            "id"
+            "data_id"
           ]
         }
       },
@@ -126,8 +126,8 @@
     "refresh_token": {
       "name": "refresh_token",
       "columns": {
-        "id": {
-          "name": "id",
+        "token_id": {
+          "name": "token_id",
           "type": "int",
           "primaryKey": false,
           "notNull": true,
@@ -195,25 +195,25 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "refresh_token_user_id_users_id_fk": {
-          "name": "refresh_token_user_id_users_id_fk",
+        "refresh_token_user_id_users_user_id_fk": {
+          "name": "refresh_token_user_id_users_user_id_fk",
           "tableFrom": "refresh_token",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
           "columnsTo": [
-            "id"
+            "user_id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
-        "refresh_token_id": {
-          "name": "refresh_token_id",
+        "refresh_token_token_id": {
+          "name": "refresh_token_token_id",
           "columns": [
-            "id"
+            "token_id"
           ]
         }
       },
@@ -230,8 +230,8 @@
     "auth": {
       "name": "auth",
       "columns": {
-        "id": {
-          "name": "id",
+        "auth_id": {
+          "name": "auth_id",
           "type": "int",
           "primaryKey": false,
           "notNull": true,
@@ -246,7 +246,7 @@
         },
         "password_hash": {
           "name": "password_hash",
-          "type": "varchar(255)",
+          "type": "varchar(512)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -305,35 +305,29 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "auth_user_id_users_id_fk": {
-          "name": "auth_user_id_users_id_fk",
+        "auth_user_id_users_user_id_fk": {
+          "name": "auth_user_id_users_user_id_fk",
           "tableFrom": "auth",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
           "columnsTo": [
-            "id"
+            "user_id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
-        "auth_id": {
-          "name": "auth_id",
+        "auth_auth_id": {
+          "name": "auth_auth_id",
           "columns": [
-            "id"
+            "auth_id"
           ]
         }
       },
       "uniqueConstraints": {
-        "auth_password_hash_unique": {
-          "name": "auth_password_hash_unique",
-          "columns": [
-            "password_hash"
-          ]
-        },
         "auth_verify_token_unique": {
           "name": "auth_verify_token_unique",
           "columns": [
@@ -345,12 +339,6 @@
           "columns": [
             "reset_password_token"
           ]
-        },
-        "auth_salt_unique": {
-          "name": "auth_salt_unique",
-          "columns": [
-            "salt"
-          ]
         }
       },
       "checkConstraint": {}
@@ -358,15 +346,15 @@
     "users": {
       "name": "users",
       "columns": {
-        "id": {
-          "name": "id",
+        "user_id": {
+          "name": "user_id",
           "type": "int",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": true
         },
-        "name": {
-          "name": "name",
+        "username": {
+          "name": "username",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true,
@@ -446,10 +434,10 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "users_id": {
-          "name": "users_id",
+        "users_user_id": {
+          "name": "users_user_id",
           "columns": [
-            "id"
+            "user_id"
           ]
         }
       },

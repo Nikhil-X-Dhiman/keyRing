@@ -3,6 +3,7 @@ import { usePrivateInstance } from "./usePrivateInstance";
 import { useCrypto } from "./useCrypto";
 import { instance } from "../api/axios";
 import { useDB } from "./useDB";
+import equal from "fast-deep-equal";
 
 export const useFetchData = () => {
 	const {
@@ -32,30 +33,45 @@ export const useFetchData = () => {
 		}
 	};
 
+	const handleFetchLocalDbList = async () => {
+		const localDBItemsList = await fetchAllItemsDB();
+		const plainTextLocalDBList = await handleListToDecrypt(localDBItemsList);
+		setPasswdList(plainTextLocalDBList);
+	};
+
 	const handleFetchList = async () => {
 		try {
 			const response = await privateInstance.get("/api/v1/all");
 
 			const { success, result } = response.data;
 			if (success) {
-				// Add Items to Local DB, can't use bulk coz of different colums name
-				result.forEach(async (item) => {
-					try {
-						await handleAddItemDB(item);
-					} catch (error) {
-						console.error(
-							"Failed to Add Items into IndexedDB. Maybe it already exist: ",
-							error
-						);
-					}
-				});
+				// Add Items to Local DB, can't use bulk coz of different columns name and maybe deep copy will also not work here
+				const localItemList = await fetchAllItemsDB();
+				console.log(localItemList, result);
+
+				if (!equal(result, localItemList)) {
+					result.forEach(async (item) => {
+						try {
+							await handleAddItemDB(item);
+						} catch (error) {
+							console.error(
+								"Failed to Add Items into IndexedDB. Maybe it already exist: ",
+								error
+							);
+						}
+					});
+				}
+
 				const plainTextCloudList = await handleListToDecrypt(result);
 				console.log("Plain Text Cloud List: ", plainTextCloudList);
 
 				setPasswdList(plainTextCloudList);
+			} else {
+				await handleFetchLocalDbList();
 			}
 		} catch (error) {
 			console.error(error.response?.data?.msg, error);
+			// await handleFetchLocalDbList();
 			throw new Error("Retrieving & Decrypting Data Failed");
 		}
 	};

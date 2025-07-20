@@ -37,7 +37,12 @@ export const MainPage = () => {
 
 	// fetch data from the server and save it to the server only then save the to local too
 	// const [passwdList, setPasswdList] = useState([]); //
-	const { handleAddItem: handleSaveItemDB } = useDB();
+	const {
+		handleAddItemDB,
+		handleEmptyListDB,
+		handleEmptyAppState,
+		handleDelDB,
+	} = useDB();
 	const [itemIndex, setItemIndex] = useState(null); // index for add, edit and view
 	const [focusItem, setFocusItem] = useState(defaultEmpty); // passwd item for edit and add mode
 	const [mode, setMode] = useState(null); // modes for different view selection (null, view, edit, add)
@@ -83,7 +88,7 @@ export const MainPage = () => {
 	}, [auth.masterKey]);
 	// Search & filters data based upon user search query & active page
 	const filteredList = passwdList.filter((item) => {
-		console.log("item: ", item);
+		// console.log("item: ", item);
 
 		const matchesSearch =
 			item?.name?.toLowerCase().includes(searchItem?.toLowerCase()) ||
@@ -378,13 +383,6 @@ export const MainPage = () => {
 			const uriString = JSON.stringify(focusItem.uri);
 			console.log("Now Adding Item into DB");
 
-			try {
-				const dbOp = await handleSaveItemDB({ itemID, ...focusItem });
-				console.log("DB Operation: ", dbOp);
-			} catch (error) {
-				console.error(error);
-			}
-
 			const encryptedFocusItem = {
 				id: itemID,
 				name: JSON.stringify(await handleEncrypt(focusItem.name)),
@@ -403,6 +401,15 @@ export const MainPage = () => {
 					// item
 				);
 				if (response.status === 201 && response.data.success === true) {
+					try {
+						const dbOp = await handleAddItemDB({
+							itemID: encryptedFocusItem.id,
+							...encryptedFocusItem,
+						});
+						console.log("DB Operation: ", dbOp);
+					} catch (error) {
+						console.error(error);
+					}
 					setPasswdList((prev) => {
 						const updatedList = [...prev];
 						updatedList.push(item);
@@ -462,6 +469,9 @@ export const MainPage = () => {
 			setPageMode("All");
 			localStorage.setItem("isLogged", JSON.stringify(false));
 			setAuth(null);
+			await handleEmptyListDB();
+			await handleEmptyAppState();
+			await handleDelDB();
 			clearSessionKey();
 			navigate("/login/email");
 		} else {

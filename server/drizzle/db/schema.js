@@ -13,8 +13,8 @@ import {
 
 // Track users
 export const userTable = mysqlTable("users", {
-	id: int("id").autoincrement().primaryKey(),
-	name: varchar("name", { length: 255 }).notNull(),
+	userID: int("user_id").autoincrement().primaryKey(),
+	username: varchar("username", { length: 255 }).notNull(),
 	email: varchar("email", { length: 255 }).notNull().unique(),
 	emailVerified: boolean("email_verified").default(false).notNull(),
 	role: mysqlEnum("role", ["admin", "customer"]).default("customer").notNull(),
@@ -31,11 +31,11 @@ export const userTable = mysqlTable("users", {
 
 // Track user Auth details
 export const userAuthTable = mysqlTable("auth", {
-	id: int("id").autoincrement().primaryKey(),
-	userID: int("user_id").references(() => userTable.id, {
+	authID: int("auth_id").autoincrement().primaryKey(),
+	userID: int("user_id").references(() => userTable.userID, {
 		onDelete: "cascade",
 	}),
-	passwordHash: varchar("password_hash", { length: 255 }).unique().notNull(),
+	passwordHash: varchar("password_hash", { length: 512 }).notNull(),
 	verifyToken: varchar("verify_token", { length: 255 }).unique(),
 	verifyTokenExpiry: timestamp("verify_token_expiry", {
 		withTimezone: true,
@@ -44,7 +44,7 @@ export const userAuthTable = mysqlTable("auth", {
 	resetPasswordTokenExpiry: timestamp("reset_password_token_expiry", {
 		withTimezone: true,
 	}),
-	salt: varchar("salt", { length: 255 }).unique().notNull(),
+	salt: varchar("salt", { length: 255 }).notNull(),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at")
 		.defaultNow()
@@ -54,8 +54,8 @@ export const userAuthTable = mysqlTable("auth", {
 
 // Track user Session Details
 export const refreshTokenTable = mysqlTable("refresh_token", {
-	id: int("id").autoincrement().primaryKey(),
-	userID: int("user_id").references(() => userTable.id, {
+	tokenID: int("token_id").autoincrement().primaryKey(),
+	userID: int("user_id").references(() => userTable.userID, {
 		onDelete: "cascade",
 	}),
 	token: varchar("token", { length: 500 }).unique().notNull(),
@@ -73,17 +73,17 @@ export const refreshTokenTable = mysqlTable("refresh_token", {
 });
 
 // Store user Password Data
-export const loginTable = mysqlTable("login", {
-	id: int("id").autoincrement().primaryKey(),
-	userID: int("user_id").references(() => userTable.id, {
+export const appDataTable = mysqlTable("app_data", {
+	dataID: int("data_id").autoincrement().primaryKey(),
+	userID: int("user_id").references(() => userTable.userID, {
 		onDelete: "cascade",
 	}),
-	itemID: varchar("item_id", { length: 255 }).notNull(),
-	name: varchar("name", { length: 255 }),
-	user: varchar("username", { length: 255 }),
-	passwd: varchar("password", { length: 255 }),
+	uuid: varchar("uuid", { length: 512 }).notNull(),
+	name: varchar("name", { length: 512 }),
+	username: varchar("username", { length: 512 }),
+	password: varchar("password", { length: 512 }),
 	uri: json("uri"),
-	fav: boolean("favorite").default(false).notNull(),
+	favourite: boolean("favourite").default(false).notNull(),
 	note: text("note"),
 	trash: boolean("trash").default(false).notNull(),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -97,18 +97,18 @@ export const loginTable = mysqlTable("login", {
 // userTable && userAuthTable && refreshTokenTable
 export const userRelations = relations(userTable, ({ one, many }) => ({
 	auth: one(userAuthTable, {
-		fields: [userTable.id],
+		fields: [userTable.userID],
 		references: [userAuthTable.userID],
 	}),
 	token: many(refreshTokenTable), //foreign key
-	login: many(loginTable),
+	login: many(appDataTable),
 }));
 
 // userTable && userAuthTable
 export const userAuthRelations = relations(userAuthTable, ({ one }) => ({
 	user: one(userTable, {
 		fields: [userAuthTable.userID],
-		references: [userTable.id],
+		references: [userTable.userID],
 	}),
 }));
 
@@ -118,15 +118,15 @@ export const refreshTokenRelations = relations(
 	({ one }) => ({
 		user: one(userTable, {
 			fields: [refreshTokenTable.userID],
-			references: [userTable.id],
+			references: [userTable.userID],
 		}),
 	})
 );
 
 // userTable && loginTable
-export const loginRelations = relations(loginTable, ({ one }) => ({
+export const loginRelations = relations(appDataTable, ({ one }) => ({
 	user: one(userTable, {
-		fields: [loginTable.userID],
-		references: [userTable.id],
+		fields: [appDataTable.userID],
+		references: [userTable.userID],
 	}),
 }));

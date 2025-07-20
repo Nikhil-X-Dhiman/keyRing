@@ -31,8 +31,12 @@ export const LoginPasswd = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const verifyToken = useVerifyAccessToken();
+	const { handleAddAppState, handleDBOpen } = useDB();
+
 	// const privateInstance = usePrivateInstance();
 	const from = location.state?.from?.pathname || "/user/home";
+
+	const masterSaltRef = useRef("");
 
 	const {
 		auth,
@@ -42,6 +46,7 @@ export const LoginPasswd = () => {
 		validPasswd,
 		setUserLogin,
 		setValidPasswd,
+		publicKey,
 		// setPublicKey,
 		// setPasswdList,
 	} = useAuth();
@@ -79,59 +84,23 @@ export const LoginPasswd = () => {
 	}, [userLogin.passwd]);
 
 	useEffect(() => {
-		// async function publicKeyRequest() {
-		// 	// Fetch Public Key to Verify Access Token
-		// 	try {
-		// 		const response = await instance.get("/api/v1/auth/public");
-		// 		if (response.status === 200) {
-		// 			await setPublicKey(response.data.publicKey);
-		// 		} else if (response.status === 204) {
-		// 			console.error("Public Key: Not Found!!!");
-		// 			setPageError("Public Key Not Found");
-		// 		}
-		// 	} catch (error) {
-		// 		console.error("Public Key: Unable to send or receive data", error);
-		// 		setPageError("Unable to retrieve data");
-		// 	}
-		// }
-		// publicKeyRequest();
 		publicKeyRequest();
 	}, []);
 
 	useEffect(() => {
 		const fetchData = async () => {
 			if (auth?.masterKey && auth?.accessToken) {
-				// const handleFetchData = async () => {
-				// 	try {
-				// 		const response = await privateInstance.get("/api/v1/all");
-
-				// 		const { success, result } = response.data;
-				// 		if (success) {
-				// 			const updatedListPromises = result.map(async (item) => {
-				// 				const { itemID, name, user, passwd, uri, note, fav, trash } =
-				// 					item;
-				// 				// Decrypt Data upon arrival
-				// 				return {
-				// 					id: itemID,
-				// 					name: await handleDecrypt(JSON.parse(name)),
-				// 					user: await handleDecrypt(JSON.parse(user)),
-				// 					passwd: await handleDecrypt(JSON.parse(passwd)),
-				// 					uri: JSON.parse(await handleDecrypt(JSON.parse(uri))),
-				// 					note: await handleDecrypt(JSON.parse(note)),
-				// 					favourite: await handleDecrypt(JSON.parse(fav)),
-				// 					trash,
-				// 				};
-				// 			});
-				// 			const updatedList = await Promise.all(updatedListPromises);
-				// 			setPasswdList(updatedList);
-				// 		}
-				// 	} catch (error) {
-				// 		console.error(error.response?.data?.msg, error);
-				// 		setPageError("Retrieving & Decrypting Data Failed");
-				// 	}
-				// };
-				// await handleFetchData();
 				await handleFetchList();
+				const currentUserState = {
+					email: userLogin.email,
+					user: auth.user,
+					master_salt: masterSaltRef.current,
+					access_token: auth.accessToken,
+					public_key: publicKey,
+					login_status: 1,
+				};
+
+				await handleAddAppState(currentUserState);
 				setLoading(false);
 				navigate(from, { replace: true });
 			}
@@ -148,6 +117,7 @@ export const LoginPasswd = () => {
 	const handleSubmitBtn = async (e) => {
 		e.preventDefault();
 		setLoading(true);
+		await handleDBOpen();
 		if (validPasswd && validEmail) {
 			try {
 				const response = await instance.post("/api/v1/auth/login", userLogin, {
@@ -157,7 +127,7 @@ export const LoginPasswd = () => {
 
 				const access_token = response.data?.access_token;
 				const masterSalt = base64ToBuffer(response.data?.master_salt);
-
+				masterSaltRef.current = response.data?.master_salt;
 				if (response.status === 200) {
 					setAuth((prev) => ({ ...prev, accessToken: access_token }));
 

@@ -5,7 +5,7 @@ import { base64ToBuffer, useCrypto } from "../../hooks/useCrypto";
 import LockIcon from "../../src/assets/lock.svg?react";
 import { usePrivateInstance } from "../../hooks/usePrivateInstance";
 import { passwdSchema } from "../../utils/authSchema";
-import { instance } from "../../api/axios";
+// import { instance } from "../../api/axios";
 import { useLocation, useNavigate } from "react-router";
 import { InputField } from "../InputField";
 import { Button } from "../Button";
@@ -13,6 +13,7 @@ import { ErrorModal } from "../ErrorModal";
 import { AuthFormHeader } from "../AuthFormHeader";
 import { useFetchData } from "../../hooks/useFetchData";
 import { ClockLoader } from "react-spinners";
+// import { useDB } from "../../hooks/useDB";
 export const UnLock = () => {
 	const {
 		auth,
@@ -21,11 +22,13 @@ export const UnLock = () => {
 		validPasswd,
 		setUserLogin,
 		setValidPasswd,
-		setPublicKey,
+		// setPublicKey,
+		// setUserRegister,
 	} = useAuth();
 	const { initialiseCrypto, clearSessionKey } = useCrypto();
 	const privateInstance = usePrivateInstance();
 	const { publicKeyRequest, handleFetchList } = useFetchData();
+	// const { handleFetchAppState } = useDB();
 
 	const [modalError, setModalError] = useState("");
 	const [inputError, setInputError] = useState("");
@@ -86,23 +89,45 @@ export const UnLock = () => {
 	}, [userLogin.passwd]);
 
 	useEffect(() => {
-		async function publicKeyRequest() {
-			// Fetch Public Key to Verify Access Token
-			try {
-				const response = await instance.get("/api/v1/auth/public");
-				if (response.status === 200) {
-					setPublicKey(response.data.publicKey);
-					// console.log("Public Key: ", response.data.publicKey);
-				} else if (response.status === 204) {
-					console.log("Public Key: Not Found!!!");
-					setModalError("Error: Public Key Not Found");
-				}
-			} catch (error) {
-				console.error("Public Key: Unable to send or receive data", error);
-				setModalError("Public Key Not Available");
-			}
-		}
-		publicKeyRequest();
+		// async function publicKeyRequest() {
+		// 	// Fetch Public Key to Verify Access Token
+		// 	try {
+		// 		const response = await instance.get("/api/v1/auth/public");
+		// 		if (response.status === 200) {
+		// 			setPublicKey(response.data.publicKey);
+		// 			// console.log("Public Key: ", response.data.publicKey);
+		// 		} else if (response.status === 204) {
+		// 			console.log("Public Key: Not Found!!!");
+		// 			setModalError("Error: Public Key Not Found");
+		// 		}
+		// 	} catch (error) {
+		// 		console.error("Public Key: Unable to send or receive data", error);
+		// 		setModalError("Public Key Not Available");
+		// 	}
+		// }
+		// publicKeyRequest();
+		// const initialiseUnlock = async () => {
+		// 	const userState = await handleFetchAppState();
+		// 	console.log("UserState: ", userState);
+		// 	const {
+		// 		email,
+		// 		user,
+		// 		master_salt,
+		// 		access_token,
+		// 		public_key,
+		// 		// login_status,
+		// 	} = userState;
+		// 	console.log("Master Salt: ", master_salt);
+		// 	setAuth((prev) => ({
+		// 		...prev,
+		// 		accessToken: access_token,
+		// 		user,
+		// 		masterSalt: master_salt,
+		// 	}));
+		// 	setUserLogin((prev) => ({ ...prev, email }));
+		// 	setPublicKey(public_key);
+		// };
+		// initialiseUnlock();
 	}, []);
 
 	if (!auth.user) {

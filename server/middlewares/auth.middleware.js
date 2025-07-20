@@ -26,7 +26,4 @@ export const authenticateUserRequest = async (req, res, next) => {
 			}
 		}
 	}
-
-	req.user = null;
-	return next();
 };

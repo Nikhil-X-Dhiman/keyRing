@@ -156,6 +156,69 @@ export const useDB = () => {
 		}
 	};
 
+	const handleAddAppState = async (userState) => {
+		try {
+			await db.appState.add({ ...userState, id: 0 });
+			return true;
+		} catch (error) {
+			console.error("Failed to add user state to loacl DB: ", error);
+			throw new Error("Failed to add user state to DB");
+		}
+	};
+
+	const handleFetchAppState = async () => {
+		try {
+			const userState = await db.appState.get(0);
+			return userState;
+		} catch (error) {
+			console.error("Failed to fetch user state: ", error);
+			throw new Error("User State Not Found");
+		}
+	};
+
+	const handleEmptyAppState = async () => {
+		try {
+			await db.appState.clear();
+			console.log("App State is now Deleted");
+		} catch (error) {
+			console.error("User State Deletion Not Completed: ", error);
+			throw new Error("User State Deletion Not Completed");
+		}
+	};
+
+	const handleDelDB = async () => {
+		try {
+			await db.delete();
+			console.log("Local DB Deleted");
+			return true;
+		} catch (error) {
+			console.error("DB cannot be deleted: ", error);
+			throw new Error("DB Deletion Error");
+		}
+	};
+
+	const handleDBOpen = async () => {
+		try {
+			db.open();
+			console.log("Local DB is now available");
+		} catch (error) {
+			console.error("DB cannot be initialized: ", error);
+			throw new Error("DB cannot be initialized");
+		}
+	};
+
+	const handleAddNewAccessTokenDB = async (accessToken) => {
+		try {
+			await db.appState.update(0, {
+				access_token: accessToken,
+			});
+			return true;
+		} catch (error) {
+			console.error("New Token Addition Failed: ", error);
+			throw new Error("New Token Addition Failed");
+		}
+	};
+
 	return {
 		fetchAllItemsDB,
 		handleAddItemDB,
@@ -166,5 +229,11 @@ export const useDB = () => {
 		handleToggleFavDB,
 		handleToggleTrashDB,
 		handleBulkAddItemsDB,
+		handleAddAppState,
+		handleEmptyAppState,
+		handleFetchAppState,
+		handleDelDB,
+		handleDBOpen,
+		handleAddNewAccessTokenDB,
 	};
 };

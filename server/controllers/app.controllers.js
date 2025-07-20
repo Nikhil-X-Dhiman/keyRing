@@ -4,7 +4,7 @@ import {
 	getAllPasswdById,
 	insertPasswdById,
 	markPasswdTrashByItemID,
-	updatePasswdByItemID,
+	updatePasswdByItemUUID,
 } from "../models/app.models.js";
 
 export const handleConnectionCheck = (req, res) => {
@@ -15,8 +15,6 @@ export const handleConnectionCheck = (req, res) => {
 			.status(200)
 			.json({ success: true, msg: "Connection Success!!! User Logged In!!!" });
 	}
-	// when user is logged out
-	console.log("User Logged Out!!!");
 	return res
 		.status(200)
 		.json({ success: true, msg: "Connection Success!!! User Logged Out!!!" });
@@ -29,10 +27,10 @@ export const handleAllDataRetrieval = async (req, res) => {
 			msg: "Access is Denied...Authentication Required!!!",
 		});
 	}
-	const id = req.user.id;
+	const userID = req.user.userID;
 	// console.log(id);
 
-	const result = await getAllPasswdById(id);
+	const result = await getAllPasswdById(userID);
 	// console.log(result);
 	return res
 		.status(200)
@@ -46,9 +44,9 @@ export const handleAddItem = async (req, res) => {
 			msg: "Access is Denied...Authentication Required!!!",
 		});
 	}
-	const userID = req.user.id;
+	const userID = req.user.userID;
 	const item = req.body;
-	console.log("item: ", item);
+	// console.log("item: ", item);
 
 	const result = await insertPasswdById(userID, item);
 	console.log(result);
@@ -64,10 +62,10 @@ export const handleDeleteItem = async (req, res) => {
 			msg: "Access is Denied...Authentication Required!!!",
 		});
 	}
-	const { itemID } = req.params;
-	console.log("ItemID: ", itemID);
+	const { uuid } = req.params;
+	console.log("UUID: ", uuid);
 
-	const [result] = await delPasswdByItemID(itemID);
+	const [result] = await delPasswdByItemID(uuid);
 	console.log("Delete DB Result: ", result.affectedRows);
 
 	if (result?.affectedRows === 0) {
@@ -85,11 +83,13 @@ export const handleEmptyTrash = async (req, res) => {
 			msg: "Access is Denied...Authentication Required!!!",
 		});
 	}
-	const userID = req.user.id;
+	const userID = req.user.userID;
 	const [result] = await delTrashPasswd(userID);
-	console.log("Trash Del: ", result);
+	// console.log("Trash Del: ", result);
 	if (result?.affectedRows === 0) {
-		return res.status(404).json({ success: false, msg: "Trash is Empty!!!" });
+		return res
+			.status(404)
+			.json({ success: false, msg: "Trash is not Empty!!!" });
 	}
 	return res.status(200).json({ success: true, msg: "Trash is now empty!!!" });
 };
@@ -101,10 +101,10 @@ export const handleMarkTrash = async (req, res) => {
 			msg: "Access is Denied...Authentication Required!!!",
 		});
 	}
-	const { itemID } = req.params;
+	const { uuid } = req.params;
 	const payload = req.body;
-	console.log("Trash Value: ", payload, itemID);
-	const result = await markPasswdTrashByItemID(itemID, payload);
+	console.log("Trash Value: ", payload, uuid);
+	const result = await markPasswdTrashByItemID(uuid, payload);
 	console.log("Result: ", result);
 	if (!result) {
 		return res.status(404).json({ success: false, msg: "Not Found!!!" });
@@ -119,9 +119,9 @@ export const handleEditItem = async (req, res) => {
 			msg: "Access is Denied...Authentication Required!!!",
 		});
 	}
-	const { itemID } = req.params;
+	const { uuid } = req.params;
 	const payload = req.body;
-	const result = await updatePasswdByItemID(itemID, payload);
+	const result = await updatePasswdByItemUUID(uuid, payload);
 	console.log("Result: ", result);
 	if (!result) {
 		return res.status(404).json({ success: false, msg: "Not Found!!!" });

@@ -26,8 +26,8 @@ export const handleLogin = async (req, res) => {
 			.status(405)
 			.json({ success: false, msg: "User Already Logged In!!!" });
 	}
-	const { email, passwd } = req.body;
-	if (!email || !passwd) {
+	const { email, password } = req.body;
+	if (!email || !password) {
 		// checks if email or password is present
 		return res.status(400).json({
 			success: false,
@@ -46,13 +46,13 @@ export const handleLogin = async (req, res) => {
 	let result;
 	try {
 		// get user details from db
-		[result] = await getUserByCredentials(email, passwd);
+		[result] = await getUserByCredentials(email);
 
 		// compare passwd with its hash from db
 		console.log("Pre Pass Verify: ", result);
 
 		let passwdVerification = result
-			? await verifyPasswd(passwd, result?.auth?.passwordHash)
+			? await verifyPasswd(password, result?.auth?.passwordHash)
 			: false;
 		console.log("Post Pass Verify: ", passwdVerification);
 		if (!passwdVerification || !result) {
@@ -70,8 +70,8 @@ export const handleLogin = async (req, res) => {
 	}
 	// payload created for access token
 	const payload = {
-		id: result?.users?.id,
-		name: result?.users?.name,
+		userID: result?.users?.userID,
+		username: result?.users?.username,
 		email: result?.users?.email,
 		verified: result?.users?.emailVerified,
 		role: result?.users?.role,
@@ -80,7 +80,7 @@ export const handleLogin = async (req, res) => {
 	// create access token
 	const accessToken = genAccessToken(payload);
 	// create refresh token
-	const refreshToken = genRefreshToken({ id: payload?.id });
+	const refreshToken = genRefreshToken({ userID: payload?.userID });
 	if (!accessToken || !refreshToken) {
 		// check if access token & refresh token is created or not
 		return res.status(500).json({
@@ -90,7 +90,7 @@ export const handleLogin = async (req, res) => {
 	}
 	// insert refresh token into db to track user session
 	// TODO: check for already using refresh token for current user
-	await insertRefreshToken(refreshToken, payload?.id);
+	await insertRefreshToken(refreshToken, payload?.userID);
 
 	res.cookie("refresh_token", refreshToken, {
 		// 14 days (in miliseconds)
@@ -114,11 +114,11 @@ export const handleRegister = async (req, res) => {
 	// extract fields from request body
 	console.log("Register Initialised");
 
-	const { email, name, passwd, masterSalt } = req.body.payload;
+	const { email, username, password, masterSalt } = req.body.payload;
 	console.log(req.body);
 
 	// check if all fields are present
-	if (!email || !name || !passwd || !masterSalt) {
+	if (!email || !username || !password || !masterSalt) {
 		return res.status(400).json({
 			success: false,
 			msg: "Missing Required Fields!!!",
@@ -126,24 +126,24 @@ export const handleRegister = async (req, res) => {
 	}
 	//	Check Schemas for all fields
 	const emailCheck = emailSchema.safeParse(email);
-	const nameCheck = nameSchema.safeParse(name);
-	const passwdCheck = passwdSchema.safeParse(passwd);
+	const nameCheck = nameSchema.safeParse(username);
+	const passwdCheck = passwdSchema.safeParse(password);
 	if (!emailCheck.success || !nameCheck.success || !passwdCheck.success) {
-		return res.send(400).json({
+		return res.status(400).json({
 			success: false,
 			msg: "Proper Format of the Fields are Required!!!",
 		});
 	}
-	console.log("Check 1: ", email, name, passwd, masterSalt);
+	console.log("Check 1: ", email, username, password, masterSalt);
 	console.log("Register Check Complete");
 
 	// Create hash from passwd
-	const hashPasswd = await genPasswdHash(passwd);
+	const hashPassword = await genPasswdHash(password);
 	// Insert User Credential into db
 	const result = await insertUserByCredential(
 		email,
-		name,
-		hashPasswd,
+		username,
+		hashPassword,
 		masterSalt
 	);
 	console.log("Check 2: ", result);
@@ -184,10 +184,10 @@ export const handleGetMasterSalt = async (req, res) => {
 	// }
 	console.log("Getting Salt Initiated");
 
-	const { email, passwd } = req.body;
-	console.log("Email & passwd: ", email, passwd);
+	const { email, password } = req.body;
+	console.log("Email & password: ", email, password);
 
-	if (!email || !passwd) {
+	if (!email || !password) {
 		// checks if email or password is present
 		return res.status(400).json({
 			success: false,
@@ -206,11 +206,11 @@ export const handleGetMasterSalt = async (req, res) => {
 	let result;
 	try {
 		// get user details from db
-		[result] = await getUserByCredentials(email, passwd);
+		[result] = await getUserByCredentials(email);
 
 		// compare passwd with its hash from db
 		let passwdVerification = result
-			? await verifyPasswd(passwd, result?.auth?.passwordHash)
+			? await verifyPasswd(password, result?.auth?.passwordHash)
 			: false;
 		if (!passwdVerification || !result) {
 			// no email found or passwd is incorrect
@@ -224,7 +224,7 @@ export const handleGetMasterSalt = async (req, res) => {
 			master_salt: result?.auth?.salt,
 		});
 	} catch (error) {
-		console.error("handleLogin: ", error);
+		// console.log("handleLogin: ", error);
 		return res.status(400).json({
 			success: false,
 			msg: "Error Occured: Salt Retrival Failed",
@@ -245,7 +245,7 @@ export const handleRefreshToken = async (req, res) => {
 			.status(403)
 			.json({ success: false, msg: "Refresh Token Not Received!!!" });
 	}
-	const [decodedRefreshToken] = await verifyRefreshToken(refreshToken);
+	const decodedRefreshToken = await verifyRefreshToken(refreshToken);
 	// it verify, refresh token is valid & exist inside session db
 	if (!decodedRefreshToken) {
 		return res
@@ -254,8 +254,8 @@ export const handleRefreshToken = async (req, res) => {
 	}
 	// payload for new access token creation
 	const payload = {
-		id: decodedRefreshToken?.users?.id,
-		name: decodedRefreshToken?.users?.name,
+		userID: decodedRefreshToken?.users?.userID,
+		username: decodedRefreshToken?.users?.username,
 		email: decodedRefreshToken?.users?.email,
 		verified: decodedRefreshToken?.users?.emailVerified,
 		role: decodedRefreshToken?.users?.role,

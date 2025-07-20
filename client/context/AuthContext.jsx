@@ -3,7 +3,12 @@ import { AuthContext } from "./AuthContextObject";
 
 export const AuthProvider = ({ children }) => {
 	const defaultUserValues = { email: "", passwd: "" };
-	const defaultAuthValues = { accessToken: "", user: "", masterKey: "" };
+	const defaultAuthValues = {
+		accessToken: "",
+		user: "",
+		masterKey: "",
+		masterSalt: "",
+	};
 	const defaultRegisterValues = {
 		email: "",
 		name: "",
