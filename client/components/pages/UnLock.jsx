@@ -33,14 +33,14 @@ export const UnLock = () => {
 	const [modalError, setModalError] = useState("");
 	const [inputError, setInputError] = useState("");
 	const [loading, setLoading] = useState(false);
-	const passwdRef = useRef(null);
+	const passwordRef = useRef(null);
 
 	const location = useLocation();
 	const navigate = useNavigate();
 	const from = location.state?.from?.pathname || "/user/home";
 
 	useEffect(() => {
-		passwdRef.current.focus();
+		passwordRef.current.focus();
 	}, []);
 
 	useEffect(() => {
@@ -73,8 +73,8 @@ export const UnLock = () => {
 	}, [validPasswd]);
 
 	useEffect(() => {
-		if (userLogin.passwd) {
-			const { success } = passwdSchema.safeParse(userLogin.passwd);
+		if (userLogin.password) {
+			const { success } = passwdSchema.safeParse(userLogin.password);
 			// success, error & data
 			if (success) {
 				setValidPasswd(true);
@@ -86,7 +86,7 @@ export const UnLock = () => {
 		} else {
 			setInputError("Password Field is Empty");
 		}
-	}, [userLogin.passwd]);
+	}, [userLogin.password]);
 
 	useEffect(() => {
 		// async function publicKeyRequest() {
@@ -139,7 +139,7 @@ export const UnLock = () => {
 	const handleSubmitBtn = async (e) => {
 		setLoading(true);
 		e.preventDefault();
-		if (!userLogin.passwd) {
+		if (!userLogin.password) {
 			setModalError("Password Field Cannot be Empty.");
 		}
 		console.log("pre submit request");
@@ -159,10 +159,10 @@ export const UnLock = () => {
 					console.log("UnLock salt: ", masterSalt);
 					console.log("post x4 submit request");
 					await publicKeyRequest();
-					await initialiseCrypto(userLogin.passwd, masterSalt);
+					await initialiseCrypto(userLogin.password, masterSalt);
 					// await handleFetchList();
 					console.log("UnLock: initialiseCrypto completed.");
-					setUserLogin((prev) => ({ ...prev, passwd: "" }));
+					setUserLogin((prev) => ({ ...prev, password: "" }));
 				}
 			} catch (error) {
 				if (!error?.response) {
@@ -180,7 +180,7 @@ export const UnLock = () => {
 					);
 				}
 			}
-		} else if (userLogin.passwd === "") {
+		} else if (userLogin.password === "") {
 			setModalError("Password Field is Empty.");
 		} else {
 			setModalError("Incorrect Password.");
@@ -225,11 +225,11 @@ export const UnLock = () => {
 					required={true}
 					type="password"
 					showToggle={true}
-					ref={passwdRef}
-					value={userLogin.passwd}
+					ref={passwordRef}
+					value={userLogin.password}
 					error={inputError}
 					onChange={(e) =>
-						setUserLogin((prev) => ({ ...prev, passwd: e.target.value }))
+						setUserLogin((prev) => ({ ...prev, password: e.target.value }))
 					}
 				/>
 

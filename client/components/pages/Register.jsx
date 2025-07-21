@@ -20,19 +20,19 @@ export const Register = () => {
 	const { userRegister, setUserRegister } = useAuth();
 
 	const [pageError, setPageError] = useState("");
-	const [passwdCompare, setPasswdCompare] = useState({
-		passwd: "",
-		confirmPasswd: "",
+	const [passwordCompare, setPasswordCompare] = useState({
+		password: "",
+		confirmPassword: "",
 	});
 
 	const [validEmail, setValidEmail] = useState(false);
-	const [validName, setValidName] = useState(false);
-	const [validPasswd, setValidPasswd] = useState(false);
+	const [validUserName, setValidUserName] = useState(false);
+	const [validPassword, setValidPassword] = useState(false);
 
 	const [emailReq, setEmailReq] = useState("");
-	const [nameReq, setNameReq] = useState("");
-	const [passwdReq, setpasswdReq] = useState("");
-	const [confirmPasswdReq, setconfirmPasswdReq] = useState("");
+	const [userNameReq, setUserNameReq] = useState("");
+	const [passwordReq, setPasswordReq] = useState("");
+	const [confirmPasswordReq, setconfirmPasswordReq] = useState("");
 
 	useEffect(() => {
 		emailRef.current?.focus();
@@ -56,48 +56,53 @@ export const Register = () => {
 	}, [userRegister.email]);
 
 	useEffect(() => {
-		if (userRegister.name) {
-			const { success, error } = nameSchema.safeParse(userRegister.name);
+		if (userRegister.username) {
+			const { success, error } = nameSchema.safeParse(userRegister.username);
 
 			if (success) {
-				setValidName(true);
-				setNameReq("");
+				setValidUserName(true);
+				setUserNameReq("");
 			} else {
-				setValidName(false);
+				setValidUserName(false);
 				console.error("Name Invalid: ", error);
-				setNameReq("Note: Name length allowed between 2 & 32");
+				setUserNameReq("Note: Name length allowed between 2 & 32");
 			}
 		}
-	}, [userRegister.name]);
+	}, [userRegister.username]);
 
 	useEffect(() => {
-		if (passwdCompare.passwd || passwdCompare.confirmPasswd) {
-			const { success, error } = passwdSchema.safeParse(passwdCompare.passwd);
+		if (passwordCompare.password || passwordCompare.confirmPassword) {
+			const { success, error } = passwdSchema.safeParse(
+				passwordCompare.password
+			);
 			if (success) {
-				setValidPasswd(true);
-				setpasswdReq("");
+				setValidPassword(true);
+				setPasswordReq("");
 			} else {
-				setValidPasswd(false);
+				setValidPassword(false);
 				console.error("Password Error: ", error);
-				setpasswdReq(
+				setPasswordReq(
 					"Note: Password must contain a-z, A-Z, 0-9, (*#@!$%&) & atleast 8 characters long"
 				);
 			}
 			if (
-				passwdCompare.confirmPasswd &&
-				passwdCompare.confirmPasswd !== passwdCompare.passwd
+				passwordCompare.confirmPassword &&
+				passwordCompare.confirmPassword !== passwordCompare.password
 			) {
-				setconfirmPasswdReq("Note: Password Does Not Match");
-				setUserRegister((prev) => ({ ...prev, passwd: "" }));
+				setconfirmPasswordReq("Note: Password Does Not Match");
+				setUserRegister((prev) => ({ ...prev, password: "" }));
 			} else if (
-				passwdCompare.confirmPasswd &&
-				passwdCompare.confirmPasswd === passwdCompare.passwd
+				passwordCompare.confirmPassword &&
+				passwordCompare.confirmPassword === passwordCompare.password
 			) {
-				setconfirmPasswdReq("");
-				setUserRegister((prev) => ({ ...prev, passwd: passwdCompare.passwd }));
+				setconfirmPasswordReq("");
+				setUserRegister((prev) => ({
+					...prev,
+					password: passwordCompare.password,
+				}));
 			}
 		}
-	}, [passwdCompare.passwd, passwdCompare.confirmPasswd]);
+	}, [passwordCompare.password, passwordCompare.confirmPassword]);
 
 	const handleRegisterInput = (e) => {
 		const { name, value } = e.target;
@@ -106,13 +111,13 @@ export const Register = () => {
 
 	const handlePasswdInput = (e) => {
 		const { name, value } = e.target;
-		setPasswdCompare((prev) => ({ ...prev, [name]: value }));
+		setPasswordCompare((prev) => ({ ...prev, [name]: value }));
 	};
 
 	const handleRegisterForm = async (e) => {
 		e.preventDefault();
 
-		if (validEmail && validName && validPasswd && !confirmPasswdReq) {
+		if (validEmail && validUserName && validPassword && !confirmPasswordReq) {
 			try {
 				const masterSalt = await bufferToBase64(generateCryptoRandomValue(16));
 				console.log("Generated MasterSalt: ", masterSalt);
@@ -122,7 +127,7 @@ export const Register = () => {
 				});
 				setUserRegister((prev) => ({ ...prev, masterSalt }));
 				if (response.status === 201) {
-					setUserRegister((prev) => ({ ...prev, passwd: "" }));
+					setUserRegister((prev) => ({ ...prev, password: "" }));
 					navigate("/login/email", { replace: true });
 				}
 			} catch (error) {
@@ -171,7 +176,7 @@ export const Register = () => {
 						<InputField
 							label="Email address"
 							required
-							type="test"
+							type="text"
 							name="email"
 							id="email"
 							ref={emailRef}
@@ -185,38 +190,38 @@ export const Register = () => {
 							label="Name"
 							required
 							type="text"
-							name="name"
-							id="name"
-							value={userRegister.name}
+							name="username"
+							id="username"
+							value={userRegister.username}
 							onChange={handleRegisterInput}
-							error={nameReq}
+							error={userNameReq}
 						/>
 
 						{/* Passwd Input Field */}
 						<InputField
 							label="Password"
 							required
-							name="passwd"
+							name="password"
 							type="password"
 							showToggle={true}
-							id="passwd"
-							value={passwdCompare.passwd}
+							id="password"
+							value={passwordCompare.password}
 							onChange={handlePasswdInput}
-							error={passwdReq}
+							error={passwordReq}
 						/>
 
 						{/* Comfirm Passwd Input Field */}
 						<InputField
 							label="Confirm Password"
 							required
-							name="confirmPasswd"
-							id="confirmPasswd"
+							name="confirmPassword"
+							id="confirmPassword"
 							type="password"
-							showToggle={validPasswd && passwdCompare.passwd}
-							value={passwdCompare.confirmPasswd}
+							showToggle={validPassword && passwordCompare.password}
+							value={passwordCompare.confirmPassword}
 							onChange={handlePasswdInput}
-							disabled={!passwdCompare.passwd || !validPasswd}
-							error={confirmPasswdReq}
+							disabled={!passwordCompare.password || !validPassword}
+							error={confirmPasswordReq}
 						/>
 						<Button>Register</Button>
 					</form>

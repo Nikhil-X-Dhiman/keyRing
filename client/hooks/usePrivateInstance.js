@@ -17,7 +17,7 @@ export const usePrivateInstance = () => {
 				return config;
 			},
 			(error) => {
-				Promise.reject(error);
+				return Promise.reject(error);
 			}
 		);
 

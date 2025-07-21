@@ -1,8 +1,7 @@
 import { Layout } from "../components/layout/Layout";
-import { PersistLogin } from "../components/layout/PersistLogin";
-import { LoginEmail } from "../components/LoginEmail";
-import { LoginPasswd } from "../components/LoginPasswd";
-import { Register } from "../components/Register";
+import { LoginEmail } from "../components/pages/LoginEmail";
+import { LoginPasswd } from "../components/pages/LoginPasswd";
+import { Register } from "../components/pages/Register";
 
 export const authRoutes = [
 	{

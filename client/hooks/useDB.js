@@ -22,30 +22,28 @@ export const useDB = () => {
 		}
 		try {
 			const {
-				itemID,
+				uuid,
 				name,
-				user,
-				passwd,
+				username,
+				password,
 				uri,
 				note,
 				favourite,
 				trash,
-				userID,
 				createdAt,
 				updatedAt,
 			} = item;
 			const id = await db.passwdList.add({
-				itemID,
+				uuid,
 				name,
-				user,
-				password: passwd,
+				username,
+				password,
 				uri,
 				note,
 				favourite,
 				trash,
 				created_at: createdAt,
 				updated_at: updatedAt,
-				userID,
 			});
 			console.log("Item Added with ID: ", id);
 			return id;
@@ -54,9 +52,9 @@ export const useDB = () => {
 			throw new Error("Failed to Add Item");
 		}
 	};
-	const handleBulkAddItemsDB = (itemList) => {
+	const handleBulkAddItemsDB = async (itemList) => {
 		try {
-			db.passwdList.bulkAdd(itemList);
+			await db.passwdList.bulkAdd(itemList);
 			return true;
 		} catch (error) {
 			console.error("Bulk Add to DB Failed: ", error);
@@ -67,7 +65,7 @@ export const useDB = () => {
 		try {
 			const success = await db.passwdList.update(id, {
 				favourite: !currentValue,
-				updated_at: new Date(),
+				updated_at: new Date().toISOString(),
 			});
 			if (success) {
 				console.log("Item is now Favourite");
@@ -86,7 +84,7 @@ export const useDB = () => {
 		try {
 			const success = await db.passwdList.update(id, {
 				trash: !currentValue,
-				updated_at: new Date(),
+				updated_at: new Date().toISOString(),
 			});
 			if (success) {
 				console.log("Item is now in Trash");
@@ -199,7 +197,7 @@ export const useDB = () => {
 
 	const handleDBOpen = async () => {
 		try {
-			db.open();
+			await db.open();
 			console.log("Local DB is now available");
 		} catch (error) {
 			console.error("DB cannot be initialized: ", error);

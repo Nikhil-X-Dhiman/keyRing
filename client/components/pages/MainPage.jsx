@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router";
-import { useAuth } from "../hooks/useAuth";
-import { usePrivateInstance } from "../hooks/usePrivateInstance";
+import { useAuth } from "../../hooks/useAuth";
+import { usePrivateInstance } from "../../hooks/usePrivateInstance";
 import { IoMdCloseCircleOutline } from "react-icons/io";
 import { HiOutlineTrash } from "react-icons/hi2";
 import { IoMdAddCircleOutline } from "react-icons/io";
@@ -12,23 +12,23 @@ import { IoClose } from "react-icons/io5";
 import { MdModeEdit } from "react-icons/md";
 import { LuSave } from "react-icons/lu";
 import { MdCloseFullscreen } from "react-icons/md";
-import { useCrypto } from "../hooks/useCrypto";
-import { SearchField } from "./SearchField";
-import { Button } from "./Button";
-import { SideNav } from "./SideNav";
-import { DisplayList } from "./DisplayList";
-import { AddItemBtn } from "./AddItemBtn";
-import { BgBrand } from "./BgBrand";
-import { ItemField } from "./ItemField";
-import { ErrorModal } from "./ErrorModal";
-import { useDB } from "../hooks/useDB";
+import { useCrypto } from "../../hooks/useCrypto";
+import { SearchField } from "../SearchField";
+import { Button } from "../Button";
+import { SideNav } from "../SideNav";
+import { DisplayList } from "../DisplayList";
+import { AddItemBtn } from "../AddItemBtn";
+import { BgBrand } from "../BgBrand";
+import { ItemField } from "../ItemField";
+import { ErrorModal } from "../ErrorModal";
+import { useDB } from "../../hooks/useDB";
 
 export const MainPage = () => {
 	const defaultEmpty = {
-		id: undefined,
+		uuid: undefined,
 		name: "",
-		user: "",
-		passwd: "",
+		username: "",
+		password: "",
 		uri: [""],
 		note: "",
 		favourite: false,
@@ -80,16 +80,14 @@ export const MainPage = () => {
 	}, [itemIndex, mode]);
 	// Fetch user data and decrypts it
 	useLayoutEffect(() => {
-		if (!auth.masterKey) {
+		if (!auth?.masterKey || !auth?.user) {
 			console.log("MainPage: Master Key not available, redirecting to /locked");
 			navigate("/locked", { replace: true });
 			return;
 		}
-	}, [auth.masterKey]);
+	}, [auth?.masterKey, auth?.user]);
 	// Search & filters data based upon user search query & active page
 	const filteredList = passwdList.filter((item) => {
-		// console.log("item: ", item);
-
 		const matchesSearch =
 			item?.name?.toLowerCase().includes(searchItem?.toLowerCase()) ||
 			item?.user?.toLowerCase().includes(searchItem?.toLowerCase());
@@ -118,7 +116,7 @@ export const MainPage = () => {
 	const handleLinkOpen = (i) => {
 		try {
 			let url = passwdList[itemIndex].uri[i];
-			url = "http://" + url;
+			url = "https://" + url;
 			window.open(url, "_blank", "noopener noreferrer");
 		} catch (error) {
 			console.error("Error Link Opening: ", error);
@@ -204,11 +202,14 @@ export const MainPage = () => {
 	// for page all & fav it sends them to trash by marking them so they can be restored, but for trash page it removes them completly & cannot ve recovered...also sends request to server to del it in the cloud too
 	const handleDeleteItem = async () => {
 		if (pageMode === "All" || pageMode === "Fav") {
-			const itemID = passwdList[itemIndex].id;
+			const itemUUID = passwdList[itemIndex].uuid;
 			try {
-				const response = await privateInstance.patch(`/api/v1/item/${itemID}`, {
-					trash: !passwdList[itemIndex].trash,
-				});
+				const response = await privateInstance.patch(
+					`/api/v1/item/${itemUUID}`,
+					{
+						trash: !passwdList[itemIndex].trash,
+					}
+				);
 				if (response.status === 200 && response.data.success) {
 					setPasswdList((prev) => {
 						const updatedList = [...prev];
@@ -229,11 +230,13 @@ export const MainPage = () => {
 		} else if (pageMode === "Trash") {
 			console.log("Handle Trash Del");
 
-			const itemID = passwdList[itemIndex].id;
-			console.log("Delete Item ID: ", itemID);
+			const itemUUID = passwdList[itemIndex].uuid;
+			console.log("Delete Item ID: ", itemUUID);
 
 			try {
-				const response = await privateInstance.delete(`/api/v1/item/${itemID}`);
+				const response = await privateInstance.delete(
+					`/api/v1/item/${itemUUID}`
+				);
 				console.log(response);
 
 				if (response.status === 200 && response.data.success === true) {
@@ -337,24 +340,24 @@ export const MainPage = () => {
 		}
 		if (mode === "Edit") {
 			try {
-				const itemID = passwdList[itemIndex].id;
+				const itemUUID = passwdList[itemIndex].uuid;
 				// Apply Encryption to data
 				const uriString = JSON.stringify(focusItem.uri);
 				const encryptedFocusItem = {
-					id: focusItem.id,
-					name: JSON.stringify(await handleEncrypt(focusItem.name)),
-					user: JSON.stringify(await handleEncrypt(focusItem.user)),
-					passwd: JSON.stringify(await handleEncrypt(focusItem.passwd)),
-					uri: JSON.stringify(await handleEncrypt(uriString)),
-					note: JSON.stringify(await handleEncrypt(focusItem.note)),
-					favourite: JSON.stringify(await handleEncrypt(focusItem.favourite)),
+					uuid: focusItem.uuid,
+					name: await handleEncrypt(focusItem.name),
+					username: await handleEncrypt(focusItem.username),
+					password: await handleEncrypt(focusItem.password),
+					uri: await handleEncrypt(uriString),
+					note: await handleEncrypt(focusItem.note),
+					favourite: focusItem.favourite,
 					trash: focusItem.trash,
 				};
 				console.log("Encrypted Data to upload: ", encryptedFocusItem);
 
 				try {
 					const response = await privateInstance.put(
-						`/api/v1/item/${itemID}`,
+						`/api/v1/item/${itemUUID}`,
 						encryptedFocusItem
 					);
 					if (response.status === 200 && response.data.success === true) {
@@ -378,32 +381,33 @@ export const MainPage = () => {
 				setPageError("Decryption Failed");
 			}
 		} else if (mode === "Add") {
-			const itemID = uuidv4();
+			// const itemID = uuidv4();
+			const itemUUID = crypto.randomUUID();
 			// Encrypt Data
 			const uriString = JSON.stringify(focusItem.uri);
 			console.log("Now Adding Item into DB");
 
 			const encryptedFocusItem = {
-				id: itemID,
-				name: JSON.stringify(await handleEncrypt(focusItem.name)),
-				user: JSON.stringify(await handleEncrypt(focusItem.user)),
-				passwd: JSON.stringify(await handleEncrypt(focusItem.passwd)),
-				uri: JSON.stringify(await handleEncrypt(uriString)),
-				note: JSON.stringify(await handleEncrypt(focusItem.note)),
-				favourite: JSON.stringify(await handleEncrypt(focusItem.favourite)),
+				uuid: itemUUID,
+				name: await handleEncrypt(focusItem.name),
+				username: await handleEncrypt(focusItem.username),
+				password: await handleEncrypt(focusItem.password),
+				uri: await handleEncrypt(uriString),
+				note: await handleEncrypt(focusItem.note),
+				favourite: focusItem.favourite,
 				trash: focusItem.trash,
 			};
-			const item = { ...focusItem, id: itemID };
+			const item = { ...focusItem, uuid: itemUUID };
 			try {
 				const response = await privateInstance.post(
-					`/api/v1/item/${itemID}`,
+					`/api/v1/item/${itemUUID}`,
 					encryptedFocusItem
 					// item
 				);
 				if (response.status === 201 && response.data.success === true) {
 					try {
 						const dbOp = await handleAddItemDB({
-							itemID: encryptedFocusItem.id,
+							uuid: encryptedFocusItem.uuid,
 							...encryptedFocusItem,
 						});
 						console.log("DB Operation: ", dbOp);
@@ -428,10 +432,10 @@ export const MainPage = () => {
 		}
 	};
 	// retreive the index of the item clicked and open its view mode that retrieve data of the item using the index we get from the item clicked
-	const handleClickItem = (id) => {
+	const handleClickItem = (uuid) => {
 		// Display Clicked Passwd View
 		let prevItemIndex = itemIndex; // get old clicked item index
-		let i = passwdList.findIndex((item) => item.id === id); // find index uring id
+		let i = passwdList.findIndex((item) => item.uuid === uuid); // find index uring id
 		setItemIndex(i); // setting index to show that passwd item
 		setMode((prev) => {
 			// setting mode to view the clicked passwd item
@@ -589,45 +593,45 @@ export const MainPage = () => {
 								) : (
 									""
 								)}
-								{(mode === "View" && passwdList[itemIndex]?.user) ||
+								{(mode === "View" && passwdList[itemIndex]?.username) ||
 								mode === "Add" ||
 								mode === "Edit" ? (
 									<div className="flex border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5 justify-start items-center w-full">
 										<ItemField
 											label="Username"
 											type="text"
-											name="user"
-											id="user"
+											name="username"
+											id="username"
 											value={
 												mode === "View"
-													? passwdList[itemIndex].user || ""
-													: focusItem.user || ""
+													? passwdList[itemIndex].username || ""
+													: focusItem.username || ""
 											}
 											onChange={handleInputChange}
 											readOnly={mode === "View"}
 											autoComplete="off"
 											mode={mode}
 											cTitle="Copy Username"
-											onClick={() => handleCopy("user")}
+											onClick={() => handleCopy("username")}
 											showCopy={true}
 										/>
 									</div>
 								) : (
 									""
 								)}
-								{(mode === "View" && passwdList[itemIndex]?.passwd) ||
+								{(mode === "View" && passwdList[itemIndex]?.password) ||
 								mode === "Add" ||
 								mode === "Edit" ? (
 									<div className="flex items-center justify-between border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5">
 										<ItemField
 											label="Password"
 											type="password"
-											name="passwd"
-											id="passwd"
+											name="password"
+											id="password"
 											value={
 												mode === "View"
-													? passwdList[itemIndex].passwd || ""
-													: focusItem.passwd || ""
+													? passwdList[itemIndex].password || ""
+													: focusItem.password || ""
 											}
 											onChange={handleInputChange}
 											readOnly={mode === "View"}
@@ -635,7 +639,7 @@ export const MainPage = () => {
 											mode={mode}
 											cTitle="Copy Password"
 											tTitle="Toggle Visibility"
-											onClick={() => handleCopy("passwd")}
+											onClick={() => handleCopy("password")}
 											showCopy={true}
 											showToggle={true}
 										/>

@@ -12,6 +12,8 @@ export const ListItem = ({
 		<>
 			{filteredList.map((item) => (
 				<li
+					role="button"
+					tabIndex={0}
 					className={`${listStyle} ${
 						item.id === passwdList[itemIndex]?.id && itemIndex !== null
 							? "border-l-blue-400 bg-slate-700"

@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useRefreshToken } from "../../hooks/useRefreshToken";
-import { Navigate, Outlet } from "react-router";
+import { Outlet } from "react-router";
 import { Loading } from "../pages/Loading";
 import { useDB } from "../../hooks/useDB";
 // import { error } from "zod/v4/locales/ar.js";
@@ -15,7 +15,7 @@ export const PersistLogin = () => {
 	const [fetchDB, setFetchDB] = useState(false);
 	let isMountedRef = useRef(null);
 
-	useLayoutEffect(() => {
+	useEffect(() => {
 		isMountedRef.current = true;
 		setIsLoading(true);
 		// async function verifyRefreshToken() {
@@ -78,7 +78,7 @@ export const PersistLogin = () => {
 		// };
 	}, []);
 
-	useLayoutEffect(() => {
+	useEffect(() => {
 		if (fetchDB === true) {
 			async function verifyRefreshToken() {
 				try {

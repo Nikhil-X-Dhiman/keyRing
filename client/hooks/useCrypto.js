@@ -42,11 +42,11 @@ export const base64ToBuffer = (base64) => {
 };
 
 // Derive the Key From The Password
-const deriveKey = async (passwd, salt) => {
-	if (!passwd || !salt) {
+const deriveKey = async (password, salt) => {
+	if (!password || !salt) {
 		throw new Error("Password or Salt is not available.");
 	}
-	const passwdBuffer = new TextEncoder().encode(passwd);
+	const passwdBuffer = new TextEncoder().encode(password);
 
 	const keyMaterial = await window.crypto.subtle.importKey(
 		"raw",
@@ -76,13 +76,13 @@ export const useCrypto = () => {
 	const { userLogin, setUserLogin, auth, setAuth } = useAuth();
 	// const masterKeyRef = useRef(null);
 
-	const initialiseCrypto = async (masterPasswd, masterSalt) => {
-		if (!masterPasswd || !masterSalt) {
+	const initialiseCrypto = async (masterPassword, masterSalt) => {
+		if (!masterPassword || !masterSalt) {
 			throw new Error("Error: Password or Salt Not Provided.");
 		}
 		try {
 			// const sessionSalt = generateCryptoRandomValue(SALT_LENGTH_BYTES);
-			const masterKey = await deriveKey(masterPasswd, masterSalt);
+			const masterKey = await deriveKey(masterPassword, masterSalt);
 			// masterKeyRef.current = masterKey;
 			setAuth((prev) => ({ ...prev, masterKey }));
 
@@ -90,10 +90,10 @@ export const useCrypto = () => {
 
 			return true;
 		} catch (error) {
-			throw new Error("Failed to create Master Key: ", error);
+			throw new Error("Failed to create Master Key: " + error);
 		} finally {
-			if (userLogin?.passwd) {
-				setUserLogin((prev) => ({ ...prev, passwd: "" }));
+			if (userLogin?.password) {
+				setUserLogin((prev) => ({ ...prev, password: "" }));
 				console.log("User Login Password is Cleared");
 			}
 		}
@@ -189,19 +189,20 @@ export const useCrypto = () => {
 		console.log("Session Key Cleared");
 	};
 
-	const handleListToDecrypt = async (list) => {
-		const updatedListPromises = list.map(async (item) => {
-			const { itemID, name, user, passwd, uri, note, fav, trash } = item;
+	const handleListToDecrypt = async (itemList) => {
+		const updatedListPromises = itemList.map(async (item) => {
+			const { uuid, name, username, password, uri, note, favourite, trash } =
+				item;
 
 			// Decrypt Data upon arrival
 			return {
-				id: itemID,
+				uuid,
 				name: await handleDecrypt(JSON.parse(name)),
-				user: await handleDecrypt(JSON.parse(user)),
-				passwd: await handleDecrypt(JSON.parse(passwd)),
+				username: await handleDecrypt(JSON.parse(username)),
+				password: await handleDecrypt(JSON.parse(password)),
 				uri: JSON.parse(await handleDecrypt(JSON.parse(uri))),
 				note: await handleDecrypt(JSON.parse(note)),
-				favourite: await handleDecrypt(JSON.parse(fav)),
+				favourite,
 				trash,
 			};
 		});

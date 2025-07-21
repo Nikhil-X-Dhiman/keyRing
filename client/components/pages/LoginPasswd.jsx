@@ -1,20 +1,20 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useRef, useState } from "react";
-import { passwdSchema } from "../utils/authSchema.js";
-import { instance } from "../api/axios.js";
-import { useAuth } from "../hooks/useAuth.js";
+import { passwdSchema } from "../../utils/authSchema.js";
+import { instance } from "../../api/axios.js";
+import { useAuth } from "../../hooks/useAuth.js";
 import { Link, Navigate, useNavigate, useLocation } from "react-router";
-import { useVerifyAccessToken } from "../hooks/useVerifyJWT.jsx";
+import { useVerifyAccessToken } from "../../hooks/useVerifyJWT.jsx";
 import WaveIcon from "../public/wave.svg?react";
-import { base64ToBuffer, useCrypto } from "../hooks/useCrypto.js";
-import { InputField } from "./InputField.jsx";
-import { ErrorModal } from "./ErrorModal.jsx";
+import { base64ToBuffer, useCrypto } from "../../hooks/useCrypto.js";
+import { InputField } from "../InputField.jsx";
+import { ErrorModal } from "../ErrorModal.jsx";
 import { ClockLoader } from "react-spinners";
 // import { usePrivateInstance } from "../hooks/usePrivateInstance.jsx";
-import { useFetchData } from "../hooks/useFetchData";
-import { AuthFormHeader } from "./AuthFormHeader.jsx";
-import { Button } from "./Button.jsx";
-import { useDB } from "../hooks/useDB.js";
+import { useFetchData } from "../../hooks/useFetchData.js";
+import { AuthFormHeader } from "../AuthFormHeader.jsx";
+import { Button } from "../Button.jsx";
+import { useDB } from "../../hooks/useDB.js";
 
 export const LoginPasswd = () => {
 	const PASSWD_REGEX =
@@ -22,7 +22,7 @@ export const LoginPasswd = () => {
 
 	const [loading, setLoading] = useState(false);
 
-	const passwdRef = useRef();
+	const passwordRef = useRef();
 	const errRef = useRef();
 
 	const [inputError, setInputError] = useState("");
@@ -43,7 +43,7 @@ export const LoginPasswd = () => {
 		setAuth,
 		userLogin,
 		validEmail,
-		validPasswd,
+		validPasswd: validPassword,
 		setUserLogin,
 		setValidPasswd,
 		publicKey,
@@ -56,7 +56,7 @@ export const LoginPasswd = () => {
 	const { publicKeyRequest, handleFetchList } = useFetchData();
 
 	useEffect(() => {
-		passwdRef.current?.focus();
+		passwordRef.current?.focus();
 	}, []);
 
 	useEffect(() => {
@@ -69,8 +69,8 @@ export const LoginPasswd = () => {
 	}, [pageError]);
 
 	useEffect(() => {
-		if (userLogin.passwd) {
-			const { success } = passwdSchema.safeParse(userLogin.passwd);
+		if (userLogin.password) {
+			const { success } = passwdSchema.safeParse(userLogin.password);
 			// success, error & data
 			if (success) {
 				setValidPasswd(true);
@@ -81,17 +81,18 @@ export const LoginPasswd = () => {
 		} else {
 			setInputError("");
 		}
-	}, [userLogin.passwd]);
+	}, [userLogin.password]);
 
-	useEffect(() => {
-		publicKeyRequest();
-	}, []);
+	// useEffect(() => {
+	// 	publicKeyRequest();
+	// }, []);
 
 	useEffect(() => {
 		const fetchData = async () => {
 			if (auth?.masterKey && auth?.accessToken) {
 				await handleFetchList();
 				const currentUserState = {
+					id: 0,
 					email: userLogin.email,
 					user: auth.user,
 					master_salt: masterSaltRef.current,
@@ -100,7 +101,12 @@ export const LoginPasswd = () => {
 					login_status: 1,
 				};
 
-				await handleAddAppState(currentUserState);
+				try {
+					await handleAddAppState(currentUserState);
+				} catch (err) {
+					console.error("Failed to save user state to DB", err);
+					setPageError("Unable to save user session locally.");
+				}
 				setLoading(false);
 				navigate(from, { replace: true });
 			}
@@ -117,8 +123,15 @@ export const LoginPasswd = () => {
 	const handleSubmitBtn = async (e) => {
 		e.preventDefault();
 		setLoading(true);
-		await handleDBOpen();
-		if (validPasswd && validEmail) {
+		try {
+			await handleDBOpen();
+		} catch (err) {
+			console.error("DB Initialization Error:", err);
+			setPageError("Something went wrong with app storage. Try again.");
+			setLoading(false);
+			return;
+		}
+		if (validPassword && validEmail) {
 			try {
 				const response = await instance.post("/api/v1/auth/login", userLogin, {
 					headers: { "Content-Type": "application/json" },
@@ -135,8 +148,8 @@ export const LoginPasswd = () => {
 
 					if (success) {
 						setAuth((prev) => ({ ...prev, user: payload }));
-						await initialiseCrypto(userLogin.passwd, masterSalt);
-						setUserLogin((prev) => ({ ...prev, passwd: "" }));
+						await initialiseCrypto(userLogin.password, masterSalt);
+						setUserLogin((prev) => ({ ...prev, password: "" }));
 						localStorage.setItem("isLogged", JSON.stringify(true));
 					} else {
 						console.error("Verify Access Token Failed: ", error);
@@ -159,7 +172,7 @@ export const LoginPasswd = () => {
 			console.error("Invalid Email: Redirecting to Email Page");
 			setLoading(false);
 			navigate("/login/email", { replace: true });
-		} else if (!validPasswd) {
+		} else if (!validPassword) {
 			setPageError("Incorrect Password!!!");
 		}
 	};
@@ -183,11 +196,11 @@ export const LoginPasswd = () => {
 					required
 					type="password"
 					showToggle={true}
-					ref={passwdRef}
-					value={userLogin.passwd}
+					ref={passwordRef}
+					value={userLogin.password}
 					error={inputError}
 					onChange={(e) =>
-						setUserLogin((prev) => ({ ...prev, passwd: e.target.value }))
+						setUserLogin((prev) => ({ ...prev, password: e.target.value }))
 					}
 				/>
 				<Button

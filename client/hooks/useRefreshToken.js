@@ -38,12 +38,12 @@ export const useRefreshToken = () => {
 				setAuth((prev) => ({ ...prev, accessToken, user: payload }));
 				setUserLogin((prev) => ({ ...prev, email: payload.email }));
 			}
-			return accessToken;
+			return accessToken || null;
 		} catch (error) {
 			if (error?.response?.data?.success === false) {
-				console.error(error?.response?.data?.message, error);
+				console.error("Token Refresh Failed: ", error?.response?.data?.message);
 			} else {
-				console.error(error);
+				console.error("Unknown error during token refresh: ", error);
 			}
 		}
 	};

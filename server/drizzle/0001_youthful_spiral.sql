@@ -1,0 +1,1 @@
+ALTER TABLE `app_data` ADD CONSTRAINT `app_data_uuid_unique` UNIQUE(`uuid`);

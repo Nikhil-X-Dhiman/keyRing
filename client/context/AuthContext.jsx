@@ -2,17 +2,17 @@ import { useState } from "react";
 import { AuthContext } from "./AuthContextObject";
 
 export const AuthProvider = ({ children }) => {
-	const defaultUserValues = { email: "", passwd: "" };
+	const defaultUserValues = { email: "", password: "" };
 	const defaultAuthValues = {
 		accessToken: "",
-		user: "",
+		user: {},
 		masterKey: "",
 		masterSalt: "",
 	};
 	const defaultRegisterValues = {
 		email: "",
-		name: "",
-		passwd: "",
+		username: "",
+		password: "",
 		masterSalt: "",
 	};
 	const [auth, setAuth] = useState(defaultAuthValues);
@@ -22,10 +22,10 @@ export const AuthProvider = ({ children }) => {
 		JSON.parse(localStorage.getItem("persist")) || false
 	);
 	const [publicKey, setPublicKey] = useState("");
+	const [passwdList, setPasswdList] = useState([]);
+
 	const [validEmail, setValidEmail] = useState(false);
 	const [validPasswd, setValidPasswd] = useState(false);
-	const [masterKey, setMasterKey] = useState("");
-	const [passwdList, setPasswdList] = useState([]);
 	const [appLoading, setAppLoading] = useState(false);
 
 	return (
@@ -46,8 +46,6 @@ export const AuthProvider = ({ children }) => {
 				setUserRegister,
 				validPasswd,
 				setValidPasswd,
-				masterKey,
-				setMasterKey,
 				passwdList,
 				setPasswdList,
 				appLoading,

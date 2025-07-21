@@ -9,8 +9,10 @@ export const ErrorModal = ({
 	return (
 		<>
 			<div
-				className={`fixed  top-10 w-70 border-1 border-gray-400 rounded-2xl transition-all ${
-					isOpen ? "right-10" : "right-[-50rem] pointer-events-none"
+				className={`fixed top-10 w-70 border-1 border-gray-400 rounded-2xl transition-all duration-300 ease-in-out ${
+					isOpen
+						? "right-10 opacity-100 scale-100"
+						: "right-[-50rem] pointer-events-none opacity-0 scale-90"
 				}`}
 			>
 				<div className="flex justify-between bg-red-900 p-2 pr-3 rounded-t-2xl">

@@ -18,22 +18,5 @@ export const InputError = ({ message, touched = false }) => {
 		</>
 	);
 };
-// export const InputError = ({ message, touched = false, className = "" }) => {
-// 	const baseStyle =
-// 		"flex items-center gap-1 text-[.7rem] font-semibold text-left text-red-500 mt-1 mb-1";
-// 	const finalStyle = `${baseStyle} ${className}`;
-// 	return (
-// 		<>
-// 			{message && touched ? (
-// 				<p className={finalStyle}>
-// 					<CrossIcon className="w-3 h-3 font-bold" />
-// 					{`Error: ${message}`}
-// 				</p>
-// 			) : (
-// 				""
-// 			)}
-// 		</>
-// 	);
-// };
 
 InputError.displayName = "InputError";

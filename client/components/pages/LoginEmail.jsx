@@ -3,8 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { emailSchema } from "../utils/authSchema.js";
 import { useNavigate, useLocation, Link } from "react-router";
 import { useAuth } from "../hooks/useAuth.js";
-import CrossIcon from "../public/cross.svg?react";
-import { InputError } from "./InputError.jsx";
 import { InputField } from "./InputField.jsx";
 import { Button } from "./Button.jsx";
 import { CheckboxField } from "./CheckboxField.jsx";
@@ -44,7 +42,7 @@ export const LoginEmail = () => {
 		setValidEmail(false);
 		setUserLogin({
 			email: localStorage.getItem("userEmail") || "",
-			passwd: "",
+			password: "",
 		});
 	}, []);
 
@@ -73,12 +71,6 @@ export const LoginEmail = () => {
 			);
 		}
 	}, [emailFocus, userLogin.email]);
-
-	// useEffect(() => {
-	// 	if (validEmail === true) {
-	// 		setErr("");
-	// 	}
-	// }, [validEmail]);
 
 	useEffect(() => {
 		if (!persist) {

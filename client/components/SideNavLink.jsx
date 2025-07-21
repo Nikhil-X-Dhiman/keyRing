@@ -7,6 +7,7 @@ export const SideNavLink = ({
 }) => {
 	return (
 		<li
+			tabIndex={0}
 			className={`flex items-center gap-x-1.5 hover:text-blue-500 ${
 				pageMode === pageModeText ? "text-blue-400 font-medium" : ""
 			} cursor-pointer`}

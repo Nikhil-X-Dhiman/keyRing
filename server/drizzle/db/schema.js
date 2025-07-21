@@ -78,7 +78,7 @@ export const appDataTable = mysqlTable("app_data", {
 	userID: int("user_id").references(() => userTable.userID, {
 		onDelete: "cascade",
 	}),
-	uuid: varchar("uuid", { length: 512 }).notNull(),
+	uuid: varchar("uuid", { length: 512 }).unique().notNull(),
 	name: varchar("name", { length: 512 }),
 	username: varchar("username", { length: 512 }),
 	password: varchar("password", { length: 512 }),

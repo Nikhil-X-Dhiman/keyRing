@@ -47,19 +47,70 @@ export const useFetchData = () => {
 			if (success) {
 				// Add Items to Local DB, can't use bulk coz of different columns name and maybe deep copy will also not work here
 				const localItemList = await fetchAllItemsDB();
-				console.log(localItemList, result);
 
-				if (!equal(result, localItemList)) {
-					result.forEach(async (item) => {
-						try {
-							await handleAddItemDB(item);
-						} catch (error) {
-							console.error(
-								"Failed to Add Items into IndexedDB. Maybe it already exist: ",
-								error
-							);
+				// making both size equal in column
+				const stripItem = ({
+					uuid,
+					name,
+					username,
+					password,
+					uri,
+					note,
+					favourite,
+					trash,
+				}) => ({
+					uuid,
+					name,
+					username,
+					password,
+					uri,
+					note,
+					favourite,
+					trash,
+				});
+
+				const cloudStripped = result.map(stripItem);
+				const localStripped = localItemList.map(stripItem);
+
+				console.log(cloudStripped, localStripped);
+
+				if (!equal(cloudStripped, localStripped)) {
+					const localUUIDs = new Set(localItemList.map((item) => item.uuid));
+					for (const item of result) {
+						if (!localUUIDs.has(item.uuid)) {
+							try {
+								const {
+									uuid,
+									name,
+									username,
+									password,
+									uri,
+									note,
+									favourite,
+									trash,
+									createdAt,
+									updatedAt,
+								} = item;
+								await handleAddItemDB({
+									uuid,
+									name,
+									username,
+									password,
+									uri,
+									note,
+									favourite,
+									trash,
+									created_at: new Date(createdAt).toISOString(), // ensure date is iso string formatted from cloud
+									updated_at: new Date(updatedAt).toISOString(),
+								});
+							} catch (error) {
+								console.error(
+									"Failed to Add Items into IndexedDB. Maybe it already exist: ",
+									error
+								);
+							}
 						}
-					});
+					}
 				}
 
 				const plainTextCloudList = await handleListToDecrypt(result);
