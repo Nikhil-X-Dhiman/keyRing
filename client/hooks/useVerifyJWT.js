@@ -2,26 +2,26 @@ import { useAuth } from "./useAuth";
 import { jwtVerify, importSPKI } from "jose";
 
 export const useVerifyAccessToken = () => {
-	const { publicKey } = useAuth();
+	const { auth } = useAuth();
 
-	const verifyToken = async (token, publickey) => {
-		if (!publicKey && !publickey) {
+	const verifyToken = async (token, publicKey) => {
+		if (!auth.publicKey && !publicKey) {
 			console.warn("Public Key Not available for Token Verification");
 			return {
-				isValid: false,
+				success: false,
 				payload: null,
 				error: "Public Key Not Available",
 			};
 		}
-		if (!publickey) {
-			publickey = publicKey;
+		if (!publicKey) {
+			publicKey = auth.publicKey;
 		}
 		if (!token) {
 			console.error("No Token is provided for Verification");
 			return { success: false, payload: false, error: "No Token is Available" };
 		}
 		try {
-			const importedPublicKey = await importSPKI(publickey, "RS256");
+			const importedPublicKey = await importSPKI(publicKey, "RS256");
 			const { payload } = await jwtVerify(token, importedPublicKey);
 			// console.log("Decoded Access Token Payload: ", payload);
 			return { success: true, payload, error: null };

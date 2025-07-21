@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router";
 import { authRoutes } from "./authRoutes";
 import { publicRoutes } from "./publicRoutes";
 import { userRoutes } from "./userRoutes";
+import { InitializeDB } from "../components/layout/InitializeDB";
 
 // export const router = createBrowserRouter([
 // 	{
@@ -12,7 +13,8 @@ import { userRoutes } from "./userRoutes";
 // ]);
 
 export const router = createBrowserRouter([
-	...authRoutes,
-	...publicRoutes,
-	...userRoutes,
+	{
+		element: <InitializeDB />,
+		children: [...authRoutes, ...publicRoutes, ...userRoutes],
+	},
 ]);

@@ -73,7 +73,7 @@ const deriveKey = async (password, salt) => {
 
 export const useCrypto = () => {
 	// Starts Derive Key by suppling passwd and salt
-	const { userLogin, setUserLogin, auth, setAuth } = useAuth();
+	const { setUserLogin, auth, setAuth } = useAuth();
 	// const masterKeyRef = useRef(null);
 
 	const initialiseCrypto = async (masterPassword, masterSalt) => {
@@ -92,10 +92,8 @@ export const useCrypto = () => {
 		} catch (error) {
 			throw new Error("Failed to create Master Key: " + error);
 		} finally {
-			if (userLogin?.password) {
-				setUserLogin((prev) => ({ ...prev, password: "" }));
-				console.log("User Login Password is Cleared");
-			}
+			setUserLogin((prev) => ({ ...prev, password: "" }));
+			console.log("User Login Password is Cleared");
 		}
 	};
 

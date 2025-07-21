@@ -52,6 +52,9 @@ export const LoginPasswd = () => {
 	const from = location.state?.from?.pathname || "/user/home";
 
 	const masterSaltRef = useRef("");
+	const userRef = useRef({});
+	const accessTokenRef = useRef("");
+	const publicKeyRef = useRef("");
 
 	const {
 		auth,
@@ -61,7 +64,6 @@ export const LoginPasswd = () => {
 		validPasswd: validPassword,
 		setUserLogin,
 		setValidPasswd,
-		publicKey,
 		// setPublicKey,
 		// setPasswdList,
 	} = useAuth();
@@ -104,20 +106,19 @@ export const LoginPasswd = () => {
 
 	useEffect(() => {
 		const fetchData = async () => {
-			if (auth?.masterKey && auth?.accessToken) {
-				await handleFetchList();
+			if (auth?.masterKey && auth?.user) {
 				const currentUserState = {
-					id: 0,
 					email: userLogin.email,
-					user: auth.user,
+					user: userRef.current,
 					master_salt: masterSaltRef.current,
-					access_token: auth.accessToken,
-					public_key: publicKey,
-					login_status: 1,
+					access_token: accessTokenRef.current,
+					public_key: publicKeyRef.current,
+					login_status: true,
 				};
 
 				try {
 					await handleAddAppState(currentUserState);
+					await handleFetchList();
 				} catch (err) {
 					console.error("Failed to save user state to DB", err);
 					setPageError("Unable to save user session locally.");
@@ -152,20 +153,26 @@ export const LoginPasswd = () => {
 					headers: { "Content-Type": "application/json" },
 					withCredentials: true,
 				});
-
-				const access_token = response.data?.access_token;
-				const masterSalt = base64ToBuffer(response.data?.master_salt);
-				masterSaltRef.current = response.data?.master_salt;
+				publicKeyRef.current = response.data?.public_key;
+				accessTokenRef.current = response.data?.access_token;
+				masterSaltRef.current = base64ToBuffer(response.data?.master_salt);
 				if (response.status === 200) {
-					setAuth((prev) => ({ ...prev, accessToken: access_token }));
+					// user auth status state update
+					setAuth((prev) => ({
+						...prev,
+						accessToken: accessTokenRef.current,
+						masterSalt: masterSaltRef.current,
+						publicKey: publicKeyRef.current,
+					}));
 
-					const { success, payload, error } = await verifyToken(access_token);
+					const { success, payload, error } = await verifyToken(
+						accessTokenRef.current,
+						publicKeyRef.current
+					);
 
 					if (success) {
 						setAuth((prev) => ({ ...prev, user: payload }));
-						await initialiseCrypto(userLogin.password, masterSalt);
-						setUserLogin((prev) => ({ ...prev, password: "" }));
-						localStorage.setItem("isLogged", JSON.stringify(true));
+						await initialiseCrypto(userLogin.password, masterSaltRef.current);
 					} else {
 						console.error("Verify Access Token Failed: ", error);
 						setPageError("Access Token Verification Failed");

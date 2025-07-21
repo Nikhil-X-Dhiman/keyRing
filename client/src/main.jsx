@@ -5,7 +5,8 @@ import { RouterProvider } from "react-router";
 import { router } from "../routes/mainRouter.jsx";
 import { AuthProvider } from "../context/AuthContext.jsx";
 import { disableReactDevTools } from "@fvilers/disable-react-devtools";
-import { Tmp } from "../Tmp.jsx";
+import { AppProvider } from "../context/AppContext.jsx";
+import { GlobalLoadingSpinner } from "../components/layout/GlobalLoading.jsx";
 
 if (import.meta.env.VITE_ENV === "PRODUCTION") {
 	disableReactDevTools();
@@ -13,10 +14,11 @@ if (import.meta.env.VITE_ENV === "PRODUCTION") {
 
 createRoot(document.getElementById("root")).render(
 	<StrictMode>
-		<AuthProvider>
-			{/* <App /> */}
-			<RouterProvider router={router} />
-		</AuthProvider>
-		{/* <Tmp /> */}
+		<AppProvider>
+			<AuthProvider>
+				<RouterProvider router={router} />
+				<GlobalLoadingSpinner />
+			</AuthProvider>
+		</AppProvider>
 	</StrictMode>
 );

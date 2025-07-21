@@ -8,13 +8,15 @@
 // import { AuthFormHeader } from "./AuthFormHeader.jsx";
 
 import { useEffect, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
+import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
 import { emailSchema } from "../../utils/authSchema";
 import { AuthFormHeader } from "../AuthFormHeader";
 import { InputField } from "../InputField";
 import { Button } from "../Button";
 import { CheckboxField } from "../CheckboxField.jsx";
+import { useDB } from "../../hooks/useDB.js";
+import { Loading } from "./Loading.jsx";
 
 export const LoginEmail = () => {
 	const EMAIL_REGEX =
@@ -37,21 +39,20 @@ export const LoginEmail = () => {
 
 	const {
 		// auth,
+		app,
+		setApp,
 		userLogin,
 		validEmail,
 		setUserLogin,
 		setValidEmail,
-		persist,
-		setPersist,
+		// persist,
+		// setPersist,
 	} = useAuth();
+
+	const { handleUpdateAppState } = useDB();
 
 	useEffect(() => {
 		emailRef.current?.focus();
-		setValidEmail(false);
-		setUserLogin({
-			email: localStorage.getItem("userEmail") || "",
-			password: "",
-		});
 	}, []);
 
 	useEffect(() => {
@@ -81,10 +82,12 @@ export const LoginEmail = () => {
 	}, [emailFocus, userLogin.email]);
 
 	useEffect(() => {
-		if (!persist) {
-			localStorage.removeItem("userEmail");
+		if (!app.persist) {
+			(async () => {
+				await handleUpdateAppState("email", null);
+			})();
 		}
-	}, [persist]);
+	}, [app.persist]);
 
 	const handleEmailSubmit = (e) => {
 		e.preventDefault();
@@ -102,69 +105,74 @@ export const LoginEmail = () => {
 	};
 
 	const togglePersist = () => {
-		localStorage.setItem("persist", JSON.stringify(!persist));
-		setPersist((prev) => !prev);
+		// localStorage.setItem("persist", JSON.stringify(!persist));
+		// setPersist((prev) => !prev);
+		setApp((prev) => ({ ...prev, persist: !prev.persist }));
 	};
 
-	return isLoading ? (
-		<h1>Loading!!!</h1>
-	) : (
-		<>
-			<main className="flex flex-col justify-center items-center pt-15 select-none">
-				<AuthFormHeader
-					title="Log in to KeyRing"
-					imgSrc="../src/assets/vault.png"
-					imgAlt="vault-img"
-				/>
-
-				<form
-					onSubmit={handleEmailSubmit}
-					className="flex flex-col items-center gap-y-1 border-1 border-gray-400 rounded-2xl m-5 p-7  bg-slate-800 w-md"
-				>
-					<InputField
-						label="Email address"
-						required={true}
-						id="login-email"
-						ref={emailRef}
-						value={userLogin.email}
-						error={inputError}
-						onChange={(e) =>
-							setUserLogin((prev) => ({ ...prev, email: e.target.value }))
-						}
-						onFocus={() => setEmailFocus(true)}
-						onBlur={() => setEmailFocus(false)}
+	if (app.loading === true) {
+		return <Loading loading={app.loading} />;
+	} else if (app.persist === true && userLogin.email !== "") {
+		return <Navigate to="/login/passwd" replace />;
+	} else {
+		return (
+			<>
+				<main className="flex flex-col justify-center items-center pt-15 select-none">
+					<AuthFormHeader
+						title="Log in to KeyRing"
+						imgSrc="../src/assets/vault.png"
+						imgAlt="vault-img"
 					/>
 
-					<CheckboxField
-						label="Remember Me"
-						id="login-remember"
-						onChange={togglePersist}
-						checked={persist}
-					/>
+					<form
+						onSubmit={handleEmailSubmit}
+						className="flex flex-col items-center gap-y-1 border-1 border-gray-400 rounded-2xl m-5 p-7  bg-slate-800 w-md"
+					>
+						<InputField
+							label="Email address"
+							required={true}
+							id="login-email"
+							ref={emailRef}
+							value={userLogin.email}
+							error={inputError}
+							onChange={(e) =>
+								setUserLogin((prev) => ({ ...prev, email: e.target.value }))
+							}
+							onFocus={() => setEmailFocus(true)}
+							onBlur={() => setEmailFocus(false)}
+						/>
 
-					<Button
-						title={`${
-							validEmail
-								? "Submit & Continue to Password Page"
-								: "Enter Valid Email in Above Field !!!"
-						}`}
-						disabled={!validEmail}
-						variant={validEmail ? "primary" : "disabled"}
-						className=""
-					>
-						Continue
-					</Button>
-				</form>
-				<div>
-					New to keyRing?{" "}
-					<Link
-						to="/register"
-						className="text-blue-300 hover:text-blue-200 hover:underline transition duration-200 ease-in-out"
-					>
-						Create Account
-					</Link>
-				</div>
-			</main>
-		</>
-	);
+						<CheckboxField
+							label="Remember Me"
+							id="login-remember"
+							onChange={togglePersist}
+							checked={app.persist}
+						/>
+
+						<Button
+							title={`${
+								validEmail
+									? "Submit & Continue to Password Page"
+									: "Enter Valid Email in Above Field !!!"
+							}`}
+							disabled={!validEmail}
+							variant={validEmail ? "primary" : "disabled"}
+							className=""
+						>
+							Continue
+						</Button>
+					</form>
+					<div>
+						New to keyRing?{" "}
+						<Link
+							to="/register"
+							className="text-blue-300 hover:text-blue-200 hover:underline transition duration-200 ease-in-out"
+						>
+							Create Account
+						</Link>
+					</div>
+				</main>
+			</>
+		);
+	}
 };

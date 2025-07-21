@@ -19,7 +19,7 @@ export const useFetchData = () => {
 	const { handleAddItemDB, fetchAllItemsDB } = useDB();
 
 	const publicKeyRequest = async () => {
-		// Fetch Public Key to Verify Access Token
+		// On demand Fetch Public Key to Verify Access Token
 		try {
 			const response = await instance.get("/api/v1/auth/public");
 			if (response.status === 200) {

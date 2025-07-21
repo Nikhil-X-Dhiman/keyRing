@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
 		user: {},
 		masterKey: "",
 		masterSalt: "",
+		publicKey: "",
 	};
 	const defaultRegisterValues = {
 		email: "",
@@ -15,18 +16,16 @@ export const AuthProvider = ({ children }) => {
 		password: "",
 		masterSalt: "",
 	};
+
 	const [auth, setAuth] = useState(defaultAuthValues);
+
 	const [userLogin, setUserLogin] = useState(defaultUserValues);
 	const [userRegister, setUserRegister] = useState(defaultRegisterValues);
-	const [persist, setPersist] = useState(
-		JSON.parse(localStorage.getItem("persist")) || false
-	);
-	const [publicKey, setPublicKey] = useState("");
+
 	const [passwdList, setPasswdList] = useState([]);
 
 	const [validEmail, setValidEmail] = useState(false);
 	const [validPasswd, setValidPasswd] = useState(false);
-	const [appLoading, setAppLoading] = useState(false);
 
 	return (
 		<AuthContext.Provider
@@ -34,12 +33,8 @@ export const AuthProvider = ({ children }) => {
 				auth,
 				setAuth,
 				defaultUserValues,
-				persist,
-				setPersist,
 				userLogin,
 				setUserLogin,
-				publicKey,
-				setPublicKey,
 				validEmail,
 				setValidEmail,
 				userRegister,
@@ -48,8 +43,6 @@ export const AuthProvider = ({ children }) => {
 				setValidPasswd,
 				passwdList,
 				setPasswdList,
-				appLoading,
-				setAppLoading,
 			}}
 		>
 			{children}

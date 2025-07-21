@@ -1,5 +1,6 @@
 // Importing dexie db instance
 
+import { useCallback } from "react";
 import { db } from "../db/db";
 
 export const useDB = () => {
@@ -170,7 +171,21 @@ export const useDB = () => {
 			return userState;
 		} catch (error) {
 			console.error("Failed to fetch user state: ", error);
-			throw new Error("User State Not Found");
+			return null;
+		}
+	};
+
+	const handleUpdateAppState = async (field, value) => {
+		try {
+			const success = await db.appState.update(0, {
+				[field]: value,
+			});
+			if (success) {
+				console.log(`Field: ${field} is updated with value: ${value}`);
+				return true;
+			}
+		} catch (error) {
+			console.error("Updating Field " + field + " failed: ", error);
 		}
 	};
 
@@ -195,7 +210,7 @@ export const useDB = () => {
 		}
 	};
 
-	const handleDBOpen = async () => {
+	const handleDBOpen = useCallback(async () => {
 		try {
 			await db.open();
 			console.log("Local DB is now available");
@@ -203,7 +218,7 @@ export const useDB = () => {
 			console.error("DB cannot be initialized: ", error);
 			throw new Error("DB cannot be initialized");
 		}
-	};
+	}, []);
 
 	const handleAddNewAccessTokenDB = async (accessToken) => {
 		try {
@@ -214,6 +229,16 @@ export const useDB = () => {
 		} catch (error) {
 			console.error("New Token Addition Failed: ", error);
 			throw new Error("New Token Addition Failed");
+		}
+	};
+
+	const handleFetchAppStateDB = async (field) => {
+		try {
+			const appState = await db.appState.get(0);
+			return appState?.[field] ?? null;
+		} catch (error) {
+			console.error(`Error fetching field "${field}" from appState:`, error);
+			throw new Error("Fetching from LocalDB Failed");
 		}
 	};
 
@@ -233,5 +258,7 @@ export const useDB = () => {
 		handleDelDB,
 		handleDBOpen,
 		handleAddNewAccessTokenDB,
+		handleFetchAppStateDB,
+		handleUpdateAppState,
 	};
 };

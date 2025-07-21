@@ -103,7 +103,7 @@ export const handleLogin = async (req, res) => {
 	return res.status(200).json({
 		success: true,
 		access_token: accessToken,
-		publicKey: publicKey,
+		public_key: publicKey,
 		master_salt: result?.auth?.salt,
 		msg: "Log In Successful!!!",
 	});
