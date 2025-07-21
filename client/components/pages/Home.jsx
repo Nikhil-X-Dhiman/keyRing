@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { LoginEmail } from "../LoginEmail";
+// import { LoginEmail } from "./LoginEmail";
 export const Home = () => {
 	return (
 		<div className="bg-slate-700 text-slate-300">

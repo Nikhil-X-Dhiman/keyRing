@@ -1,18 +1,27 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+// import { useEffect, useRef, useState } from "react";
+// import { useAuth } from "../../hooks/useAuth";
+// import { base64ToBuffer, useCrypto } from "../../hooks/useCrypto";
+// import { usePrivateInstance } from "../../hooks/usePrivateInstance";
+// import { passwdSchema } from "../../utils/authSchema";
+// // import { instance } from "../../api/axios";
+// import { useLocation, useNavigate } from "react-router";
+// import { InputField } from "../InputField";
+// import { Button } from "../Button";
+// import { ErrorModal } from "../ErrorModal";
+// import { AuthFormHeader } from "../AuthFormHeader";
+// import { useFetchData } from "../../hooks/useFetchData";
+// import { ClockLoader } from "react-spinners";
+
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { base64ToBuffer, useCrypto } from "../../hooks/useCrypto";
-import LockIcon from "../../src/assets/lock.svg?react";
-import { usePrivateInstance } from "../../hooks/usePrivateInstance";
-import { passwdSchema } from "../../utils/authSchema";
-// import { instance } from "../../api/axios";
-import { useLocation, useNavigate } from "react-router";
-import { InputField } from "../InputField";
-import { Button } from "../Button";
-import { ErrorModal } from "../ErrorModal";
-import { AuthFormHeader } from "../AuthFormHeader";
 import { useFetchData } from "../../hooks/useFetchData";
-import { ClockLoader } from "react-spinners";
+import { usePrivateInstance } from "../../hooks/usePrivateInstance";
+import { useLocation, useNavigate } from "react-router";
+import { passwdSchema } from "../../utils/authSchema";
+import LockIcon from "../../src/assets/lock.svg?react";
+
 // import { useDB } from "../../hooks/useDB";
 export const UnLock = () => {
 	const {

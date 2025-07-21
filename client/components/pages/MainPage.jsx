@@ -1,9 +1,27 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+// import { useEffect, useLayoutEffect, useRef, useState } from "react";
+// // import { v4 as uuidv4 } from "uuid";
+// import { useNavigate } from "react-router";
+// import { useAuth } from "../../hooks/useAuth";
+// import { usePrivateInstance } from "../../hooks/usePrivateInstance";
+// import { useCrypto } from "../../hooks/useCrypto";
+// import { SearchField } from "../SearchField";
+// import { Button } from "../Button";
+// import { SideNav } from "../SideNav";
+// import { DisplayList } from "../DisplayList";
+// import { AddItemBtn } from "../AddItemBtn";
+// import { BgBrand } from "../BgBrand";
+// import { ItemField } from "../ItemField";
+// import { ErrorModal } from "../ErrorModal";
+// import { useDB } from "../../hooks/useDB";
+
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-// import { v4 as uuidv4 } from "uuid";
+import { useDB } from "../../hooks/useDB";
 import { useNavigate } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
+import { useCrypto } from "../../hooks/useCrypto";
 import { usePrivateInstance } from "../../hooks/usePrivateInstance";
+
 import { IoMdCloseCircleOutline } from "react-icons/io";
 import { HiOutlineTrash } from "react-icons/hi2";
 import { IoMdAddCircleOutline } from "react-icons/io";
@@ -12,16 +30,6 @@ import { IoClose } from "react-icons/io5";
 import { MdModeEdit } from "react-icons/md";
 import { LuSave } from "react-icons/lu";
 import { MdCloseFullscreen } from "react-icons/md";
-import { useCrypto } from "../../hooks/useCrypto";
-import { SearchField } from "../SearchField";
-import { Button } from "../Button";
-import { SideNav } from "../SideNav";
-import { DisplayList } from "../DisplayList";
-import { AddItemBtn } from "../AddItemBtn";
-import { BgBrand } from "../BgBrand";
-import { ItemField } from "../ItemField";
-import { ErrorModal } from "../ErrorModal";
-import { useDB } from "../../hooks/useDB";
 
 export const MainPage = () => {
 	const defaultEmpty = {

@@ -11,7 +11,8 @@ CREATE TABLE `app_data` (
 	`trash` boolean NOT NULL DEFAULT false,
 	`created_at` timestamp NOT NULL DEFAULT (now()),
 	`updated_at` timestamp NOT NULL DEFAULT (now()),
-	CONSTRAINT `app_data_data_id` PRIMARY KEY(`data_id`)
+	CONSTRAINT `app_data_data_id` PRIMARY KEY(`data_id`),
+	CONSTRAINT `app_data_uuid_unique` UNIQUE(`uuid`)
 );
 --> statement-breakpoint
 CREATE TABLE `refresh_token` (

@@ -1,20 +1,35 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+// import { useEffect, useRef, useState } from "react";
+// import { passwdSchema } from "../../utils/authSchema.js";
+// import { instance } from "../../api/axios.js";
+// import { useAuth } from "../../hooks/useAuth.js";
+// import { Link, Navigate, useNavigate, useLocation } from "react-router";
+// import { base64ToBuffer, useCrypto } from "../../hooks/useCrypto.js";
+// import { InputField } from "../InputField.jsx";
+// import { ErrorModal } from "../ErrorModal.jsx";
+// import { ClockLoader } from "react-spinners";
+// // import { usePrivateInstance } from "../hooks/usePrivateInstance.jsx";
+// import { useFetchData } from "../../hooks/useFetchData.js";
+// import { AuthFormHeader } from "../AuthFormHeader.jsx";
+// import { Button } from "../Button.jsx";
+// import { useDB } from "../../hooks/useDB.js";
+// import { useVerifyAccessToken } from "../../hooks/useVerifyJWT.js";
+
 import { useEffect, useRef, useState } from "react";
-import { passwdSchema } from "../../utils/authSchema.js";
-import { instance } from "../../api/axios.js";
-import { useAuth } from "../../hooks/useAuth.js";
-import { Link, Navigate, useNavigate, useLocation } from "react-router";
-import { useVerifyAccessToken } from "../../hooks/useVerifyJWT.jsx";
-import WaveIcon from "../public/wave.svg?react";
-import { base64ToBuffer, useCrypto } from "../../hooks/useCrypto.js";
-import { InputField } from "../InputField.jsx";
-import { ErrorModal } from "../ErrorModal.jsx";
+import { Link, Navigate, useLocation, useNavigate } from "react-router";
+import { useVerifyAccessToken } from "../../hooks/useVerifyJWT";
+import { useDB } from "../../hooks/useDB";
+import { base64ToBuffer, useCrypto } from "../../hooks/useCrypto";
+import { useFetchData } from "../../hooks/useFetchData";
+import { passwdSchema } from "../../utils/authSchema";
+import { useAuth } from "../../hooks/useAuth";
+import { instance } from "../../api/axios";
+import WaveIcon from "../../public/wave.svg?react";
+import { ErrorModal } from "../ErrorModal";
+import { AuthFormHeader } from "../AuthFormHeader";
+import { InputField } from "../InputField";
+import { Button } from "../Button";
 import { ClockLoader } from "react-spinners";
-// import { usePrivateInstance } from "../hooks/usePrivateInstance.jsx";
-import { useFetchData } from "../../hooks/useFetchData.js";
-import { AuthFormHeader } from "../AuthFormHeader.jsx";
-import { Button } from "../Button.jsx";
-import { useDB } from "../../hooks/useDB.js";
 
 export const LoginPasswd = () => {
 	const PASSWD_REGEX =
@@ -53,7 +68,7 @@ export const LoginPasswd = () => {
 
 	const { initialiseCrypto } = useCrypto();
 
-	const { publicKeyRequest, handleFetchList } = useFetchData();
+	const { handleFetchList } = useFetchData();
 
 	useEffect(() => {
 		passwordRef.current?.focus();

@@ -101,7 +101,7 @@ export const userRelations = relations(userTable, ({ one, many }) => ({
 		references: [userAuthTable.userID],
 	}),
 	token: many(refreshTokenTable), //foreign key
-	login: many(appDataTable),
+	appData: many(appDataTable),
 }));
 
 // userTable && userAuthTable

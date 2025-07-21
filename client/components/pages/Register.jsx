@@ -2,17 +2,31 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { useAuth } from "../hooks/useAuth.js";
-import { emailSchema, nameSchema, passwdSchema } from "../utils/authSchema";
-import { instance } from "../api/axios";
+import { useAuth } from "../../hooks/useAuth";
+import { emailSchema, nameSchema, passwdSchema } from "../../utils/authSchema";
 import {
 	bufferToBase64,
 	generateCryptoRandomValue,
-} from "../hooks/useCrypto.js";
-import { ErrorModal } from "./ErrorModal.jsx";
-import { InputField } from "./InputField.jsx";
-import { Button } from "./Button.jsx";
-import { AuthFormHeader } from "./AuthFormHeader.jsx";
+} from "../../hooks/useCrypto";
+import { instance } from "../../api/axios";
+import { ErrorModal } from "../ErrorModal";
+import { AuthFormHeader } from "../AuthFormHeader";
+import { InputField } from "../InputField";
+import { Button } from "../Button";
+
+// import { useEffect, useRef, useState } from "react";
+// import { Link, useNavigate } from "react-router";
+// import { useAuth } from "../../hooks/useAuth.js";
+// import { emailSchema, nameSchema, passwdSchema } from "../../utils/authSchema";
+// import { instance } from "../../api/axios";
+// import {
+// 	bufferToBase64,
+// 	generateCryptoRandomValue,
+// } from "../../hooks/useCrypto.js";
+// import { ErrorModal } from "../ErrorModal.jsx";
+// import { InputField } from "./InputField.jsx";
+// import { Button } from "./Button.jsx";
+// import { AuthFormHeader } from "./AuthFormHeader.jsx";
 
 export const Register = () => {
 	const navigate = useNavigate();

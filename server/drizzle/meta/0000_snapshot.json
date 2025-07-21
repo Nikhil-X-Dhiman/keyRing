@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "7aa4b6f0-b8be-475d-9e44-f4813ec26dd3",
+  "id": "b361c249-f3e9-4e25-9bc8-9f1efe7d8ad0",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "app_data": {
@@ -120,7 +120,14 @@
           ]
         }
       },
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "app_data_uuid_unique": {
+          "name": "app_data_uuid_unique",
+          "columns": [
+            "uuid"
+          ]
+        }
+      },
       "checkConstraint": {}
     },
     "refresh_token": {

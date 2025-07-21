@@ -1,12 +1,20 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+// import { useEffect, useRef, useState } from "react";
+// import { emailSchema } from "../../utils/authSchema.js";
+// import { useNavigate, useLocation, Link } from "react-router";
+// import { useAuth } from "../hooks/useAuth.js";
+// import { InputField } from "./InputField.jsx";
+// import { Button } from "./Button.jsx";
+// import { AuthFormHeader } from "./AuthFormHeader.jsx";
+
 import { useEffect, useRef, useState } from "react";
-import { emailSchema } from "../utils/authSchema.js";
-import { useNavigate, useLocation, Link } from "react-router";
-import { useAuth } from "../hooks/useAuth.js";
-import { InputField } from "./InputField.jsx";
-import { Button } from "./Button.jsx";
-import { CheckboxField } from "./CheckboxField.jsx";
-import { AuthFormHeader } from "./AuthFormHeader.jsx";
+import { Link, useLocation, useNavigate } from "react-router";
+import { useAuth } from "../../hooks/useAuth";
+import { emailSchema } from "../../utils/authSchema";
+import { AuthFormHeader } from "../AuthFormHeader";
+import { InputField } from "../InputField";
+import { Button } from "../Button";
+import { CheckboxField } from "../CheckboxField.jsx";
 
 export const LoginEmail = () => {
 	const EMAIL_REGEX =

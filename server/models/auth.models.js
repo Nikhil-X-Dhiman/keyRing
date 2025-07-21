@@ -34,21 +34,27 @@ export const insertUserByCredential = async (
 	password,
 	salt
 ) => {
-	try {
+	const result = await db.transaction(async (tx) => {
 		// insert email & name to user table
-		const [query1] = await db
-			.insert(userTable)
-			.values({ email, username })
-			.$returningId();
-		// insert passwd hash into user auth table and primary key from prev. insertion from query 1
-		const [query2] = await db
-			.insert(userAuthTable)
-			.values({ userID: query1, passwordHash: password, salt })
-			.$returningId();
+		try {
+			const [query1] = await tx
+				.insert(userTable)
+				.values({ email, username })
+				.$returningId();
+			// insert passwd hash into user auth table and primary key from prev. insertion from query 1
 
-		return query2;
-	} catch (error) {
-		console.error("Register User Error: ", error);
-		return false;
-	}
+			const [query2] = await tx
+				.insert(userAuthTable)
+				.values({ userID: query1.userID, passwordHash: password, salt })
+				.$returningId();
+
+			return query2;
+		} catch (error) {
+			console.error("Register User Error: ", error);
+			return false;
+		}
+	});
+
+	console.log("Transaction Result: ", result);
+	return result;
 };
