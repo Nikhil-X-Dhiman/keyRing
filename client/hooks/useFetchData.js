@@ -104,10 +104,7 @@ export const useFetchData = () => {
 									updated_at: new Date(updatedAt).toISOString(),
 								});
 							} catch (error) {
-								console.error(
-									"Failed to Add Items into IndexedDB. Maybe it already exist: ",
-									error
-								);
+								console.error("Failed to Add Items into IndexedDB: ", error);
 							}
 						}
 					}

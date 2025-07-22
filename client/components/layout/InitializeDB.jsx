@@ -6,41 +6,54 @@ import { useAuth } from "../../hooks/useAuth";
 import { useApp } from "../../hooks/useApp";
 
 export const InitializeDB = () => {
-	const { handleDBOpen, handleFetchAppState } = useDB();
+	const { handleDBOpen, handleFetchFullAppState, handleInitializeAppState } =
+		useDB();
 	const { setAuth, setUserLogin } = useAuth();
-	const { setAppState, startLoading, endLoading, loading } = useApp();
+	const { setAppState, startLoading, endLoading, loading, setDBLoaded } =
+		useApp();
 
 	useEffect(() => {
 		if (typeof window === "undefined") return; // SSR Protection
 		startLoading();
 		const initialize = async () => {
 			try {
+				// open connection to DB
 				await handleDBOpen();
 				console.log("DB Initialization Successfull");
-				// now loads the state to the context from localDB
-				const {
-					email = "",
-					user = {},
-					master_salt = "",
-					access_token = "",
-					public_key = "",
-					persist = false,
-					login_status = false,
-				} = (await handleFetchAppState()) || {};
-				// setting auth & app context
-				setAppState((prev) => ({ ...prev, persist, login: login_status }));
+				// loads the state to the context from localDB
+				const state = await handleFetchFullAppState();
+				if (state && state.persist) {
+					console.log("DB Found -> Updating States");
 
-				setAuth((prev) => ({
-					...prev,
-					accessToken: access_token,
-					user,
-					masterSalt: master_salt,
-					publicKey: public_key,
-				}));
-				setUserLogin((prev) => ({ ...prev, email }));
+					const {
+						email = "",
+						user = {},
+						master_salt = "",
+						access_token = "",
+						public_key = "",
+						persist = false,
+						login_status = false,
+					} = state;
+					// setting auth & app context
+					setAppState((prev) => ({ ...prev, persist, login: login_status }));
+
+					setAuth((prev) => ({
+						...prev,
+						accessToken: access_token,
+						user,
+						masterSalt: master_salt,
+						publicKey: public_key,
+					}));
+					setUserLogin((prev) => ({ ...prev, email }));
+				} else {
+					// if no db found & initialize db with default values
+					await handleInitializeAppState();
+					console.log("DB Not Found -> Initialization Successfull");
+				}
 			} catch (error) {
 				console.error("DB Initialization Failed: ", error);
 			} finally {
+				setDBLoaded(true);
 				endLoading();
 			}
 		};

@@ -1,3 +1,4 @@
+import { InitializeAuthRoute } from "../components/layout/InitializeAuthRoute";
 import { Layout } from "../components/layout/Layout";
 import { LoginEmail } from "../components/pages/LoginEmail";
 import { LoginPasswd } from "../components/pages/LoginPasswd";
@@ -5,19 +6,24 @@ import { Register } from "../components/pages/Register";
 
 export const authRoutes = [
 	{
-		element: <Layout />,
+		element: <InitializeAuthRoute />,
 		children: [
 			{
-				path: "login/email",
-				element: <LoginEmail />,
-			},
-			{
-				path: "login/password",
-				element: <LoginPasswd />,
-			},
-			{
-				path: "register",
-				element: <Register />,
+				element: <Layout />,
+				children: [
+					{
+						path: "login/email",
+						element: <LoginEmail />,
+					},
+					{
+						path: "login/password",
+						element: <LoginPasswd />,
+					},
+					{
+						path: "register",
+						element: <Register />,
+					},
+				],
 			},
 		],
 	},

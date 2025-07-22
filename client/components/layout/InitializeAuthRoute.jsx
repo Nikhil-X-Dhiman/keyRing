@@ -5,36 +5,43 @@ import { useEffect, useState } from "react";
 
 export const InitializeAuthRoute = () => {
 	const location = useLocation();
-	const { appState, startLoading, endLoading } = useApp();
+	const { appState, startLoading, endLoading, dbLoaded } = useApp();
 	const { auth, userLogin, validEmail } = useAuth();
 	const [redirect, setRedirect] = useState(null);
 
 	useEffect(() => {
-		startLoading();
-		const path = location.pathname;
-		const from = location.state?.from || "/user/home";
+		if (dbLoaded) {
+			startLoading();
+			const path = location.pathname;
+			const from = location.state?.from || "/user/home";
 
-		if (
-			path === "/login/email" &&
-			userLogin.email &&
-			appState.persist &&
-			validEmail
-		) {
-			setRedirect("/login/passwd");
-		} else if (path === "/login/email" && from === "/login/passwd") {
+			if (
+				path === "/login/email" &&
+				userLogin.email &&
+				appState.persist &&
+				validEmail
+			) {
+				setRedirect("/login/password");
+			} else if (path === "/login/email" && from === "/login/password") {
+				setRedirect(null);
+			} else if (
+				(path === "/login/email" || path === "/login/password") &&
+				auth.user?.email &&
+				appState.login
+			) {
+				setRedirect("/user/home");
+			} else if (path === "/login/password" && !validEmail) {
+				setRedirect("/login/email");
+			} else {
+				setRedirect(null);
+			}
 			endLoading();
-			setRedirect(null);
-		} else if (
-			(path === "/login/email" || path === "/login/passwd") &&
-			auth.user?.email &&
-			appState.login
-		) {
-			setRedirect("/user/home");
-		} else {
-			setRedirect(null);
 		}
-		endLoading();
-	}, []);
+	}, [dbLoaded, location.pathname, location.state]);
+
+	if (!dbLoaded) {
+		return null;
+	}
 
 	if (redirect) {
 		return <Navigate to={redirect} replace />;

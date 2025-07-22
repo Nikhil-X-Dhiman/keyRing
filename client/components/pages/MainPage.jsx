@@ -5,14 +5,13 @@
 // import { useAuth } from "../../hooks/useAuth";
 // import { usePrivateInstance } from "../../hooks/usePrivateInstance";
 // import { useCrypto } from "../../hooks/useCrypto";
-// import { SearchField } from "../SearchField";
-// import { Button } from "../Button";
-// import { SideNav } from "../SideNav";
-// import { DisplayList } from "../DisplayList";
-// import { AddItemBtn } from "../AddItemBtn";
-// import { BgBrand } from "../BgBrand";
-// import { ItemField } from "../ItemField";
-// import { ErrorModal } from "../ErrorModal";
+import { SearchField } from "../SearchField";
+import { Button } from "../Button";
+import { SideNav } from "../SideNav";
+import { DisplayList } from "../DisplayList";
+import { AddItemBtn } from "../AddItemBtn";
+import { BgBrand } from "../BgBrand";
+import { ItemField } from "../ItemField";
 // import { useDB } from "../../hooks/useDB";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -21,6 +20,7 @@ import { useNavigate } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
 import { useCrypto } from "../../hooks/useCrypto";
 import { usePrivateInstance } from "../../hooks/usePrivateInstance";
+import { ErrorModal } from "../ErrorModal";
 
 import { IoMdCloseCircleOutline } from "react-icons/io";
 import { HiOutlineTrash } from "react-icons/hi2";

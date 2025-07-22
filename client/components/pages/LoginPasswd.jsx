@@ -1,20 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-// import { useEffect, useRef, useState } from "react";
-// import { passwdSchema } from "../../utils/authSchema.js";
-// import { instance } from "../../api/axios.js";
-// import { useAuth } from "../../hooks/useAuth.js";
-// import { Link, Navigate, useNavigate, useLocation } from "react-router";
-// import { base64ToBuffer, useCrypto } from "../../hooks/useCrypto.js";
-// import { InputField } from "../InputField.jsx";
-// import { ErrorModal } from "../ErrorModal.jsx";
-// import { ClockLoader } from "react-spinners";
-// // import { usePrivateInstance } from "../hooks/usePrivateInstance.jsx";
-// import { useFetchData } from "../../hooks/useFetchData.js";
-// import { AuthFormHeader } from "../AuthFormHeader.jsx";
-// import { Button } from "../Button.jsx";
-// import { useDB } from "../../hooks/useDB.js";
-// import { useVerifyAccessToken } from "../../hooks/useVerifyJWT.js";
-
 import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { useVerifyAccessToken } from "../../hooks/useVerifyJWT";
@@ -30,6 +14,7 @@ import { AuthFormHeader } from "../AuthFormHeader";
 import { InputField } from "../InputField";
 import { Button } from "../Button";
 import { ClockLoader } from "react-spinners";
+import { useApp } from "../../hooks/useApp";
 
 export const LoginPasswd = () => {
 	const PASSWD_REGEX =
@@ -46,7 +31,7 @@ export const LoginPasswd = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const verifyToken = useVerifyAccessToken();
-	const { handleAddAppState, handleDBOpen } = useDB();
+	const { handleLoginUpdateAppState } = useDB();
 
 	// const privateInstance = usePrivateInstance();
 	const from = location.state?.from?.pathname || "/user/home";
@@ -64,9 +49,9 @@ export const LoginPasswd = () => {
 		validPasswd: validPassword,
 		setUserLogin,
 		setValidPasswd,
-		// setPublicKey,
-		// setPasswdList,
 	} = useAuth();
+
+	const { appState, setAppState } = useApp();
 
 	const { initialiseCrypto } = useCrypto();
 
@@ -88,15 +73,8 @@ export const LoginPasswd = () => {
 	useEffect(() => {
 		if (userLogin.password) {
 			const { success } = passwdSchema.safeParse(userLogin.password);
-			// success, error & data
-			if (success) {
-				setValidPasswd(true);
-				setInputError("");
-			} else {
-				setValidPasswd(false);
-			}
-		} else {
-			setInputError("");
+			setValidPasswd(success);
+			setInputError(success && "");
 		}
 	}, [userLogin.password]);
 
@@ -115,14 +93,20 @@ export const LoginPasswd = () => {
 					public_key: publicKeyRef.current,
 					login_status: true,
 				};
+				console.log("HEHEHEH: ", userRef.current);
 
 				try {
-					await handleAddAppState(currentUserState);
+					// only add state to db when persist is enable
+					if (appState.persist) {
+						await handleLoginUpdateAppState(currentUserState);
+						console.log("Is it running???");
+					}
 					await handleFetchList();
 				} catch (err) {
-					console.error("Failed to save user state to DB", err);
-					setPageError("Unable to save user session locally.");
+					console.error("Failed to fetch data", err);
+					setPageError("Failed to Fetch Data.");
 				}
+				setAppState((prev) => ({ ...prev, login: true }));
 				setLoading(false);
 				navigate(from, { replace: true });
 			}
@@ -131,22 +115,14 @@ export const LoginPasswd = () => {
 		console.log("here fetch data 4");
 	}, [auth?.masterKey]);
 
-	if (!userLogin.email && !validEmail) {
-		// Go to Email Login Page if Invalid Email
-		return <Navigate to="/login/email" replace />;
-	}
+	// if (!userLogin.email && !validEmail) {
+	// 	// Go to Email Login Page if Invalid Email
+	// 	return <Navigate to="/login/email" replace />;
+	// }
 
 	const handleSubmitBtn = async (e) => {
 		e.preventDefault();
 		setLoading(true);
-		try {
-			await handleDBOpen();
-		} catch (err) {
-			console.error("DB Initialization Error:", err);
-			setPageError("Something went wrong with app storage. Try again.");
-			setLoading(false);
-			return;
-		}
 		if (validPassword && validEmail) {
 			try {
 				const response = await instance.post("/api/v1/auth/login", userLogin, {
@@ -160,8 +136,6 @@ export const LoginPasswd = () => {
 					// user auth status state update
 					setAuth((prev) => ({
 						...prev,
-						accessToken: accessTokenRef.current,
-						masterSalt: masterSaltRef.current,
 						publicKey: publicKeyRef.current,
 					}));
 
@@ -169,9 +143,15 @@ export const LoginPasswd = () => {
 						accessTokenRef.current,
 						publicKeyRef.current
 					);
-
+					userRef.current = payload;
 					if (success) {
-						setAuth((prev) => ({ ...prev, user: payload }));
+						setAuth((prev) => ({
+							...prev,
+							user: payload,
+							accessToken: accessTokenRef.current,
+							masterSalt: masterSaltRef.current,
+						}));
+						// creates the masterKey
 						await initialiseCrypto(userLogin.password, masterSaltRef.current);
 					} else {
 						console.error("Verify Access Token Failed: ", error);

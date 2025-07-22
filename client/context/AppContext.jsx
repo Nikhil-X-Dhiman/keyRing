@@ -8,6 +8,8 @@ export const AppProvider = ({ children }) => {
 		login: false,
 	};
 
+	const [dbLoaded, setDBLoaded] = useState(false);
+
 	const [appState, setAppState] = useState(defaultAppValues);
 
 	const [loadingCount, setLoadingCount] = useState(0);
@@ -33,6 +35,8 @@ export const AppProvider = ({ children }) => {
 				startLoading,
 				endLoading,
 				resetLoading,
+				dbLoaded,
+				setDBLoaded,
 			}}
 		>
 			{children}

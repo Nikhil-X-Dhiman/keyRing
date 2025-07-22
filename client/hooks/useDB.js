@@ -12,7 +12,8 @@ export const useDB = () => {
 			return passwdList;
 		} catch (error) {
 			console.error("Failed to load data: ", error);
-			throw new Error("Failed to load data");
+			return [];
+			// throw new Error("Failed to load data");
 		}
 	};
 
@@ -34,7 +35,7 @@ export const useDB = () => {
 				createdAt,
 				updatedAt,
 			} = item;
-			const id = await db.passwdList.add({
+			const id = await db.passwdList.put({
 				uuid,
 				name,
 				username,
@@ -157,7 +158,7 @@ export const useDB = () => {
 
 	const handleAddAppState = async (userState) => {
 		try {
-			await db.appState.add({ ...userState, id: 0 });
+			await db.appState.add({ ...userState, id: 1 });
 			return true;
 		} catch (error) {
 			console.error("Failed to add user state to loacl DB: ", error);
@@ -165,9 +166,9 @@ export const useDB = () => {
 		}
 	};
 
-	const handleFetchAppState = async () => {
+	const handleFetchFullAppState = async () => {
 		try {
-			const userState = await db.appState.get(0);
+			const userState = await db.appState.get(1);
 			return userState;
 		} catch (error) {
 			console.error("Failed to fetch user state: ", error);
@@ -175,9 +176,48 @@ export const useDB = () => {
 		}
 	};
 
+	const handleInitializeAppState = async () => {
+		try {
+			await db.appState.put({
+				id: 1,
+				email: "",
+				user: {},
+				master_salt: "",
+				access_token: "",
+				public_key: "",
+				persist: false,
+				login_status: false,
+			});
+			console.log("DB: App State Initialization Success");
+		} catch (error) {
+			console.error("DB: AppState Initialization Failed: ", error);
+			return false;
+		}
+	};
+
+	const handleLoginUpdateAppState = async (userState) => {
+		try {
+			const success = await db.appState.update(1, {
+				email: userState.email,
+				user: userState.user,
+				master_salt: userState.master_salt,
+				access_token: userState.access_token,
+				public_key: userState.public_key,
+				login_status: userState.login_status,
+			});
+			if (success) {
+				console.log("DB: App State update with Curr User State");
+				return success;
+			}
+		} catch (error) {
+			console.error("DB: App State is not updated upon login: ", error);
+			return false;
+		}
+	};
+
 	const handleUpdateAppState = async (field, value) => {
 		try {
-			const success = await db.appState.update(0, {
+			const success = await db.appState.update(1, {
 				[field]: value,
 			});
 			if (success) {
@@ -222,7 +262,7 @@ export const useDB = () => {
 
 	const handleAddNewAccessTokenDB = async (accessToken) => {
 		try {
-			await db.appState.update(0, {
+			await db.appState.update(1, {
 				access_token: accessToken,
 			});
 			return true;
@@ -234,7 +274,7 @@ export const useDB = () => {
 
 	const handleFetchAppStateDB = async (field) => {
 		try {
-			const appState = await db.appState.get(0);
+			const appState = await db.appState.get(1);
 			return appState?.[field] ?? null;
 		} catch (error) {
 			console.error(`Error fetching field "${field}" from appState:`, error);
@@ -254,11 +294,13 @@ export const useDB = () => {
 		handleBulkAddItemsDB,
 		handleAddAppState,
 		handleEmptyAppState,
-		handleFetchAppState,
+		handleFetchFullAppState,
 		handleDelDB,
 		handleDBOpen,
 		handleAddNewAccessTokenDB,
 		handleFetchAppStateDB,
 		handleUpdateAppState,
+		handleLoginUpdateAppState,
+		handleInitializeAppState,
 	};
 };
