@@ -29,6 +29,8 @@ export const InitializeAuthRoute = () => {
 				auth.user?.email &&
 				appState.login
 			) {
+				console.log("Triggering triggering");
+
 				setRedirect("/user/home");
 			} else if (path === "/login/password" && !validEmail) {
 				setRedirect("/login/email");

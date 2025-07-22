@@ -6,47 +6,40 @@
 // import { passwdSchema } from "../../utils/authSchema";
 // // import { instance } from "../../api/axios";
 // import { useLocation, useNavigate } from "react-router";
-// import { InputField } from "../InputField";
-// import { Button } from "../Button";
-// import { ErrorModal } from "../ErrorModal";
-// import { AuthFormHeader } from "../AuthFormHeader";
+import { InputField } from "../InputField";
+import { Button } from "../Button";
+import { ErrorModal } from "../ErrorModal";
+import { AuthFormHeader } from "../AuthFormHeader";
 // import { useFetchData } from "../../hooks/useFetchData";
-// import { ClockLoader } from "react-spinners";
+import { ClockLoader } from "react-spinners";
 
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { base64ToBuffer, useCrypto } from "../../hooks/useCrypto";
 import { useFetchData } from "../../hooks/useFetchData";
 import { usePrivateInstance } from "../../hooks/usePrivateInstance";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { passwdSchema } from "../../utils/authSchema";
 import LockIcon from "../../src/assets/lock.svg?react";
+import { useAccount } from "../../hooks/useAccount";
 
 // import { useDB } from "../../hooks/useDB";
 export const UnLock = () => {
-	const {
-		auth,
-		setAuth,
-		userLogin,
-		validPasswd,
-		setUserLogin,
-		setValidPasswd,
-		// setPublicKey,
-		// setUserRegister,
-	} = useAuth();
-	const { initialiseCrypto, clearSessionKey } = useCrypto();
+	const { auth, userLogin, validPasswd, setUserLogin, setValidPasswd } =
+		useAuth();
+	const { logout } = useAccount();
+	const { initialiseCrypto } = useCrypto();
 	const privateInstance = usePrivateInstance();
 	const { publicKeyRequest, handleFetchList } = useFetchData();
-	// const { handleFetchAppState } = useDB();
 
 	const [modalError, setModalError] = useState("");
 	const [inputError, setInputError] = useState("");
 	const [loading, setLoading] = useState(false);
 	const passwordRef = useRef(null);
 
-	const location = useLocation();
+	// const location = useLocation();
 	const navigate = useNavigate();
-	const from = location.state?.from?.pathname || "/user/home";
+	// const from = location.state?.from?.pathname || "/user/home";
 
 	useEffect(() => {
 		passwordRef.current.focus();
@@ -58,16 +51,18 @@ export const UnLock = () => {
 
 	useEffect(() => {
 		if (auth.masterKey && loading === false) {
-			console.log("UnLock: Master Key detected, navigating to /user/home");
+			console.log("UnLock: Loading complete redirecting to Home");
 			// navigate("/user/home", { replace: true });
-			navigate(from, { replace: true });
+			navigate("/user/home", { replace: true });
 		}
 	}, [loading]);
 
 	useEffect(() => {
 		async function fetch() {
 			if (auth.masterKey && loading === true) {
+				console.log("Unlock: Master Key Detected...Fetching List from cloud");
 				await handleFetchList();
+
 				setLoading(false);
 			}
 		}
@@ -97,50 +92,8 @@ export const UnLock = () => {
 		}
 	}, [userLogin.password]);
 
-	useEffect(() => {
-		// async function publicKeyRequest() {
-		// 	// Fetch Public Key to Verify Access Token
-		// 	try {
-		// 		const response = await instance.get("/api/v1/auth/public");
-		// 		if (response.status === 200) {
-		// 			setPublicKey(response.data.publicKey);
-		// 			// console.log("Public Key: ", response.data.publicKey);
-		// 		} else if (response.status === 204) {
-		// 			console.log("Public Key: Not Found!!!");
-		// 			setModalError("Error: Public Key Not Found");
-		// 		}
-		// 	} catch (error) {
-		// 		console.error("Public Key: Unable to send or receive data", error);
-		// 		setModalError("Public Key Not Available");
-		// 	}
-		// }
-		// publicKeyRequest();
-		// const initialiseUnlock = async () => {
-		// 	const userState = await handleFetchAppState();
-		// 	console.log("UserState: ", userState);
-		// 	const {
-		// 		email,
-		// 		user,
-		// 		master_salt,
-		// 		access_token,
-		// 		public_key,
-		// 		// login_status,
-		// 	} = userState;
-		// 	console.log("Master Salt: ", master_salt);
-		// 	setAuth((prev) => ({
-		// 		...prev,
-		// 		accessToken: access_token,
-		// 		user,
-		// 		masterSalt: master_salt,
-		// 	}));
-		// 	setUserLogin((prev) => ({ ...prev, email }));
-		// 	setPublicKey(public_key);
-		// };
-		// initialiseUnlock();
-	}, []);
-
 	if (!auth.user) {
-		console.log("User Not Logged In!!!");
+		console.error("User Not Logged In!!! Redirect to Email Page");
 
 		return <Navigate to="/login/email" replace />;
 	}
@@ -159,7 +112,7 @@ export const UnLock = () => {
 					"/api/v1/auth/salt",
 					userLogin
 				);
-				console.log("post submit request");
+				console.log("Unlock: Salt Requested");
 
 				if (response.status === 200) {
 					console.log("post post submit request");
@@ -170,7 +123,9 @@ export const UnLock = () => {
 					await publicKeyRequest();
 					await initialiseCrypto(userLogin.password, masterSalt);
 					// await handleFetchList();
-					console.log("UnLock: initialiseCrypto completed.");
+					console.log(
+						"UnLock: initialiseCrypto completed (Master Key is created)."
+					);
 					setUserLogin((prev) => ({ ...prev, password: "" }));
 				}
 			} catch (error) {
@@ -197,22 +152,7 @@ export const UnLock = () => {
 	};
 
 	const handleLogout = async () => {
-		const response = await privateInstance.get("/api/v1/auth/logout", {
-			withCredentials: true,
-		});
-		const success = response?.data?.success;
-		const message = response?.data?.msg;
-		console.log("logout response: ", response);
-
-		console.log(success, message);
-
-		if (response.status === 200) {
-			console.log("logged out");
-			localStorage.setItem("isLogged", JSON.stringify(false));
-			navigate(from, { replace: true });
-			setAuth(null);
-			clearSessionKey();
-		}
+		await logout();
 	};
 
 	const onClose = () => {

@@ -30,5 +30,5 @@ export const useVerifyAccessToken = () => {
 			return { success: false, payload: null, error: error };
 		}
 	};
-	return verifyToken;
+	return { verifyToken };
 };

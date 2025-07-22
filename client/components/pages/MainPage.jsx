@@ -30,6 +30,7 @@ import { IoClose } from "react-icons/io5";
 import { MdModeEdit } from "react-icons/md";
 import { LuSave } from "react-icons/lu";
 import { MdCloseFullscreen } from "react-icons/md";
+import { useAccount } from "../../hooks/useAccount";
 
 export const MainPage = () => {
 	const defaultEmpty = {
@@ -51,6 +52,8 @@ export const MainPage = () => {
 		handleEmptyAppState,
 		handleDelDB,
 	} = useDB();
+	const { logout } = useAccount();
+
 	const [itemIndex, setItemIndex] = useState(null); // index for add, edit and view
 	const [focusItem, setFocusItem] = useState(defaultEmpty); // passwd item for edit and add mode
 	const [mode, setMode] = useState(null); // modes for different view selection (null, view, edit, add)
@@ -462,34 +465,35 @@ export const MainPage = () => {
 	};
 	// del the user auth status and the data with it
 	const handleLogout = async () => {
-		const response = await privateInstance.get("/api/v1/auth/logout", {
-			withCredentials: true,
-		});
-		const success = response?.data?.success;
-		const message = response?.data?.msg;
-		console.log("logout response: ", response);
+		// const response = await privateInstance.get("/api/v1/auth/logout", {
+		// 	withCredentials: true,
+		// });
+		// const success = response?.data?.success;
+		// const message = response?.data?.msg;
+		// console.log("logout response: ", response);
 
-		console.log(success, message);
+		// console.log(success, message);
 
-		if (response.status === 200) {
-			console.log("logged out");
-			setItemIndex(null);
-			setFocusItem(defaultEmpty);
-			setSearchItem("");
-			setPasswdList([]);
-			setMode(null);
-			setPageMode("All");
-			localStorage.setItem("isLogged", JSON.stringify(false));
-			setAuth(null);
-			await handleEmptyListDB();
-			await handleEmptyAppState();
-			await handleDelDB();
-			clearSessionKey();
-			navigate("/login/email");
-		} else {
-			console.error("Error: Logging Out");
-			setPageError("Failed to Logout");
-		}
+		// if (response.status === 200) {
+		// 	console.log("logged out");
+		// 	setItemIndex(null);
+		// 	setFocusItem(defaultEmpty);
+		// 	setSearchItem("");
+		// 	setPasswdList([]);
+		// 	setMode(null);
+		// 	setPageMode("All");
+		// 	localStorage.setItem("isLogged", JSON.stringify(false));
+		// 	setAuth(null);
+		// 	await handleEmptyListDB();
+		// 	await handleEmptyAppState();
+		// 	await handleDelDB();
+		// 	clearSessionKey();
+		// 	navigate("/login/email");
+		// } else {
+		// 	console.error("Error: Logging Out");
+		// 	setPageError("Failed to Logout");
+		// }
+		await logout();
 	};
 	// Clears the search field entry
 	const handleSearchClear = () => {

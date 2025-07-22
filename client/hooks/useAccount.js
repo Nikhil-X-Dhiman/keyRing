@@ -38,7 +38,7 @@ export const useAccount = () => {
 			}
 			// await handleDelDB();
 			setAuth(defaultAuthValues);
-			setAppState(defaultAppValues);
+			setAppState({ ...defaultAppValues, persist: appState.persist });
 			clearSessionKey();
 			navigate("/login/email");
 		} else {

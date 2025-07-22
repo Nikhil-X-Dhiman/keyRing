@@ -84,6 +84,7 @@ export const LoginPasswd = () => {
 
 	useEffect(() => {
 		const fetchData = async () => {
+			console.log("Passwd: Data Fetching Function Started");
 			if (auth?.masterKey && auth?.user) {
 				const currentUserState = {
 					email: userLogin.email,
@@ -93,14 +94,15 @@ export const LoginPasswd = () => {
 					public_key: publicKeyRef.current,
 					login_status: true,
 				};
-				console.log("HEHEHEH: ", userRef.current);
 
 				try {
 					// only add state to db when persist is enable
 					if (appState.persist) {
+						console.log("Passwd: States added to the DB as persist is enable");
 						await handleLoginUpdateAppState(currentUserState);
 						console.log("Is it running???");
 					}
+					console.log("Passwd: Data Fetching Started");
 					await handleFetchList();
 				} catch (err) {
 					console.error("Failed to fetch data", err);
@@ -108,7 +110,9 @@ export const LoginPasswd = () => {
 				}
 				setAppState((prev) => ({ ...prev, login: true }));
 				setLoading(false);
-				navigate(from, { replace: true });
+				console.log("Passwd: Loading is findished...Redirect to Home");
+
+				navigate("/user/home", { replace: true });
 			}
 		};
 		fetchData();
@@ -122,9 +126,12 @@ export const LoginPasswd = () => {
 
 	const handleSubmitBtn = async (e) => {
 		e.preventDefault();
+		console.log("Passwd: Loading Started");
+
 		setLoading(true);
 		if (validPassword && validEmail) {
 			try {
+				console.log("Passwd: Login Request Sent");
 				const response = await instance.post("/api/v1/auth/login", userLogin, {
 					headers: { "Content-Type": "application/json" },
 					withCredentials: true,
@@ -138,7 +145,7 @@ export const LoginPasswd = () => {
 						...prev,
 						publicKey: publicKeyRef.current,
 					}));
-
+					console.log("Passwd: Access Token is verified");
 					const { success, payload, error } = await verifyToken(
 						accessTokenRef.current,
 						publicKeyRef.current
@@ -152,6 +159,8 @@ export const LoginPasswd = () => {
 							masterSalt: masterSaltRef.current,
 						}));
 						// creates the masterKey
+						console.log("Master Key is Created");
+
 						await initialiseCrypto(userLogin.password, masterSaltRef.current);
 					} else {
 						console.error("Verify Access Token Failed: ", error);

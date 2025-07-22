@@ -6,7 +6,7 @@ import { useVerifyAccessToken } from "./useVerifyJWT";
 
 export const useRefreshToken = () => {
 	const { setAuth, setPublicKey, setUserLogin } = useAuth();
-	const verifyToken = useVerifyAccessToken();
+	const { verifyToken } = useVerifyAccessToken();
 	const { handleAddNewAccessTokenDB } = useDB();
 
 	const refreshToken = async () => {
@@ -30,8 +30,6 @@ export const useRefreshToken = () => {
 
 			const publicKey = response.data.publicKey;
 			console.log(accessToken, publicKey);
-
-			setPublicKey(publicKey);
 
 			const { success, payload } = await verifyToken(accessToken, publicKey);
 			if (success) {

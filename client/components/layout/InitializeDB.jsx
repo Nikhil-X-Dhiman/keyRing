@@ -15,6 +15,7 @@ export const InitializeDB = () => {
 	useEffect(() => {
 		if (typeof window === "undefined") return; // SSR Protection
 		startLoading();
+		setDBLoaded(false);
 		const initialize = async () => {
 			try {
 				// open connection to DB
