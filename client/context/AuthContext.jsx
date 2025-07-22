@@ -33,6 +33,7 @@ export const AuthProvider = ({ children }) => {
 				auth,
 				setAuth,
 				defaultUserValues,
+				defaultAuthValues,
 				userLogin,
 				setUserLogin,
 				validEmail,

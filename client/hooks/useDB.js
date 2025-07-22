@@ -229,13 +229,26 @@ export const useDB = () => {
 		}
 	};
 
-	const handleEmptyAppState = async () => {
+	const handleFullEmptyAppState = async () => {
 		try {
 			await db.appState.clear();
 			console.log("App State is now Deleted");
 		} catch (error) {
 			console.error("User State Deletion Not Completed: ", error);
 			throw new Error("User State Deletion Not Completed");
+		}
+	};
+
+	const handlePersistEmptyAppState = async () => {
+		try {
+			await db.appState.update(1, {
+				user: "",
+				master_salt: "",
+				access_token: "",
+				login_status: false,
+			});
+		} catch (error) {
+			console.error("LogOut: Persist Assisted Logout: ", error);
 		}
 	};
 
@@ -293,7 +306,7 @@ export const useDB = () => {
 		handleToggleTrashDB,
 		handleBulkAddItemsDB,
 		handleAddAppState,
-		handleEmptyAppState,
+		handleEmptyAppState: handleFullEmptyAppState,
 		handleFetchFullAppState,
 		handleDelDB,
 		handleDBOpen,
@@ -302,5 +315,6 @@ export const useDB = () => {
 		handleUpdateAppState,
 		handleLoginUpdateAppState,
 		handleInitializeAppState,
+		handlePersistEmptyAppState,
 	};
 };
