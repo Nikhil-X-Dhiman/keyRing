@@ -1,15 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
-// import { useAuth } from "../../hooks/useAuth";
 import { emailSchema } from "../../utils/authSchema";
 import { AuthFormHeader } from "../AuthFormHeader";
 import { InputField } from "../InputField";
 import { Button } from "../Button";
 import { CheckboxField } from "../CheckboxField.jsx";
-// import { useDB } from "../../hooks/useDB.js";
 import { Loading } from "./Loading.jsx";
-// import { useApp } from "../../hooks/useApp.js";
+
 export const LoginEmail = () => {
 	const EMAIL_REGEX =
 		/^[a-zA-Z][\w]+([._$%&]?[\w]+)*@[a-zA-Z]+(\.[a-zA-Z]{2,})+$/;
@@ -17,25 +15,17 @@ export const LoginEmail = () => {
 		/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[*#@!$%&]).{8,24}$/;
 
 	const location = useLocation();
-	const from = location.state?.from || "/user/home";
 	const navigate = useNavigate();
+	const from = location.state?.from || "/user/home";
 
 	const [email, setEmail] = useState("");
 	const [persist, setPersist] = useState("");
 	const [inputError, setInputError] = useState("");
-	// const [, forceRender] = useState();
 
 	const validEmailRef = useRef(false);
 	const emailFieldRef = useRef();
-	// const inputErrorRef = useRef("");
 	const touchedRef = useRef(false);
-
-	// const {  } = useAuth();
-
-	// const { loadingRef } = useApp();
 	const loadingRef = true;
-
-	// const { handleUpdateAppState } = useDB();
 
 	useEffect(() => {
 		emailFieldRef.current?.focus();
@@ -62,14 +52,6 @@ export const LoginEmail = () => {
 		}
 	}, [email]);
 
-	// useEffect(() => {
-	// 	if (!appState.persist && userLogin.email) {
-	// 		(async () => {
-	// 			await handleUpdateAppState("email", "");
-	// 		})();
-	// 	}
-	// }, [appState.persist]);
-
 	const handlePersistToggle = useCallback(() => {
 		console.log("Email Persist Changed");
 		setPersist((prev) => !prev);
@@ -81,24 +63,15 @@ export const LoginEmail = () => {
 
 	const handleEmailSubmit = async (e) => {
 		e.preventDefault();
-		// await handleUpdateAppState("persist", appState.persist);
-		// if (persist) {
-		// 	try {
-		// 		await handleUpdateAppState("email", userLogin.email);
-		// 	} catch (error) {
-		// 		console.error("Error Remembering User Email", error);
-		// 	}
-		// }
 
 		if (validEmailRef.current) {
-			console.log("Email: Navigate to Passwd Page");
-			navigate("/login/password", { state: { from: from }, replace: true });
+			console.log("Email: Navigating to Password Page");
+			navigate("/login/password", {
+				state: { from, email, persist },
+				replace: true,
+			});
 		}
 	};
-
-	// const togglePersist = () => {
-	// 	setAppState((prev) => ({ ...prev, persist: !prev.persist }));
-	// };
 
 	if (loadingRef.current === true) {
 		return <Loading loading={loadingRef.current} />;

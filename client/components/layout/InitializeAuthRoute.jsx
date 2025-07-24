@@ -11,7 +11,7 @@ export const InitializeAuthRoute = () => {
 
 	useEffect(() => {
 		if (dbLoaded) {
-			startLoading();
+			// startLoading();
 			const path = location.pathname;
 			const from = location.state?.from || "/user/home";
 
@@ -37,7 +37,7 @@ export const InitializeAuthRoute = () => {
 			} else {
 				setRedirect(null);
 			}
-			endLoading();
+			// endLoading();
 		}
 	}, [dbLoaded, location.pathname, location.state]);
 

@@ -12,7 +12,7 @@ export const userRoutes = [
 				element: <RequireAuth />, // Protects these child routes, redirects if not authenticated
 				children: [
 					{
-						path: "user/home",
+						path: "home",
 						element: <Layout />,
 						children: [
 							{

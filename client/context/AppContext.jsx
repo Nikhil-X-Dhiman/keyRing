@@ -1,13 +1,13 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useRef, useState } from "react";
 import { AppContext } from "./AppContextObject";
 
 export const AppProvider = ({ children }) => {
 	const initialAppStateValues = {
-		vault: "unlock",
 		persist: false,
-		login: false,
+		online: false,
 	};
-
+	// Global Loading
 	const [loading, setLoading] = useState(true);
 
 	const appState = useRef(initialAppStateValues);

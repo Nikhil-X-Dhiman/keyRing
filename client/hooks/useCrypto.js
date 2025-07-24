@@ -82,13 +82,16 @@ export const useCrypto = () => {
 		}
 		try {
 			// const sessionSalt = generateCryptoRandomValue(SALT_LENGTH_BYTES);
-			const masterKey = await deriveKey(masterPassword, masterSalt);
+			const masterKey = await deriveKey(
+				masterPassword,
+				base64ToBuffer(masterSalt)
+			);
 			// masterKeyRef.current = masterKey;
 			setAuth((prev) => ({ ...prev, masterKey }));
 
 			console.log("Master Key Created.");
 
-			return true;
+			return masterKey;
 		} catch (error) {
 			throw new Error("Failed to create Master Key: " + error);
 		} finally {

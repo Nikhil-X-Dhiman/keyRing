@@ -186,7 +186,6 @@ export const useDB = () => {
 				access_token: "",
 				public_key: "",
 				persist: false,
-				login_status: false,
 			});
 			console.log("DB: App State Default Initialization Success");
 		} catch (error) {
@@ -195,7 +194,7 @@ export const useDB = () => {
 		}
 	};
 
-	const handleLoginUpdateAppState = async (userState) => {
+	const handleLoginUpdateAppState = useCallback(async (userState) => {
 		try {
 			const success = await db.appState.update(1, {
 				email: userState.email,
@@ -203,7 +202,6 @@ export const useDB = () => {
 				master_salt: userState.master_salt,
 				access_token: userState.access_token,
 				public_key: userState.public_key,
-				login_status: userState.login_status,
 			});
 			if (success) {
 				console.log("DB: App State update with Curr User State");
@@ -213,7 +211,7 @@ export const useDB = () => {
 			console.error("DB: App State is not updated upon login: ", error);
 			return false;
 		}
-	};
+	}, []);
 
 	const handleUpdateAppState = async (field, value) => {
 		try {
@@ -245,7 +243,6 @@ export const useDB = () => {
 				user: "",
 				master_salt: "",
 				access_token: "",
-				login_status: false,
 			});
 		} catch (error) {
 			console.error("LogOut: Persist Assisted Logout: ", error);

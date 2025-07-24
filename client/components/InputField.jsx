@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { PiEyeDuotone, PiEyeSlash } from "react-icons/pi";
 import { ImCancelCircle } from "react-icons/im";
 import { InputError } from "./InputError";
@@ -32,10 +32,22 @@ export const InputField = React.memo(
 			const [visible, setVisible] = useState(false);
 			const showPasswdToggle = showToggle && type === "password";
 
-			const handleToggleVisibility = (e) => {
+			const handleToggleVisibility = useCallback((e) => {
 				e.preventDefault();
 				setVisible((prev) => !prev);
-			};
+			}, []);
+
+			const passwordRevealBtn = useMemo(() => {
+				return (
+					<>
+						{visible ? (
+							<PiEyeSlash className="text-2xl cursor-pointer opacity-70  duration-200 w-5 h-5" />
+						) : (
+							<PiEyeDuotone className="text-2xl cursor-pointer opacity-70 duration-200 w-5 h-5" />
+						)}
+					</>
+				);
+			}, [visible]);
 
 			return (
 				<fieldset
@@ -73,11 +85,7 @@ export const InputField = React.memo(
 							className="absolute right-4 top-[2px] cursor-pointer"
 							tabIndex={0}
 						>
-							{visible ? (
-								<PiEyeSlash className="text-2xl cursor-pointer opacity-70  duration-200 w-5 h-5" />
-							) : (
-								<PiEyeDuotone className="text-2xl cursor-pointer opacity-70 duration-200 w-5 h-5" />
-							)}
+							{passwordRevealBtn}
 						</button>
 					)}
 					{error && value && <InputError message={error} touched={touched} />}

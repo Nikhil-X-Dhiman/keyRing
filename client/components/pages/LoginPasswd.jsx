@@ -1,10 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { useVerifyAccessToken } from "../../hooks/useVerifyJWT";
 import { useDB } from "../../hooks/useDB";
-import { base64ToBuffer, useCrypto } from "../../hooks/useCrypto";
-import { useFetchData } from "../../hooks/useFetchData";
+import { useCrypto } from "../../hooks/useCrypto";
 import { passwdSchema } from "../../utils/authSchema";
 import { useAuth } from "../../hooks/useAuth";
 import { instance } from "../../api/axios";
@@ -14,161 +13,120 @@ import { AuthFormHeader } from "../AuthFormHeader";
 import { InputField } from "../InputField";
 import { Button } from "../Button";
 import { ClockLoader } from "react-spinners";
-import { useApp } from "../../hooks/useApp";
+import { Loading } from "./Loading";
 
 export const LoginPasswd = () => {
 	const PASSWD_REGEX =
 		/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[*#@!$%&]).{8,24}$/;
-
-	const [loading, setLoading] = useState(false);
-
-	const passwordRef = useRef();
-	const errRef = useRef();
-
-	const [inputError, setInputError] = useState("");
-	const [pageError, setPageError] = useState("");
 
 	const location = useLocation();
 	const navigate = useNavigate();
 	const verifyToken = useVerifyAccessToken();
 	const { handleLoginUpdateAppState } = useDB();
 
-	// const privateInstance = usePrivateInstance();
-	const from = location.state?.from?.pathname || "/user/home";
-
-	const masterSaltRef = useRef("");
-	const userRef = useRef({});
-	const accessTokenRef = useRef("");
-	const publicKeyRef = useRef("");
-
-	const {
-		auth,
-		setAuth,
-		userLogin,
-		validEmail,
-		validPasswd: validPassword,
-		setUserLogin,
-		setValidPasswd,
-	} = useAuth();
-
-	const { appState, setAppState } = useApp();
-
+	const { setAuth, setDerivedAuth } = useAuth();
 	const { initialiseCrypto } = useCrypto();
 
-	const { handleFetchList } = useFetchData();
+	const [localLoading, setLocalLoading] = useState(false);
+	const [passwordValue, setPasswordValue] = useState("");
+	const [validPassword, setValidPassword] = useState(false);
+	// TODO: save for register page
+	// const [confirmPasswordValue, setConfirmPasswordValue] = useState(NaN);
+	// const [matchPassword, setMatchPassword] = useState(false);
+
+	const [inputError, setInputError] = useState("");
+	const [pageError, setPageError] = useState("");
+
+	const passwordFieldRef = useRef();
+
+	// passed from login email page
+	const from = location.state?.from || "/home";
+	const email = location.state?.email || null;
+	const persist = location.state?.persist || null;
 
 	useEffect(() => {
-		passwordRef.current?.focus();
+		console.log("Password: Password Field Focus Set");
+		passwordFieldRef.current?.focus();
 	}, []);
 
 	useEffect(() => {
-		errRef.current?.focus();
-		setLoading(false);
-	}, [inputError]);
-
-	useEffect(() => {
-		setLoading(false);
+		console.log("Password: Page Error. Loading -> false");
+		setLocalLoading(false);
 	}, [pageError]);
 
 	useEffect(() => {
-		if (userLogin.password) {
-			const { success } = passwdSchema.safeParse(userLogin.password);
-			setValidPasswd(success);
+		if (passwordValue) {
+			const { success } = passwdSchema.safeParse(passwordValue);
+			setValidPassword(success);
 			setInputError(success && "");
 		}
-	}, [userLogin.password]);
+	}, [passwordValue]);
 
-	// useEffect(() => {
-	// 	publicKeyRequest();
-	// }, []);
-
-	useEffect(() => {
-		const fetchData = async () => {
-			console.log("Passwd: Data Fetching Function Started");
-			if (auth?.masterKey && auth?.user) {
-				const currentUserState = {
-					email: userLogin.email,
-					user: userRef.current,
-					master_salt: masterSaltRef.current,
-					access_token: accessTokenRef.current,
-					public_key: publicKeyRef.current,
-					login_status: true,
-				};
-
-				try {
-					// only add state to db when persist is enable
-					if (appState.persist) {
-						console.log("Passwd: States added to the DB as persist is enable");
-						await handleLoginUpdateAppState(currentUserState);
-						console.log("Is it running???");
-					}
-					console.log("Passwd: Data Fetching Started");
-					await handleFetchList();
-				} catch (err) {
-					console.error("Failed to fetch data", err);
-					setPageError("Failed to Fetch Data.");
-				}
-				setAppState((prev) => ({ ...prev, login: true }));
-				setLoading(false);
-				console.log("Passwd: Loading is finished...Go to Home");
-
-				navigate("/user/home", { replace: true });
-			}
-		};
-		fetchData();
-		console.log("here fetch data 4");
-	}, [auth?.masterKey]);
-
-	// if (!userLogin.email && !validEmail) {
-	// 	// Go to Email Login Page if Invalid Email
-	// 	return <Navigate to="/login/email" replace />;
-	// }
-
+	// Request to Server for Authentication
 	const handleSubmitBtn = async (e) => {
 		e.preventDefault();
-		console.log("Passwd: Loading Started");
+		console.log("Password: Auth Request to Server (Local Loading Started)");
 
-		setLoading(true);
-		if (validPassword && validEmail) {
+		setLocalLoading(true);
+		if (validPassword) {
 			try {
-				console.log("Passwd: Login Request Sent");
-				const response = await instance.post("/api/v1/auth/login", userLogin, {
-					headers: { "Content-Type": "application/json" },
-					withCredentials: true,
-				});
-				publicKeyRef.current = response.data?.public_key;
-				accessTokenRef.current = response.data?.access_token;
-				masterSaltRef.current = base64ToBuffer(response.data?.master_salt);
+				console.log("Password: Auth Request Sending");
+				const response = await instance.post(
+					"/api/v1/auth/login",
+					{ email, password: passwordValue },
+					{
+						headers: { "Content-Type": "application/json" },
+						withCredentials: true,
+					}
+				);
+				const { public_key, access_token, master_salt } = response.data;
+
 				if (response.status === 200) {
 					// user auth status state update
-					setAuth((prev) => ({
-						...prev,
-						publicKey: publicKeyRef.current,
-					}));
-					console.log("Passwd: Access Token is verified");
+					console.log("Password: Request Success");
+					setDerivedAuth({ masterSalt: master_salt, publicKey: public_key });
+					console.log("Password: Access Token is about to verify");
 					const { success, payload, error } = await verifyToken(
-						accessTokenRef.current,
-						publicKeyRef.current
+						access_token,
+						public_key
 					);
-					userRef.current = payload;
 					if (success) {
-						setAuth((prev) => ({
-							...prev,
-							user: payload,
-							accessToken: accessTokenRef.current,
-							masterSalt: masterSaltRef.current,
-						}));
+						setAuth({ accessToken: access_token, user: payload });
 						// creates the masterKey
-						console.log("Master Key is Created");
+						console.log("Master Key is Creating");
+						const masterKey = await initialiseCrypto(
+							passwordValue,
+							master_salt
+						);
 
-						await initialiseCrypto(userLogin.password, masterSaltRef.current);
+						try {
+							const currentAppState = {
+								email: email,
+								user: payload,
+								master_salt,
+								access_token,
+								public_key,
+							};
+							// only add state to DB when persist is enable
+							if (persist) {
+								console.log(
+									"Password: States added to the DB (Persist Enabled)"
+								);
+								await handleLoginUpdateAppState(currentAppState);
+							}
+						} catch (err) {
+							console.error("Password: Failed to save App state to DB", err);
+							setPageError("Password: Failed to save App state to DB");
+						}
+						console.log("Home Navigation Starts");
+						navigate(from, { state: { masterKey } });
 					} else {
-						console.error("Verify Access Token Failed: ", error);
+						console.error("Access Token Verification Failed: ", error);
 						setPageError("Access Token Verification Failed");
 					}
 				} else {
 					console.error("Client: Request Failed");
-					setPageError("Login Failed!!!Try Again");
+					setPageError("Login Failed!!! Try Again");
 				}
 			} catch (error) {
 				if (!error?.response) {
@@ -178,11 +136,9 @@ export const LoginPasswd = () => {
 					console.error("Server Error: Login Failed!!!: ", error);
 					setPageError(error?.response?.data?.msg);
 				}
+			} finally {
+				setLocalLoading(false);
 			}
-		} else if (!validEmail) {
-			console.error("Invalid Email: Redirecting to Email Page");
-			navigate("/login/email", { replace: true });
-			setLoading(false);
 		} else if (!validPassword) {
 			setPageError("Incorrect Password!!!");
 		}
@@ -192,6 +148,16 @@ export const LoginPasswd = () => {
 		setPageError("");
 	};
 
+	const handleBackBtn = useCallback(() => {
+		navigate("/login/email", { replace: true });
+	}, []);
+
+	if (!email) {
+		return <Navigate to="/login/email" replace />;
+	} else if (localLoading) {
+		return <Loading loading={localLoading} />;
+	}
+
 	return (
 		<main className="flex flex-col justify-center items-center pt-15 select-none">
 			<ErrorModal
@@ -200,19 +166,17 @@ export const LoginPasswd = () => {
 				onClose={handleErrorModalClose}
 			/>
 			<AuthFormHeader Icon={WaveIcon} title="Welcome Back" />
-			{userLogin.email}
+			{email}
 			<form className="flex flex-col items-center gap-y-1 border-1 border-gray-400 rounded-2xl m-5 p-7  bg-slate-800 w-md mt-7">
 				<InputField
 					label="Password"
 					required
 					type="password"
 					showToggle={true}
-					ref={passwordRef}
-					value={userLogin.password}
+					ref={passwordFieldRef}
+					value={passwordValue}
 					error={inputError}
-					onChange={(e) =>
-						setUserLogin((prev) => ({ ...prev, password: e.target.value }))
-					}
+					onChange={(e) => setPasswordValue(e.target.value)}
 				/>
 				<Button
 					title="Login in to your account"
@@ -220,17 +184,15 @@ export const LoginPasswd = () => {
 					onClick={handleSubmitBtn}
 					className="flex justify-center items-center gap-2"
 				>
-					{loading && <ClockLoader size={23} />}
-					{loading ? "Processing..." : "Login"}
+					<>
+						{localLoading && <ClockLoader size={23} />}
+						{localLoading ? "Processing..." : "Login"}
+					</>
 				</Button>
 
 				<p>or</p>
 
-				<Button
-					variant="outline"
-					type="reset"
-					onClick={() => navigate("/login/email")}
-				>
+				<Button variant="outline" type="reset" onClick={handleBackBtn}>
 					Back
 				</Button>
 			</form>
