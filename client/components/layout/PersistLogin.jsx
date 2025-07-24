@@ -61,6 +61,7 @@ export const PersistLogin = () => {
 				// 	console.log("Persist: Refreshing Access Token");
 				// 	await refreshAccessToken();
 				// }
+				debugger;
 
 				if (!auth.user?.email && !auth.accessToken) {
 					console.log("Persist: Redirect to Email Page");

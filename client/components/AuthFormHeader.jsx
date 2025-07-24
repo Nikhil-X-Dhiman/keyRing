@@ -1,4 +1,6 @@
-export const AuthFormHeader = ({ imgSrc, imgAlt, title, Icon }) => {
+import React from "react";
+
+export const AuthFormHeader = React.memo(({ imgSrc, imgAlt, title, Icon }) => {
 	return (
 		<figure className="flex flex-col items-center gap-y-2 p-2 select-none">
 			{imgSrc && <img src={imgSrc} alt={imgAlt} className="w-23 h-23" />}
@@ -6,4 +8,4 @@ export const AuthFormHeader = ({ imgSrc, imgAlt, title, Icon }) => {
 			<figcaption className="text-xl font-semibold mb-2">{title}</figcaption>
 		</figure>
 	);
-};
+});

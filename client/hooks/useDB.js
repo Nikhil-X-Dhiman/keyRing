@@ -188,7 +188,7 @@ export const useDB = () => {
 				persist: false,
 				login_status: false,
 			});
-			console.log("DB: App State Initialization Success");
+			console.log("DB: App State Default Initialization Success");
 		} catch (error) {
 			console.error("DB: AppState Initialization Failed: ", error);
 			return false;

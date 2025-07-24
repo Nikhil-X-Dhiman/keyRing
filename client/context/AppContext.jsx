@@ -1,43 +1,28 @@
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { AppContext } from "./AppContextObject";
 
 export const AppProvider = ({ children }) => {
-	const defaultAppValues = {
+	const initialAppStateValues = {
 		vault: "unlock",
 		persist: false,
 		login: false,
 	};
 
-	const [dbLoaded, setDBLoaded] = useState(false);
+	const [loading, setLoading] = useState(true);
 
-	const [appState, setAppState] = useState(defaultAppValues);
+	const appState = useRef(initialAppStateValues);
 
-	const [loadingCount, setLoadingCount] = useState(0);
-
-	const startLoading = () => {
-		setLoadingCount((prev) => prev + 1);
-	};
-
-	const endLoading = () => {
-		setLoadingCount((prev) => Math.max(0, prev - 1));
-	};
-
-	const resetLoading = () => setLoadingCount(0);
-
-	const loading = loadingCount > 0;
+	const initStateValues = useCallback(() => {
+		appState.current = initialAppStateValues;
+	}, []);
 
 	return (
 		<AppContext.Provider
 			value={{
-				defaultAppValues,
 				appState,
-				setAppState,
 				loading,
-				startLoading,
-				endLoading,
-				resetLoading,
-				dbLoaded,
-				setDBLoaded,
+				setLoading,
+				initStateValues,
 			}}
 		>
 			{children}

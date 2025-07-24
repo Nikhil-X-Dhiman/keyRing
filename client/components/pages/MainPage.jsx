@@ -91,7 +91,7 @@ export const MainPage = () => {
 	}, [itemIndex, mode]);
 	// Fetch user data and decrypts it
 	useLayoutEffect(() => {
-		if (!auth?.masterKey || !auth?.user) {
+		if (!auth?.masterKey || !auth?.user?.email) {
 			console.log("MainPage: Master Key not available, redirecting to /locked");
 			navigate("/locked", { replace: true });
 			return;

@@ -1,16 +1,15 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useRef, useState } from "react";
-import { Link, Navigate, useLocation, useNavigate } from "react-router";
-import { useAuth } from "../../hooks/useAuth";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router";
+// import { useAuth } from "../../hooks/useAuth";
 import { emailSchema } from "../../utils/authSchema";
 import { AuthFormHeader } from "../AuthFormHeader";
 import { InputField } from "../InputField";
 import { Button } from "../Button";
 import { CheckboxField } from "../CheckboxField.jsx";
-import { useDB } from "../../hooks/useDB.js";
+// import { useDB } from "../../hooks/useDB.js";
 import { Loading } from "./Loading.jsx";
-import { useApp } from "../../hooks/useApp.js";
-
+// import { useApp } from "../../hooks/useApp.js";
 export const LoginEmail = () => {
 	const EMAIL_REGEX =
 		/^[a-zA-Z][\w]+([._$%&]?[\w]+)*@[a-zA-Z]+(\.[a-zA-Z]{2,})+$/;
@@ -21,68 +20,88 @@ export const LoginEmail = () => {
 	const from = location.state?.from || "/user/home";
 	const navigate = useNavigate();
 
-	const emailRef = useRef();
-	const errRef = useRef();
+	const [email, setEmail] = useState("");
+	const [persist, setPersist] = useState("");
 	const [inputError, setInputError] = useState("");
-	const [touched, setTouched] = useState(false);
+	// const [, forceRender] = useState();
 
-	const { userLogin, validEmail, setUserLogin, setValidEmail } = useAuth();
+	const validEmailRef = useRef(false);
+	const emailFieldRef = useRef();
+	// const inputErrorRef = useRef("");
+	const touchedRef = useRef(false);
 
-	const { appState, setAppState, loading } = useApp();
+	// const {  } = useAuth();
 
-	const { handleUpdateAppState } = useDB();
+	// const { loadingRef } = useApp();
+	const loadingRef = true;
+
+	// const { handleUpdateAppState } = useDB();
 
 	useEffect(() => {
-		emailRef.current?.focus();
+		emailFieldRef.current?.focus();
 	}, []);
 
 	useEffect(() => {
-		errRef.current?.focus();
-	}, [inputError]);
-
-	useEffect(() => {
-		const { success } = emailSchema.safeParse(userLogin.email);
-		setValidEmail(success);
-		setTouched(true);
-		if (touched) {
+		// set flag to represent user starts writing in input field
+		touchedRef.current = true;
+		// Verify Email Schema
+		const { success } = emailSchema.safeParse(email);
+		// setValidEmail(success);
+		// Set Flag to represent valid email
+		validEmailRef.current = success;
+		if (touchedRef.current) {
+			// sets the error
 			setInputError(
 				success
 					? ""
 					: 'Email must contain username, "@" & domain name. Characters Allowed are [a-z], [0-9] & [ ._$%& ]'
 			);
+			// inputErrorRef.current = success
+			// 	? ""
+			// 	: 'Email must contain username, "@" & domain name. Characters Allowed are [a-z], [0-9] & [ ._$%& ]';
 		}
-	}, [userLogin.email]);
+	}, [email]);
 
-	useEffect(() => {
-		if (!appState.persist && userLogin.email) {
-			(async () => {
-				await handleUpdateAppState("email", "");
-			})();
-		}
-	}, [appState.persist]);
+	// useEffect(() => {
+	// 	if (!appState.persist && userLogin.email) {
+	// 		(async () => {
+	// 			await handleUpdateAppState("email", "");
+	// 		})();
+	// 	}
+	// }, [appState.persist]);
+
+	const handlePersistToggle = useCallback(() => {
+		console.log("Email Persist Changed");
+		setPersist((prev) => !prev);
+	}, []);
+
+	const handleEmailChange = useCallback((e) => {
+		setEmail(e.target.value);
+	}, []);
 
 	const handleEmailSubmit = async (e) => {
 		e.preventDefault();
-		await handleUpdateAppState("persist", appState.persist);
-		if (appState.persist) {
-			try {
-				await handleUpdateAppState("email", userLogin.email);
-			} catch (error) {
-				console.error("Error Remembering User Email", error);
-			}
-		}
+		// await handleUpdateAppState("persist", appState.persist);
+		// if (persist) {
+		// 	try {
+		// 		await handleUpdateAppState("email", userLogin.email);
+		// 	} catch (error) {
+		// 		console.error("Error Remembering User Email", error);
+		// 	}
+		// }
 
-		if (validEmail) {
+		if (validEmailRef.current) {
+			console.log("Email: Navigate to Passwd Page");
 			navigate("/login/password", { state: { from: from }, replace: true });
 		}
 	};
 
-	const togglePersist = () => {
-		setAppState((prev) => ({ ...prev, persist: !prev.persist }));
-	};
+	// const togglePersist = () => {
+	// 	setAppState((prev) => ({ ...prev, persist: !prev.persist }));
+	// };
 
-	if (loading === true) {
-		return <Loading loading={loading} />;
+	if (loadingRef.current === true) {
+		return <Loading loading={loadingRef.current} />;
 	} else {
 		return (
 			<>
@@ -101,29 +120,28 @@ export const LoginEmail = () => {
 							label="Email address"
 							required={true}
 							id="login-email"
-							ref={emailRef}
-							value={userLogin.email}
+							ref={emailFieldRef}
+							value={email}
 							error={inputError}
-							onChange={(e) =>
-								setUserLogin((prev) => ({ ...prev, email: e.target.value }))
-							}
+							touched={touchedRef.current}
+							onChange={handleEmailChange}
 						/>
 
 						<CheckboxField
 							label="Remember Me"
 							id="login-remember"
-							onChange={togglePersist}
-							checked={appState.persist}
+							onChange={handlePersistToggle}
+							checked={persist}
 						/>
 
 						<Button
 							title={`${
-								validEmail
+								validEmailRef.current
 									? "Submit & Continue to Password Page"
 									: "Enter Valid Email in Above Field !!!"
 							}`}
-							disabled={!validEmail}
-							variant={validEmail ? "primary" : "disabled"}
+							disabled={!validEmailRef.current}
+							variant={validEmailRef.current ? "primary" : "disabled"}
 							className=""
 						>
 							Continue

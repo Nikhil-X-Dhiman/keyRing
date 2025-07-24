@@ -110,7 +110,7 @@ export const LoginPasswd = () => {
 				}
 				setAppState((prev) => ({ ...prev, login: true }));
 				setLoading(false);
-				console.log("Passwd: Loading is findished...Redirect to Home");
+				console.log("Passwd: Loading is finished...Go to Home");
 
 				navigate("/user/home", { replace: true });
 			}
@@ -181,8 +181,8 @@ export const LoginPasswd = () => {
 			}
 		} else if (!validEmail) {
 			console.error("Invalid Email: Redirecting to Email Page");
-			setLoading(false);
 			navigate("/login/email", { replace: true });
+			setLoading(false);
 		} else if (!validPassword) {
 			setPageError("Incorrect Password!!!");
 		}
