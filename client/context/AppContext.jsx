@@ -12,7 +12,7 @@ export const AppProvider = ({ children }) => {
 
 	const appState = useRef(initialAppStateValues);
 
-	const initStateValues = useCallback(() => {
+	const handleInitStateValues = useCallback(() => {
 		appState.current = initialAppStateValues;
 	}, []);
 
@@ -22,7 +22,7 @@ export const AppProvider = ({ children }) => {
 				appState,
 				loading,
 				setLoading,
-				initStateValues,
+				handleInitStateValues,
 			}}
 		>
 			{children}
