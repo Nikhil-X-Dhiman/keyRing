@@ -3,7 +3,7 @@ import { useApp } from "../../hooks/useApp";
 import { useAuth } from "../../hooks/useAuth";
 import { useEffect, useState } from "react";
 
-export const InitializeAuthRoute = () => {
+const InitializeAuthRoute = () => {
 	const location = useLocation();
 	const { appState, startLoading, endLoading, dbLoaded } = useApp();
 	const { auth, userLogin, validEmail } = useAuth();
@@ -50,3 +50,5 @@ export const InitializeAuthRoute = () => {
 	}
 	return <Outlet />;
 };
+
+export default InitializeAuthRoute;

@@ -1,6 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, Navigate, useLocation, useNavigate } from "react-router";
+import {
+	Link,
+	Navigate,
+	replace,
+	useLocation,
+	useNavigate,
+} from "react-router";
 import { useVerifyAccessToken } from "../../hooks/useVerifyJWT";
 import { useDB } from "../../hooks/useDB";
 import { useCrypto } from "../../hooks/useCrypto";
@@ -15,28 +21,25 @@ import { Button } from "../Button";
 import { ClockLoader } from "react-spinners";
 import { Loading } from "./Loading";
 
-export const LoginPasswd = () => {
+const LoginPasswd = () => {
 	const PASSWD_REGEX =
 		/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[*#@!$%&]).{8,24}$/;
 
 	const location = useLocation();
 	const navigate = useNavigate();
+	// Custom Hooks
 	const verifyToken = useVerifyAccessToken();
 	const { handleLoginUpdateAppState } = useDB();
-
 	const { setAuth, setDerivedAuth } = useAuth();
 	const { initialiseCrypto } = useCrypto();
-
+	// Page States
 	const [localLoading, setLocalLoading] = useState(false);
 	const [passwordValue, setPasswordValue] = useState("");
 	const [validPassword, setValidPassword] = useState(false);
-	// TODO: save for register page
-	// const [confirmPasswordValue, setConfirmPasswordValue] = useState(NaN);
-	// const [matchPassword, setMatchPassword] = useState(false);
-
+	// Error States
 	const [inputError, setInputError] = useState("");
 	const [pageError, setPageError] = useState("");
-
+	// Ref for Focus
 	const passwordFieldRef = useRef();
 
 	// passed from login email page
@@ -119,7 +122,7 @@ export const LoginPasswd = () => {
 							setPageError("Password: Failed to save App state to DB");
 						}
 						console.log("Home Navigation Starts");
-						navigate(from, { state: { masterKey } });
+						navigate(from, { state: { masterKey }, replace: true });
 					} else {
 						console.error("Access Token Verification Failed: ", error);
 						setPageError("Access Token Verification Failed");
@@ -209,3 +212,5 @@ export const LoginPasswd = () => {
 		</main>
 	);
 };
+
+export default LoginPasswd;

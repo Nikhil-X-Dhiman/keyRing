@@ -1,8 +1,10 @@
-import { InitializeAuthRoute } from "../components/layout/InitializeAuthRoute";
-import { Layout } from "../components/layout/Layout";
-import { LoginEmail } from "../components/pages/LoginEmail";
-import { LoginPasswd } from "../components/pages/LoginPasswd";
-import { Register } from "../components/pages/Register";
+import React from "react";
+import InitializeAuthRoute from "../components/layout/InitializeAuthRoute";
+
+const Layout = React.lazy(() => import("../components/layout/Layout"));
+const Register = React.lazy(() => import("../components/pages/Register"));
+const LoginEmail = React.lazy(() => import("../components/pages/LoginEmail"));
+const LoginPasswd = React.lazy(() => import("../components/pages/LoginPasswd"));
 
 export const authRoutes = [
 	{

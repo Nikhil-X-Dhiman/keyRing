@@ -32,7 +32,7 @@ import { LuSave } from "react-icons/lu";
 import { MdCloseFullscreen } from "react-icons/md";
 import { useAccount } from "../../hooks/useAccount";
 
-export const MainPage = () => {
+const MainPage = () => {
 	const defaultEmpty = {
 		uuid: undefined,
 		name: "",
@@ -890,3 +890,5 @@ export const MainPage = () => {
 		</main>
 	);
 };
+
+export default MainPage;

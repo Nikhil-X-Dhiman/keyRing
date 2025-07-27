@@ -1,8 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { useAuth } from "../../hooks/useAuth";
 import { emailSchema, nameSchema, passwdSchema } from "../../utils/authSchema";
 import {
 	bufferToBase64,
@@ -14,48 +12,35 @@ import { AuthFormHeader } from "../AuthFormHeader";
 import { InputField } from "../InputField";
 import { Button } from "../Button";
 
-// import { useEffect, useRef, useState } from "react";
-// import { Link, useNavigate } from "react-router";
-// import { useAuth } from "../../hooks/useAuth.js";
-// import { emailSchema, nameSchema, passwdSchema } from "../../utils/authSchema";
-// import { instance } from "../../api/axios";
-// import {
-// 	bufferToBase64,
-// 	generateCryptoRandomValue,
-// } from "../../hooks/useCrypto.js";
-// import { ErrorModal } from "../ErrorModal.jsx";
-// import { InputField } from "./InputField.jsx";
-// import { Button } from "./Button.jsx";
-// import { AuthFormHeader } from "./AuthFormHeader.jsx";
-
-export const Register = () => {
+const Register = () => {
 	const navigate = useNavigate();
-	const emailRef = useRef();
-	const { userRegister, setUserRegister } = useAuth();
 
-	const [pageError, setPageError] = useState("");
-	const [passwordCompare, setPasswordCompare] = useState({
-		password: "",
-		confirmPassword: "",
-	});
+	const [emailValue, setEmailValue] = useState("");
+	const [usernameValue, setUsernameValue] = useState("");
+	const [passwordValue, setPasswordValue] = useState("");
+	const [confirmPasswordValue, setConfirmPasswordValue] = useState("");
 
 	const [validEmail, setValidEmail] = useState(false);
 	const [validUserName, setValidUserName] = useState(false);
 	const [validPassword, setValidPassword] = useState(false);
+	const [matchPassword, setMatchPassword] = useState(false);
+
+	const [pageError, setPageError] = useState("");
 
 	const [emailReq, setEmailReq] = useState("");
 	const [userNameReq, setUserNameReq] = useState("");
 	const [passwordReq, setPasswordReq] = useState("");
 	const [confirmPasswordReq, setconfirmPasswordReq] = useState("");
 
+	const emailFieldRef = useRef();
+
 	useEffect(() => {
-		emailRef.current?.focus();
+		emailFieldRef.current?.focus();
 	}, []);
 
 	useEffect(() => {
-		if (userRegister.email) {
-			const { success, error } = emailSchema.safeParse(userRegister.email);
-
+		if (emailValue) {
+			const { success, error } = emailSchema.safeParse(emailValue);
 			if (success) {
 				setValidEmail(true);
 				setEmailReq("");
@@ -67,11 +52,11 @@ export const Register = () => {
 				);
 			}
 		}
-	}, [userRegister.email]);
+	}, [emailValue]);
 
 	useEffect(() => {
-		if (userRegister.username) {
-			const { success, error } = nameSchema.safeParse(userRegister.username);
+		if (usernameValue) {
+			const { success, error } = nameSchema.safeParse(usernameValue);
 
 			if (success) {
 				setValidUserName(true);
@@ -82,13 +67,11 @@ export const Register = () => {
 				setUserNameReq("Note: Name length allowed between 2 & 32");
 			}
 		}
-	}, [userRegister.username]);
+	}, [usernameValue]);
 
 	useEffect(() => {
-		if (passwordCompare.password || passwordCompare.confirmPassword) {
-			const { success, error } = passwdSchema.safeParse(
-				passwordCompare.password
-			);
+		if (passwordValue || confirmPasswordValue) {
+			const { success, error } = passwdSchema.safeParse(passwordValue);
 			if (success) {
 				setValidPassword(true);
 				setPasswordReq("");
@@ -99,50 +82,58 @@ export const Register = () => {
 					"Note: Password must contain a-z, A-Z, 0-9, (*#@!$%&) & atleast 8 characters long"
 				);
 			}
-			if (
-				passwordCompare.confirmPassword &&
-				passwordCompare.confirmPassword !== passwordCompare.password
-			) {
+			if (confirmPasswordValue && confirmPasswordValue !== passwordValue) {
 				setconfirmPasswordReq("Note: Password Does Not Match");
-				setUserRegister((prev) => ({ ...prev, password: "" }));
+				setMatchPassword(false);
 			} else if (
-				passwordCompare.confirmPassword &&
-				passwordCompare.confirmPassword === passwordCompare.password
+				confirmPasswordValue &&
+				confirmPasswordValue === passwordValue
 			) {
 				setconfirmPasswordReq("");
-				setUserRegister((prev) => ({
-					...prev,
-					password: passwordCompare.password,
-				}));
+				setMatchPassword(true);
 			}
 		}
-	}, [passwordCompare.password, passwordCompare.confirmPassword]);
+	}, [passwordValue, confirmPasswordValue]);
 
-	const handleRegisterInput = (e) => {
-		const { name, value } = e.target;
-		setUserRegister((prev) => ({ ...prev, [name]: value }));
-	};
+	const handleEmailInput = useCallback((e) => {
+		setEmailValue(e.target.value);
+	}, []);
 
-	const handlePasswdInput = (e) => {
-		const { name, value } = e.target;
-		setPasswordCompare((prev) => ({ ...prev, [name]: value }));
-	};
+	const handleUserNameInput = useCallback((e) => {
+		setUsernameValue(e.target.value);
+	}, []);
+
+	const handlePasswordInput = useCallback((e) => {
+		setPasswordValue(e.target.value);
+	}, []);
+
+	const handleConfirmPasswordInput = useCallback((e) => {
+		setConfirmPasswordValue(e.target.value);
+	}, []);
 
 	const handleRegisterForm = async (e) => {
 		e.preventDefault();
+		console.log("Register: Form Submission Starts");
 
-		if (validEmail && validUserName && validPassword && !confirmPasswordReq) {
+		if (validEmail && validUserName && validPassword && matchPassword) {
 			try {
+				// generate salt & convert it so it can travel through network
 				const masterSalt = await bufferToBase64(generateCryptoRandomValue(16));
 				console.log("Generated MasterSalt: ", masterSalt);
-				const payload = { ...userRegister, masterSalt };
+				const payload = {
+					email: emailValue,
+					username: usernameValue,
+					password: passwordValue,
+					masterSalt,
+				};
 				const response = await instance.post("/api/v1/auth/register", {
 					payload,
 				});
-				setUserRegister((prev) => ({ ...prev, masterSalt }));
 				if (response.status === 201) {
-					setUserRegister((prev) => ({ ...prev, password: "" }));
-					navigate("/login/email", { replace: true });
+					navigate("/login/email", {
+						state: { email: emailValue },
+						replace: true,
+					});
 				}
 			} catch (error) {
 				if (!error?.response) {
@@ -164,9 +155,9 @@ export const Register = () => {
 		}
 	};
 
-	const onClose = () => {
+	const onClose = useCallback(() => {
 		setPageError("");
-	};
+	}, []);
 
 	return (
 		<>
@@ -193,9 +184,10 @@ export const Register = () => {
 							type="text"
 							name="email"
 							id="email"
-							ref={emailRef}
-							value={userRegister.email}
-							onChange={handleRegisterInput}
+							ref={emailFieldRef}
+							value={emailValue}
+							touched={!validEmail}
+							onChange={handleEmailInput}
 							error={emailReq}
 						/>
 
@@ -206,8 +198,9 @@ export const Register = () => {
 							type="text"
 							name="username"
 							id="username"
-							value={userRegister.username}
-							onChange={handleRegisterInput}
+							value={usernameValue}
+							touched={!validUserName}
+							onChange={handleUserNameInput}
 							error={userNameReq}
 						/>
 
@@ -219,8 +212,9 @@ export const Register = () => {
 							type="password"
 							showToggle={true}
 							id="password"
-							value={passwordCompare.password}
-							onChange={handlePasswdInput}
+							value={passwordValue}
+							touched={!validPassword}
+							onChange={handlePasswordInput}
 							error={passwordReq}
 						/>
 
@@ -231,10 +225,11 @@ export const Register = () => {
 							name="confirmPassword"
 							id="confirmPassword"
 							type="password"
-							showToggle={validPassword && passwordCompare.password}
-							value={passwordCompare.confirmPassword}
-							onChange={handlePasswdInput}
-							disabled={!passwordCompare.password || !validPassword}
+							showToggle={validPassword && confirmPasswordValue}
+							value={confirmPasswordValue}
+							touched={!matchPassword}
+							onChange={handleConfirmPasswordInput}
+							disabled={!passwordValue || !validPassword}
 							error={confirmPasswordReq}
 						/>
 						<Button>Register</Button>
@@ -255,3 +250,5 @@ export const Register = () => {
 		</>
 	);
 };
+
+export default Register;

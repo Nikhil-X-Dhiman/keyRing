@@ -8,7 +8,7 @@ export const AppProvider = ({ children }) => {
 		online: false,
 	};
 	// Global Loading
-	const [loading, setLoading] = useState(true);
+	const [loading, setLoading] = useState(false);
 
 	const appState = useRef(initialAppStateValues);
 

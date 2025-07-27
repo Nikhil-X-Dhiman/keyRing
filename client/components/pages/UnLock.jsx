@@ -24,7 +24,7 @@ import LockIcon from "../../src/assets/lock.svg?react";
 import { useAccount } from "../../hooks/useAccount";
 
 // import { useDB } from "../../hooks/useDB";
-export const UnLock = () => {
+const UnLock = () => {
 	const { auth, userLogin, validPasswd, setUserLogin, setValidPasswd } =
 		useAuth();
 	const { logout } = useAccount();
@@ -205,3 +205,5 @@ export const UnLock = () => {
 		</main>
 	);
 };
+
+export default UnLock;

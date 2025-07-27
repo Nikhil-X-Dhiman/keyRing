@@ -1,8 +1,13 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import CrossIcon from "../public/cross.svg?react";
 
 export const ErrorModal = memo(
 	({ title = "Error Message", message, onClose, isOpen }) => {
+		console.log(message, isOpen);
+
+		const crossBtnContent = useMemo(() => {
+			return <CrossIcon className="w-4 h-4 font-bold" />;
+		}, []);
 		return (
 			<>
 				<div
@@ -15,7 +20,7 @@ export const ErrorModal = memo(
 					<div className="flex justify-between bg-red-900 p-2 pr-3 rounded-t-2xl">
 						<h2>{title}</h2>
 						<button onClick={onClose} className="cursor-pointer">
-							<CrossIcon className="w-4 h-4 font-bold" />
+							{crossBtnContent}
 						</button>
 					</div>
 					<div className="flex flex-col p-2 gap-3 bg-slate-700 rounded-b-2xl">

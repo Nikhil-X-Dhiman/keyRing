@@ -1,7 +1,11 @@
 import { Outlet } from "react-router";
 import KeyRingIcon from "../../public/keyring.svg?react";
+import { useApp } from "../../hooks/useApp";
+import { Loading } from "../pages/Loading";
 
-export const Layout = () => {
+const Layout = () => {
+	const { loading } = useApp();
+
 	return (
 		// add header here
 		<div className="flex flex-col dark:bg-gray-800 dark:text-light-grey w-screen h-screen">
@@ -12,9 +16,12 @@ export const Layout = () => {
 					<span className="font-bold text-2xl">key</span>Ring
 				</span>
 			</header>
-			<div className="grow min-h-0 h-full flex flex-col">
-				<Outlet />
-			</div>
+			{loading ? (
+				<Loading loading={true} />
+			) : (
+				<div className="grow min-h-0 h-full flex flex-col">{<Outlet />}</div>
+			)}
+
 			{/* Footer */}
 			<footer className="flex justify-center items-center p-2 border-t border-slate-700">
 				<h1 className="select-none">
@@ -25,3 +32,5 @@ export const Layout = () => {
 		// add footer here
 	);
 };
+
+export default Layout;

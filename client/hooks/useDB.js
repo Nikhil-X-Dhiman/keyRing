@@ -180,7 +180,6 @@ export const useDB = () => {
 		try {
 			await db.appState.put({
 				id: 1,
-				email: "",
 				user: {},
 				master_salt: "",
 				access_token: "",

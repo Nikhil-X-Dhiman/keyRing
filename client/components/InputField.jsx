@@ -21,7 +21,7 @@ export const InputField = React.memo(
 				autoFocus = false,
 				showToggle = false,
 				touched,
-				autoComplete = "",
+				autoComplete = false,
 				className = "",
 				onFocus,
 				onBlur,

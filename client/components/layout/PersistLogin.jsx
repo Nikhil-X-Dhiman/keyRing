@@ -7,7 +7,7 @@ import { useApp } from "../../hooks/useApp";
 import { useVerifyAccessToken } from "../../hooks/useVerifyJWT";
 import { Navigate } from "react-router";
 
-export const PersistLogin = () => {
+const PersistLogin = () => {
 	const { auth, setAuth } = useAuth();
 	const refreshToken = useRefreshToken();
 	const { verifyToken } = useVerifyAccessToken();
@@ -87,3 +87,5 @@ export const PersistLogin = () => {
 
 	return <Outlet />;
 };
+
+export default PersistLogin;

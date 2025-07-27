@@ -8,7 +8,7 @@ import { Button } from "../Button";
 import { CheckboxField } from "../CheckboxField.jsx";
 import { Loading } from "./Loading.jsx";
 
-export const LoginEmail = () => {
+const LoginEmail = () => {
 	const EMAIL_REGEX =
 		/^[a-zA-Z][\w]+([._$%&]?[\w]+)*@[a-zA-Z]+(\.[a-zA-Z]{2,})+$/;
 	const PASSWD_REGEX =
@@ -36,7 +36,6 @@ export const LoginEmail = () => {
 		touchedRef.current = true;
 		// Verify Email Schema
 		const { success } = emailSchema.safeParse(email);
-		// setValidEmail(success);
 		// Set Flag to represent valid email
 		validEmailRef.current = success;
 		if (touchedRef.current) {
@@ -46,9 +45,6 @@ export const LoginEmail = () => {
 					? ""
 					: 'Email must contain username, "@" & domain name. Characters Allowed are [a-z], [0-9] & [ ._$%& ]'
 			);
-			// inputErrorRef.current = success
-			// 	? ""
-			// 	: 'Email must contain username, "@" & domain name. Characters Allowed are [a-z], [0-9] & [ ._$%& ]';
 		}
 	}, [email]);
 
@@ -134,3 +130,5 @@ export const LoginEmail = () => {
 		);
 	}
 };
+
+export default LoginEmail;
