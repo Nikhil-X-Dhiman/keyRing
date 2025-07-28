@@ -16,7 +16,7 @@ import { ItemField } from "../ItemField";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useDB } from "../../hooks/useDB";
-import { useNavigate } from "react-router";
+import { Navigate, useLocation, useNavigate } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
 import { useCrypto } from "../../hooks/useCrypto";
 import { usePrivateInstance } from "../../hooks/usePrivateInstance";
@@ -45,7 +45,7 @@ const MainPage = () => {
 	};
 
 	// fetch data from the server and save it to the server only then save the to local too
-	// const [passwdList, setPasswdList] = useState([]); //
+	// const [passwordList, setpasswordList] = useState([]); //
 	const {
 		handleAddItemDB,
 		handleEmptyListDB,
@@ -54,11 +54,13 @@ const MainPage = () => {
 	} = useDB();
 	const { logout } = useAccount();
 
+	const [passwordList, setPasswordList] = useState([]);
 	const [itemIndex, setItemIndex] = useState(null); // index for add, edit and view
 	const [focusItem, setFocusItem] = useState(defaultEmpty); // passwd item for edit and add mode
 	const [mode, setMode] = useState(null); // modes for different view selection (null, view, edit, add)
 	const [searchItem, setSearchItem] = useState("");
 	const [pageMode, setPageMode] = useState("All");
+	const [, forceRender] = useState(false);
 	// all, fav, trash
 	// Errors
 	const [pageError, setPageError] = useState("");
@@ -66,9 +68,13 @@ const MainPage = () => {
 	const searchRef = useRef();
 	const areaRef = useRef();
 	const navigate = useNavigate();
-	const { auth, setAuth, passwdList, setPasswdList } = useAuth();
-	const { clearSessionKey, handleEncrypt } = useCrypto();
+	const loaction = useLocation();
+	const { auth, setAuth } = useAuth();
+	const { handleEncrypt } = useCrypto();
 	const privateInstance = usePrivateInstance();
+
+	const masterKey = useRef("");
+	masterKey.current = location.state?.masterKey;
 
 	useEffect(() => {
 		searchRef.current?.focus();
@@ -90,15 +96,15 @@ const MainPage = () => {
 		}
 	}, [itemIndex, mode]);
 	// Fetch user data and decrypts it
-	useLayoutEffect(() => {
-		if (!auth?.masterKey || !auth?.user?.email) {
-			console.log("MainPage: Master Key not available, redirecting to /locked");
-			navigate("/locked", { replace: true });
-			return;
-		}
-	}, [auth?.masterKey, auth?.user]);
+	// useLayoutEffect(() => {
+	// 	if (!auth?.masterKey || !auth?.user?.email) {
+	// 		console.log("MainPage: Master Key not available, redirecting to /locked");
+	// 		navigate("/locked", { replace: true });
+	// 		return;
+	// 	}
+	// }, [masterKey.current]);
 	// Search & filters data based upon user search query & active page
-	const filteredList = passwdList.filter((item) => {
+	const filteredList = passwordList.filter((item) => {
 		const matchesSearch =
 			item?.name?.toLowerCase().includes(searchItem?.toLowerCase()) ||
 			item?.user?.toLowerCase().includes(searchItem?.toLowerCase());
@@ -117,7 +123,7 @@ const MainPage = () => {
 	// Copy the desired field into os clipboard
 	const handleCopy = async (field) => {
 		try {
-			await navigator.clipboard.writeText(passwdList[itemIndex][field]);
+			await navigator.clipboard.writeText(passwordList[itemIndex][field]);
 		} catch (error) {
 			console.error("Error Copying: ", error);
 			setPageError("Copying Item Field Failed");
@@ -126,7 +132,7 @@ const MainPage = () => {
 	// Opens the URI link in the browser
 	const handleLinkOpen = (i) => {
 		try {
-			let url = passwdList[itemIndex].uri[i];
+			let url = passwordList[itemIndex].uri[i];
 			url = "https://" + url;
 			window.open(url, "_blank", "noopener noreferrer");
 		} catch (error) {
@@ -137,7 +143,7 @@ const MainPage = () => {
 	// Copy the URI into the clipboard
 	const handleURICopy = async (i) => {
 		try {
-			await navigator.clipboard.writeText(passwdList[itemIndex].uri[i]);
+			await navigator.clipboard.writeText(passwordList[itemIndex].uri[i]);
 		} catch (error) {
 			console.error("Error Copying: ", error);
 			setPageError("Copying Item URI Failed");
@@ -201,7 +207,7 @@ const MainPage = () => {
 	};
 	// open the edit view with copy of the current item in the FocusItem state for edit
 	const handleEditItem = () => {
-		setFocusItem(passwdList[itemIndex] || "");
+		setFocusItem(passwordList[itemIndex] || "");
 		setMode((prev) => {
 			if (prev === null || prev === "Add" || prev === "View") {
 				return "Edit";
@@ -213,16 +219,16 @@ const MainPage = () => {
 	// for page all & fav it sends them to trash by marking them so they can be restored, but for trash page it removes them completly & cannot ve recovered...also sends request to server to del it in the cloud too
 	const handleDeleteItem = async () => {
 		if (pageMode === "All" || pageMode === "Fav") {
-			const itemUUID = passwdList[itemIndex].uuid;
+			const itemUUID = passwordList[itemIndex].uuid;
 			try {
 				const response = await privateInstance.patch(
 					`/api/v1/item/${itemUUID}`,
 					{
-						trash: !passwdList[itemIndex].trash,
+						trash: !passwordList[itemIndex].trash,
 					}
 				);
 				if (response.status === 200 && response.data.success) {
-					setPasswdList((prev) => {
+					setpasswordList((prev) => {
 						const updatedList = [...prev];
 						const item = updatedList[itemIndex];
 						const updateItem = { ...item, trash: true };
@@ -241,7 +247,7 @@ const MainPage = () => {
 		} else if (pageMode === "Trash") {
 			console.log("Handle Trash Del");
 
-			const itemUUID = passwdList[itemIndex].uuid;
+			const itemUUID = passwordList[itemIndex].uuid;
 			console.log("Delete Item ID: ", itemUUID);
 
 			try {
@@ -251,13 +257,13 @@ const MainPage = () => {
 				console.log(response);
 
 				if (response.status === 200 && response.data.success === true) {
-					setPasswdList((prev) => {
+					setpasswordList((prev) => {
 						console.log("Empty trash list update");
 
-						const updatedPasswdList = prev.filter((_, i) => {
+						const updatedpasswordList = prev.filter((_, i) => {
 							return i !== itemIndex;
 						});
-						return updatedPasswdList;
+						return updatedpasswordList;
 					});
 				}
 			} catch (error) {
@@ -280,9 +286,9 @@ const MainPage = () => {
 			console.log("Empty Trash: ", response.status, response.data.success);
 
 			if (response.status === 200 && response.data.success === true) {
-				setPasswdList((prev) => {
+				setpasswordList((prev) => {
 					let updatedList = [...prev];
-					updatedList = passwdList.filter((item) => {
+					updatedList = passwordList.filter((item) => {
 						return item.trash === false;
 					});
 					return updatedList;
@@ -302,13 +308,13 @@ const MainPage = () => {
 	};
 	// it restores the items in the trash & can be done one item at a time
 	const handleRestore = async () => {
-		const itemID = passwdList[itemIndex].id;
+		const itemID = passwordList[itemIndex].id;
 		try {
 			const response = await privateInstance.patch(`/api/v1/item/${itemID}`, {
 				trash: false,
 			});
 			if (response.status === 200 && response.data.success) {
-				setPasswdList((prev) => {
+				setpasswordList((prev) => {
 					const updatedList = [...prev];
 					const item = updatedList[itemIndex];
 					const updatedItem = { ...item, trash: false };
@@ -351,7 +357,7 @@ const MainPage = () => {
 		}
 		if (mode === "Edit") {
 			try {
-				const itemUUID = passwdList[itemIndex].uuid;
+				const itemUUID = passwordList[itemIndex].uuid;
 				// Apply Encryption to data
 				const uriString = JSON.stringify(focusItem.uri);
 				const encryptedFocusItem = {
@@ -372,7 +378,7 @@ const MainPage = () => {
 						encryptedFocusItem
 					);
 					if (response.status === 200 && response.data.success === true) {
-						setPasswdList((prev) => {
+						setpasswordList((prev) => {
 							const updatedList = [...prev];
 							updatedList[itemIndex] = focusItem;
 							return updatedList;
@@ -425,7 +431,7 @@ const MainPage = () => {
 					} catch (error) {
 						console.error(error);
 					}
-					setPasswdList((prev) => {
+					setpasswordList((prev) => {
 						const updatedList = [...prev];
 						updatedList.push(item);
 						setItemIndex(updatedList.length - 1);
@@ -446,7 +452,7 @@ const MainPage = () => {
 	const handleClickItem = (uuid) => {
 		// Display Clicked Passwd View
 		let prevItemIndex = itemIndex; // get old clicked item index
-		let i = passwdList.findIndex((item) => item.uuid === uuid); // find index uring id
+		let i = passwordList.findIndex((item) => item.uuid === uuid); // find index uring id
 		setItemIndex(i); // setting index to show that passwd item
 		setMode((prev) => {
 			// setting mode to view the clicked passwd item
@@ -479,7 +485,7 @@ const MainPage = () => {
 		// 	setItemIndex(null);
 		// 	setFocusItem(defaultEmpty);
 		// 	setSearchItem("");
-		// 	setPasswdList([]);
+		// 	setpasswordList([]);
 		// 	setMode(null);
 		// 	setPageMode("All");
 		// 	localStorage.setItem("isLogged", JSON.stringify(false));
@@ -504,6 +510,10 @@ const MainPage = () => {
 	const handleCloseErrorModal = () => {
 		setPageError("");
 	};
+
+	if (!masterKey.current) {
+		return <Navigate to="/locked" replace />;
+	}
 
 	return (
 		// <main className="grid grid-cols-3 grid-rows-[auto_1fr] h-full">
@@ -541,10 +551,10 @@ const MainPage = () => {
 				{/* min-h-0 for flex and grid to bend them to the will of overflow */}
 				{/* Display all passwd list here */}
 				<div className="overflow-y-scroll h-full">
-					{/* {passwdList.length !== 0 ? ( */}
+					{/* {passwordList.length !== 0 ? ( */}
 					<DisplayList
 						filteredList={filteredList}
-						passwdList={passwdList}
+						passwordList={passwordList}
 						itemIndex={itemIndex}
 						handleClickItem={handleClickItem}
 					/>
@@ -580,7 +590,7 @@ const MainPage = () => {
 							</div>
 
 							<div className="bg-slate-700 flex flex-col">
-								{(mode === "View" && passwdList[itemIndex]?.name) ||
+								{(mode === "View" && passwordList[itemIndex]?.name) ||
 								mode === "Add" ||
 								mode === "Edit" ? (
 									<div className="flex border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5 justify-start w-full">
@@ -591,7 +601,7 @@ const MainPage = () => {
 											id="name"
 											value={
 												mode === "View"
-													? passwdList[itemIndex]?.name || ""
+													? passwordList[itemIndex]?.name || ""
 													: focusItem?.name || ""
 											}
 											onChange={handleInputChange}
@@ -605,7 +615,7 @@ const MainPage = () => {
 								) : (
 									""
 								)}
-								{(mode === "View" && passwdList[itemIndex]?.username) ||
+								{(mode === "View" && passwordList[itemIndex]?.username) ||
 								mode === "Add" ||
 								mode === "Edit" ? (
 									<div className="flex border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5 justify-start items-center w-full">
@@ -616,7 +626,7 @@ const MainPage = () => {
 											id="username"
 											value={
 												mode === "View"
-													? passwdList[itemIndex].username || ""
+													? passwordList[itemIndex].username || ""
 													: focusItem.username || ""
 											}
 											onChange={handleInputChange}
@@ -631,7 +641,7 @@ const MainPage = () => {
 								) : (
 									""
 								)}
-								{(mode === "View" && passwdList[itemIndex]?.password) ||
+								{(mode === "View" && passwordList[itemIndex]?.password) ||
 								mode === "Add" ||
 								mode === "Edit" ? (
 									<div className="flex items-center justify-between border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5">
@@ -642,7 +652,7 @@ const MainPage = () => {
 											id="password"
 											value={
 												mode === "View"
-													? passwdList[itemIndex].password || ""
+													? passwordList[itemIndex].password || ""
 													: focusItem.password || ""
 											}
 											onChange={handleInputChange}
@@ -663,10 +673,10 @@ const MainPage = () => {
 
 							<div className="bg-slate-700 flex flex-col my-7">
 								{/* View Mode URI List */}
-								{passwdList.length !== 0 &&
+								{passwordList.length !== 0 &&
 									mode === "View" &&
 									itemIndex !== null &&
-									passwdList[itemIndex].uri.map((item, i) => {
+									passwordList[itemIndex].uri.map((item, i) => {
 										return item === "" ? (
 											""
 										) : (
@@ -729,13 +739,13 @@ const MainPage = () => {
 									</Button>
 								) : null}
 							</div>
-							{mode === "View" && passwdList[itemIndex]?.note ? (
+							{mode === "View" && passwordList[itemIndex]?.note ? (
 								<div>
 									<h3 className="text-slate-300 my-1">NOTES</h3>
 									<textarea
 										name="item-notes"
 										id="item-notes"
-										value={passwdList[itemIndex]?.note || ""}
+										value={passwordList[itemIndex]?.note || ""}
 										readOnly
 										ref={areaRef}
 										autoComplete="off"
@@ -771,7 +781,7 @@ const MainPage = () => {
 							{/* Favourite Btn Here */}
 							{mode === "Add" ||
 							mode === "Edit" ||
-							(mode === "View" && passwdList[itemIndex]?.favourite) ? (
+							(mode === "View" && passwordList[itemIndex]?.favourite) ? (
 								// Favourite Button for Item
 								<div
 									className="flex items-center justify-between gap-1.5 bg-slate-700 hover:bg-slate-600 py-2 px-3.5 cursor-pointer mt-5 mb-3"
@@ -790,7 +800,7 @@ const MainPage = () => {
 										id="favourite"
 										checked={
 											mode === "View"
-												? passwdList[itemIndex]?.favourite || false
+												? passwordList[itemIndex]?.favourite || false
 												: mode === "Add" || mode === "Edit"
 												? focusItem.favourite
 												: false
@@ -812,7 +822,7 @@ const MainPage = () => {
 					{mode === "View" && (
 						<div className="flex justify-between">
 							<div className="flex gap-4">
-								{passwdList[itemIndex].trash === true ? null : (
+								{passwordList[itemIndex].trash === true ? null : (
 									<Button
 										Icon={MdModeEdit}
 										variant="diffOps"
@@ -820,7 +830,7 @@ const MainPage = () => {
 										onClick={handleEditItem}
 									></Button>
 								)}
-								{passwdList[itemIndex].trash === true && (
+								{passwordList[itemIndex].trash === true && (
 									<Button
 										Icon={TbRestore}
 										variant="diffOps"

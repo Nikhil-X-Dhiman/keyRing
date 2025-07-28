@@ -15,8 +15,8 @@ export const useAccount = () => {
 		handlePersistEmptyAppState,
 	} = useDB();
 	const { clearSessionKey } = useCrypto();
-	const { setAuth, defaultAuthValues } = useAuth();
-	const { appState, setAppState, defaultAppValues } = useApp();
+	const { handleInitAuthValues } = useAuth();
+	const { appState } = useApp();
 
 	const logout = async () => {
 		const response = await privateInstance.get("/api/v1/auth/logout", {
@@ -37,8 +37,8 @@ export const useAccount = () => {
 				await handleFullEmptyAppState();
 			}
 			// await handleDelDB();
-			setAuth(defaultAuthValues);
-			setAppState({ ...defaultAppValues, persist: appState.persist });
+			handleInitAuthValues();
+			appState.current = { ...appState.current, persist: appState.persist };
 			clearSessionKey();
 			navigate("/login/email");
 		} else {

@@ -196,7 +196,6 @@ export const useDB = () => {
 	const handleLoginUpdateAppState = useCallback(async (userState) => {
 		try {
 			const success = await db.appState.update(1, {
-				email: userState.email,
 				user: userState.user,
 				master_salt: userState.master_salt,
 				access_token: userState.access_token,
@@ -302,7 +301,7 @@ export const useDB = () => {
 		handleToggleTrashDB,
 		handleBulkAddItemsDB,
 		handleAddAppState,
-		handleEmptyAppState: handleFullEmptyAppState,
+		handleFullEmptyAppState,
 		handleFetchFullAppState,
 		handleDelDB,
 		handleDBOpen,

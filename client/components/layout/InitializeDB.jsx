@@ -30,7 +30,6 @@ export const InitializeDB = () => {
 					console.log("DB Found -> Updating States");
 
 					const {
-						// email = "",
 						user = {},
 						master_salt = "",
 						access_token = "",

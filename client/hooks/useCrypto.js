@@ -87,7 +87,7 @@ export const useCrypto = () => {
 				base64ToBuffer(masterSalt)
 			);
 			// masterKeyRef.current = masterKey;
-			setAuth((prev) => ({ ...prev, masterKey }));
+			// setAuth((prev) => ({ ...prev, masterKey }));
 
 			console.log("Master Key Created.");
 

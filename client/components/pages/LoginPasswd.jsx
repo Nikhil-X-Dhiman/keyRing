@@ -1,12 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-	Link,
-	Navigate,
-	replace,
-	useLocation,
-	useNavigate,
-} from "react-router";
+import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { useVerifyAccessToken } from "../../hooks/useVerifyJWT";
 import { useDB } from "../../hooks/useDB";
 import { useCrypto } from "../../hooks/useCrypto";
@@ -104,7 +98,6 @@ const LoginPasswd = () => {
 
 						try {
 							const currentAppState = {
-								email: email,
 								user: payload,
 								master_salt,
 								access_token,
