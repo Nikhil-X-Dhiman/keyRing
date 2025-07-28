@@ -31,6 +31,7 @@ import { MdModeEdit } from "react-icons/md";
 import { LuSave } from "react-icons/lu";
 import { MdCloseFullscreen } from "react-icons/md";
 import { useAccount } from "../../hooks/useAccount";
+import { error } from "zod/v4/locales/ar.js";
 
 const MainPage = () => {
 	const defaultEmpty = {
@@ -45,7 +46,7 @@ const MainPage = () => {
 	};
 
 	// fetch data from the server and save it to the server only then save the to local too
-	// const [passwordList, setpasswordList] = useState([]); //
+	// const [passwordList, setPasswordList] = useState([]); //
 	const {
 		handleAddItemDB,
 		handleEmptyListDB,
@@ -68,13 +69,14 @@ const MainPage = () => {
 	const searchRef = useRef();
 	const areaRef = useRef();
 	const navigate = useNavigate();
-	const loaction = useLocation();
-	const { auth, setAuth } = useAuth();
+	const location = useLocation();
+	const { masterKey } = useAuth();
 	const { handleEncrypt } = useCrypto();
 	const privateInstance = usePrivateInstance();
 
-	const masterKey = useRef("");
-	masterKey.current = location.state?.masterKey;
+	// const masterKey = useRef("");
+	// masterKey.current = location.state?.masterKey;
+	// const masterKey = location.state?.masterKey;
 
 	useEffect(() => {
 		searchRef.current?.focus();
@@ -104,18 +106,18 @@ const MainPage = () => {
 	// 	}
 	// }, [masterKey.current]);
 	// Search & filters data based upon user search query & active page
-	const filteredList = passwordList.filter((item) => {
-		const matchesSearch =
-			item?.name?.toLowerCase().includes(searchItem?.toLowerCase()) ||
-			item?.user?.toLowerCase().includes(searchItem?.toLowerCase());
+	// const filteredList = passwordList.filter((item) => {
+	// 	const matchesSearch =
+	// 		item?.name?.toLowerCase().includes(searchItem?.toLowerCase()) ||
+	// 		item?.user?.toLowerCase().includes(searchItem?.toLowerCase());
 
-		const matchesMode =
-			(pageMode === "All" && item.trash === false) || // Only show if not in trash for "View"
-			(pageMode === "Fav" && item.favourite === true && item.trash === false) ||
-			(pageMode === "Trash" && item.trash === true);
+	// 	const matchesMode =
+	// 		(pageMode === "All" && item.trash === false) || // Only show if not in trash for "View"
+	// 		(pageMode === "Fav" && item.favourite === true && item.trash === false) ||
+	// 		(pageMode === "Trash" && item.trash === true);
 
-		return matchesSearch && matchesMode;
-	});
+	// 	return matchesSearch && matchesMode;
+	// });
 
 	// const handlePassReveal = () => {
 	// 	setPassReveal((prev) => !prev);
@@ -228,7 +230,7 @@ const MainPage = () => {
 					}
 				);
 				if (response.status === 200 && response.data.success) {
-					setpasswordList((prev) => {
+					setPasswordList((prev) => {
 						const updatedList = [...prev];
 						const item = updatedList[itemIndex];
 						const updateItem = { ...item, trash: true };
@@ -257,7 +259,7 @@ const MainPage = () => {
 				console.log(response);
 
 				if (response.status === 200 && response.data.success === true) {
-					setpasswordList((prev) => {
+					setPasswordList((prev) => {
 						console.log("Empty trash list update");
 
 						const updatedpasswordList = prev.filter((_, i) => {
@@ -286,7 +288,7 @@ const MainPage = () => {
 			console.log("Empty Trash: ", response.status, response.data.success);
 
 			if (response.status === 200 && response.data.success === true) {
-				setpasswordList((prev) => {
+				setPasswordList((prev) => {
 					let updatedList = [...prev];
 					updatedList = passwordList.filter((item) => {
 						return item.trash === false;
@@ -314,7 +316,7 @@ const MainPage = () => {
 				trash: false,
 			});
 			if (response.status === 200 && response.data.success) {
-				setpasswordList((prev) => {
+				setPasswordList((prev) => {
 					const updatedList = [...prev];
 					const item = updatedList[itemIndex];
 					const updatedItem = { ...item, trash: false };
@@ -378,7 +380,7 @@ const MainPage = () => {
 						encryptedFocusItem
 					);
 					if (response.status === 200 && response.data.success === true) {
-						setpasswordList((prev) => {
+						setPasswordList((prev) => {
 							const updatedList = [...prev];
 							updatedList[itemIndex] = focusItem;
 							return updatedList;
@@ -431,7 +433,7 @@ const MainPage = () => {
 					} catch (error) {
 						console.error(error);
 					}
-					setpasswordList((prev) => {
+					setPasswordList((prev) => {
 						const updatedList = [...prev];
 						updatedList.push(item);
 						setItemIndex(updatedList.length - 1);
@@ -485,7 +487,7 @@ const MainPage = () => {
 		// 	setItemIndex(null);
 		// 	setFocusItem(defaultEmpty);
 		// 	setSearchItem("");
-		// 	setpasswordList([]);
+		// 	setPasswordList([]);
 		// 	setMode(null);
 		// 	setPageMode("All");
 		// 	localStorage.setItem("isLogged", JSON.stringify(false));
@@ -511,7 +513,14 @@ const MainPage = () => {
 		setPageError("");
 	};
 
+	console.log("inside main: ", masterKey.current);
+	// console.log("inside main: ", location.state.masterKey);
+	// if (!masterKey.current) {
+	// 	return <Navigate to="/locked" replace />;
+	// }
 	if (!masterKey.current) {
+		console.error("Main: No master key found, redirect to locked");
+
 		return <Navigate to="/locked" replace />;
 	}
 
@@ -553,7 +562,8 @@ const MainPage = () => {
 				<div className="overflow-y-scroll h-full">
 					{/* {passwordList.length !== 0 ? ( */}
 					<DisplayList
-						filteredList={filteredList}
+						// filteredList={filteredList}
+						filteredList={passwordList}
 						passwordList={passwordList}
 						itemIndex={itemIndex}
 						handleClickItem={handleClickItem}
@@ -706,7 +716,10 @@ const MainPage = () => {
 								{focusItem.uri.length !== 0 &&
 								(mode === "Edit" || mode === "Add")
 									? focusItem.uri.map((item, i) => (
-											<div className="flex items-center justify-between border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5">
+											<div
+												key={`${i}`}
+												className="flex items-center justify-between border-b-1 border-slate-500 last:border-b-0 hover:bg-slate-600 py-3 px-3.5"
+											>
 												<ItemField
 													label={`URI ${i + 1}`}
 													type="text"

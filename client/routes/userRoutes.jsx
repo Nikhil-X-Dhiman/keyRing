@@ -20,7 +20,7 @@ export const userRoutes = [
 		element: <PersistLogin />, // Ensures user session is loaded/refreshed
 		children: [
 			{
-				element: <RequireAuth />, // Protects these child routes, redirects if not authenticated
+				element: <RequireAuth />, // Protects child routes, redirects if not authenticated
 				children: [
 					{
 						path: "home",

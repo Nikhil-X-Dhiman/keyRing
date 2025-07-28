@@ -22,9 +22,9 @@ const LoginPasswd = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
 	// Custom Hooks
-	const verifyToken = useVerifyAccessToken();
+	const { verifyToken } = useVerifyAccessToken();
 	const { handleLoginUpdateAppState } = useDB();
-	const { setAuth, setDerivedAuth } = useAuth();
+	const { setAuth, setDerivedAuth, masterKey } = useAuth();
 	const { initialiseCrypto } = useCrypto();
 	// Page States
 	const [localLoading, setLocalLoading] = useState(false);
@@ -64,8 +64,8 @@ const LoginPasswd = () => {
 		e.preventDefault();
 		console.log("Password: Auth Request to Server (Local Loading Started)");
 
-		setLocalLoading(true);
 		if (validPassword) {
+			setLocalLoading(true);
 			try {
 				console.log("Password: Auth Request Sending");
 				const response = await instance.post(
@@ -91,10 +91,13 @@ const LoginPasswd = () => {
 						setAuth({ accessToken: access_token, user: payload });
 						// creates the masterKey
 						console.log("Master Key is Creating");
-						const masterKey = await initialiseCrypto(
+						const newMasterKey = await initialiseCrypto(
 							passwordValue,
 							master_salt
 						);
+
+						masterKey.current = newMasterKey;
+						console.error("Password: MasterKey value: ", masterKey.current);
 
 						try {
 							const currentAppState = {
@@ -102,8 +105,11 @@ const LoginPasswd = () => {
 								master_salt,
 								access_token,
 								public_key,
+								persist,
 							};
 							// only add state to DB when persist is enable
+							console.error("Persist Value: ", persist);
+
 							if (persist) {
 								console.log(
 									"Password: States added to the DB (Persist Enabled)"
@@ -115,7 +121,7 @@ const LoginPasswd = () => {
 							setPageError("Password: Failed to save App state to DB");
 						}
 						console.log("Home Navigation Starts");
-						navigate(from, { state: { masterKey }, replace: true });
+						navigate("/home", { replace: true });
 					} else {
 						console.error("Access Token Verification Failed: ", error);
 						setPageError("Access Token Verification Failed");

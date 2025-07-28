@@ -26,7 +26,7 @@ import { useDB } from "../../hooks/useDB";
 
 // import { useDB } from "../../hooks/useDB";
 const UnLock = () => {
-	const { auth } = useAuth();
+	const { auth, masterKey } = useAuth();
 	const { logout } = useAccount();
 	const { handleFetchAppStateDB } = useDB();
 	const { initialiseCrypto } = useCrypto();
@@ -34,10 +34,10 @@ const UnLock = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const from = location.state?.from || "/home";
-	const { startTransition } = useTransition();
+	const [isPending, startTransition] = useTransition();
 	// const { publicKeyRequest, handleFetchList } = useFetchData();
 
-	const [masterKey, setMasterKey] = useState("");
+	// const [masterKey, setMasterKey] = useState("");
 	const [passwordValue, setPasswordValue] = useState("");
 	const [validPassword, setValidPassword] = useState("");
 	const [modalError, setModalError] = useState("");
@@ -52,9 +52,9 @@ const UnLock = () => {
 		passwordRef.current.focus();
 	}, []);
 
-	// useEffect(() => {
-	// 	setLoading(false);
-	// }, [modalError]);
+	useEffect(() => {
+		setLocalLoading(false);
+	}, [modalError]);
 
 	// useEffect(() => {
 	// 	if (auth.masterKey && loading === false) {
@@ -64,23 +64,24 @@ const UnLock = () => {
 	// 	}
 	// }, [loading]);
 
-	useEffect(() => {
-		// async function fetch() {
-		// 	if (auth.masterKey && loading === true) {
-		// 		console.log("Unlock: Master Key Detected...Fetching List from cloud");
-		// 		await handleFetchList();
-		// 		setLoading(false);
-		// 	}
-		// }
-		// fetch();
-		if (masterKey) {
-			console.log("Master Key Detected...Navigating to home");
-			setLocalLoading(false);
-			startTransition(() => {
-				navigate(from, { state: { masterKey }, replace: true });
-			});
-		}
-	}, [masterKey]);
+	// useEffect(() => {
+	// 	// async function fetch() {
+	// 	// 	if (auth.masterKey && loading === true) {
+	// 	// 		console.log("Unlock: Master Key Detected...Fetching List from cloud");
+	// 	// 		await handleFetchList();
+	// 	// 		setLoading(false);
+	// 	// 	}
+	// 	// }
+	// 	// fetch();
+	// 	if (masterKey.current) {
+	// 		console.log("Master Key Detected...Navigating to home");
+	// 		setLocalLoading(false);
+	// 		startTransition(() => {
+	// 			// navigate(from, { state: { masterKey }, replace: true });
+	// 			navigate(from, { replace: true });
+	// 		});
+	// 	}
+	// }, [masterKey]);
 	// }, [auth.masterKey]);
 
 	useEffect(() => {
@@ -129,13 +130,20 @@ const UnLock = () => {
 				// 	password: passwordValue,
 				// });
 				// console.log("Unlock: Salt Requested");
-				const masterSalt = await base64ToBuffer(
-					await handleFetchAppStateDB("master_salt")
-				);
+				// const masterSalt = await base64ToBuffer(
+				// 	await handleFetchAppStateDB("master_salt")
+				// );
+				const masterSalt = await handleFetchAppStateDB("master_salt");
 				console.log(masterSalt);
-				setMasterKey(await initialiseCrypto(passwordValue, masterSalt));
-				console.log("MasterKey Created: ", masterKey);
+				// setMasterKey(await initialiseCrypto(passwordValue, masterSalt));
+				masterKey.current = await initialiseCrypto(passwordValue, masterSalt);
+				console.log("UnLock -> MasterKey Created: ", masterKey.current);
+				setLocalLoading(false);
+				console.log("UnLock -> Redirecting to Home");
 
+				navigate("/home", { replace: true });
+				// startTransition(() => {
+				// });
 				// if (response.status === 200) {
 				// 	console.log("post post submit request");
 				// 	const masterSalt = await base64ToBuffer(response.data?.master_salt);

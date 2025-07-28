@@ -7,6 +7,7 @@ import { InputField } from "../InputField";
 import { Button } from "../Button";
 import { CheckboxField } from "../CheckboxField.jsx";
 import { Loading } from "./Loading.jsx";
+import { useApp } from "../../hooks/useApp.js";
 
 const LoginEmail = () => {
 	const EMAIL_REGEX =
@@ -16,7 +17,9 @@ const LoginEmail = () => {
 
 	const location = useLocation();
 	const navigate = useNavigate();
-	const from = location.state?.from || "/user/home";
+	const from = location.state?.from || "/home";
+
+	const { appState } = useApp();
 
 	const [email, setEmail] = useState("");
 	const [persist, setPersist] = useState("");
@@ -62,6 +65,7 @@ const LoginEmail = () => {
 
 		if (validEmailRef.current) {
 			console.log("Email: Navigating to Password Page");
+			appState.current = { ...appState.current, persist: persist };
 			navigate("/login/password", {
 				state: { from, email, persist },
 				replace: true,
@@ -120,7 +124,7 @@ const LoginEmail = () => {
 						New to keyRing?{" "}
 						<Link
 							to="/register"
-							className="text-blue-300 hover:text-blue-200 hover:underline transition duration-200 ease-in-out"
+							className="text-blue-300 hover:text-blue-200 hover:underline transition duration-200 ease-in-out hover:cursor-pointer"
 						>
 							Create Account
 						</Link>

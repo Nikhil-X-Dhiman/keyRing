@@ -21,7 +21,7 @@ export const InputField = React.memo(
 				autoFocus = false,
 				showToggle = false,
 				touched,
-				autoComplete = false,
+				autoComplete = "off",
 				className = "",
 				onFocus,
 				onBlur,
@@ -74,8 +74,8 @@ export const InputField = React.memo(
 						disabled={disabled}
 						required={required}
 						autoFocus={autoFocus}
-						className={`w-full font-base bg-transparent border-0 focus:outline-0 ${
-							disabled ? "cursor-not-allowed text-gray-500" : ""
+						className={`w-full font-base bg-transparent border-0 focus:outline-0 cursor-text ${
+							disabled ? "cursor-not-allowed text-gray-500" : "cursor-text"
 						} ${className}`}
 						{...props}
 					/>

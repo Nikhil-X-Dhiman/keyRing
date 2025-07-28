@@ -26,18 +26,18 @@ export const InitializeDB = () => {
 				const state = await handleFetchFullAppState();
 				console.log("DB DATA: ", state);
 
-				if (state && state.persist) {
+				if (state) {
 					console.log("DB Found -> Updating States");
 
 					const {
-						user = {},
+						user = null,
 						master_salt = "",
 						access_token = "",
 						public_key = "",
 						persist = false,
 					} = state;
 					// setting auth & app context
-					appState.current = { persist, ...appState.current };
+					appState.current = { ...appState.current, persist };
 					setAuth({ accessToken: access_token, user });
 					setDerivedAuth({ masterSalt: master_salt, publicKey: public_key });
 				} else {

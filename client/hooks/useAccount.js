@@ -8,14 +8,14 @@ import { useApp } from "./useApp.js";
 export const useAccount = () => {
 	const navigate = useNavigate();
 
-	const { privateInstance } = usePrivateInstance();
+	const privateInstance = usePrivateInstance();
 	const {
 		handleEmptyListDB,
-		handleEmptyAppState: handleFullEmptyAppState,
+		handleFullEmptyAppState,
 		handlePersistEmptyAppState,
 	} = useDB();
 	const { clearSessionKey } = useCrypto();
-	const { handleInitAuthValues } = useAuth();
+	const { handleInitAuthValues, masterKey } = useAuth();
 	const { appState } = useApp();
 
 	const logout = async () => {
@@ -30,16 +30,26 @@ export const useAccount = () => {
 
 		if (response.status === 200) {
 			console.log("logged out");
+			// clears all the password table
 			await handleEmptyListDB();
+			console.log("Logout: Persist Value: ", appState.persist);
+
 			if (appState.persist) {
-				handlePersistEmptyAppState;
+				// clears all but publickey, persist
+				await handlePersistEmptyAppState();
 			} else {
+				// clears all the state
 				await handleFullEmptyAppState();
 			}
 			// await handleDelDB();
-			handleInitAuthValues();
-			appState.current = { ...appState.current, persist: appState.persist };
+			await handleInitAuthValues();
+			masterKey.current = "";
+			console.log("Logout: Persist Value: ", appState.persist);
+			appState.current = { persist: false, online: false };
+			console.log("Logout: Persist Value: ", appState.persist);
 			clearSessionKey();
+			console.log("Lougout -> Navigation to Email");
+
 			navigate("/login/email");
 		} else {
 			console.error("Error: Logging Out");

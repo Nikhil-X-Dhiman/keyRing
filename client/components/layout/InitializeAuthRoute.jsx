@@ -5,7 +5,7 @@ const InitializeAuthRoute = () => {
 	const location = useLocation();
 	const { auth } = useAuth();
 	const path = location.pathname;
-	const from = location.state?.from || "/user/home";
+	const from = location.state?.from || "/home";
 
 	if ((path === "/login/email" || path === "login/password") && auth.user) {
 		return <Navigate to={from} replace />;

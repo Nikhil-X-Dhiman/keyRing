@@ -97,7 +97,7 @@ export const handleLogin = async (req, res) => {
 		maxAge: 1000 * 60 * 60 * 24 * 14,
 		httpOnly: true,
 		secure: true,
-		SameSite: "Lax",
+		sameSite: "None",
 	});
 	// send the success response to login with access token & public key to verify it
 	return res.status(200).json({
@@ -280,7 +280,7 @@ export const handleLogout = async (req, res) => {
 	res.clearCookie("refresh_token", {
 		httpOnly: true,
 		secure: true,
-		SameSite: "Lax",
+		sameSite: "None",
 		path: "/",
 	});
 	return res.status(200).json({ success: true, message: "User Logged Out" });

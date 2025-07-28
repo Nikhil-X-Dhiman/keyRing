@@ -180,7 +180,7 @@ export const useDB = () => {
 		try {
 			await db.appState.put({
 				id: 1,
-				user: {},
+				user: null,
 				master_salt: "",
 				access_token: "",
 				public_key: "",
@@ -193,13 +193,14 @@ export const useDB = () => {
 		}
 	};
 
-	const handleLoginUpdateAppState = useCallback(async (userState) => {
+	const handleLoginUpdateAppState = useCallback(async (state) => {
 		try {
 			const success = await db.appState.update(1, {
-				user: userState.user,
-				master_salt: userState.master_salt,
-				access_token: userState.access_token,
-				public_key: userState.public_key,
+				user: state.user,
+				master_salt: state.master_salt,
+				access_token: state.access_token,
+				public_key: state.public_key,
+				persist: state.persist,
 			});
 			if (success) {
 				console.log("DB: App State update with Curr User State");
@@ -238,7 +239,7 @@ export const useDB = () => {
 	const handlePersistEmptyAppState = async () => {
 		try {
 			await db.appState.update(1, {
-				user: "",
+				user: null,
 				master_salt: "",
 				access_token: "",
 			});

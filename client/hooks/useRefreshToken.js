@@ -5,7 +5,7 @@ import { useDB } from "./useDB";
 import { useVerifyAccessToken } from "./useVerifyJWT";
 
 export const useRefreshToken = () => {
-	const { setAuth, setPublicKey, setUserLogin } = useAuth();
+	const { setAuth } = useAuth();
 	const { verifyToken } = useVerifyAccessToken();
 	const { handleAddNewAccessTokenDB } = useDB();
 
@@ -34,7 +34,6 @@ export const useRefreshToken = () => {
 			const { success, payload } = await verifyToken(accessToken, publicKey);
 			if (success) {
 				setAuth((prev) => ({ ...prev, accessToken, user: payload }));
-				setUserLogin((prev) => ({ ...prev, email: payload.email }));
 			}
 			return accessToken || null;
 		} catch (error) {

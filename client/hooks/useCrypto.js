@@ -73,13 +73,15 @@ const deriveKey = async (password, salt) => {
 
 export const useCrypto = () => {
 	// Starts Derive Key by suppling passwd and salt
-	const { setUserLogin, auth, setAuth } = useAuth();
+	const { masterKey } = useAuth();
 	// const masterKeyRef = useRef(null);
 
 	const initialiseCrypto = async (masterPassword, masterSalt) => {
+		console.log("Crypto values: ", masterPassword, masterSalt);
 		if (!masterPassword || !masterSalt) {
 			throw new Error("Error: Password or Salt Not Provided.");
 		}
+
 		try {
 			// const sessionSalt = generateCryptoRandomValue(SALT_LENGTH_BYTES);
 			const masterKey = await deriveKey(
@@ -95,7 +97,6 @@ export const useCrypto = () => {
 		} catch (error) {
 			throw new Error("Failed to create Master Key: " + error);
 		} finally {
-			setUserLogin((prev) => ({ ...prev, password: "" }));
 			console.log("User Login Password is Cleared");
 		}
 	};
@@ -103,10 +104,10 @@ export const useCrypto = () => {
 	// Encrypt the data using the master key
 	const handleEncrypt = async (plainData) => {
 		// console.log("inside encrypt: ", plainData, masterKeyRef.current);
-		console.log("inside encrypt: ", plainData, auth.masterKey);
+		console.log("inside encrypt: ", plainData, masterKey.current);
 
 		// if (!masterKeyRef.current) {
-		if (!auth.masterKey) {
+		if (!masterKey.current) {
 			console.error("Encryption Error: No Master Key to encrypt.");
 			throw new Error("Encryption Failed: Key not found.");
 		}
@@ -128,7 +129,7 @@ export const useCrypto = () => {
 			const encryptedBuffer = await window.crypto.subtle.encrypt(
 				{ name: AES_ALGORITHM_NAME, iv },
 				// masterKeyRef.current,
-				auth.masterKey,
+				masterKey.current,
 				dataBytes
 			);
 			// console.log("Post Encryption Encrypted Buffer: ", encryptedBuffer);
@@ -151,7 +152,7 @@ export const useCrypto = () => {
 		}
 		if (
 			// !masterKeyRef.current ||
-			!auth.masterKey ||
+			!masterKey.current ||
 			!payload ||
 			!payload.encryptedData ||
 			!payload.iv
@@ -169,7 +170,7 @@ export const useCrypto = () => {
 			const decryptedBuffer = await window.crypto.subtle.decrypt(
 				{ name: AES_ALGORITHM_NAME, iv },
 				// masterKeyRef.current,
-				auth.masterKey,
+				masterKey.current,
 				encryptedData
 			);
 
@@ -186,7 +187,8 @@ export const useCrypto = () => {
 	};
 
 	const clearSessionKey = () => {
-		setAuth((prev) => ({ ...prev, masterKey: "" }));
+		// setAuth((prev) => ({ ...prev, masterKey: "" }));
+		masterKey.current = "";
 		console.log("Session Key Cleared");
 	};
 
