@@ -32,6 +32,7 @@ import { LuSave } from "react-icons/lu";
 import { MdCloseFullscreen } from "react-icons/md";
 import { useAccount } from "../../hooks/useAccount";
 import { error } from "zod/v4/locales/ar.js";
+import { useFetchData } from "../../hooks/useFetchData";
 
 const MainPage = () => {
 	const defaultEmpty = {
@@ -49,11 +50,14 @@ const MainPage = () => {
 	// const [passwordList, setPasswordList] = useState([]); //
 	const {
 		handleAddItemDB,
-		handleEmptyListDB,
-		handleEmptyAppState,
-		handleDelDB,
+		handleEditItemDB,
+		handleToggleTrashDB,
+		handleToggleFavDB,
+		handleDeleteItemDB,
+		handleEmptyTrashDB,
 	} = useDB();
 	const { logout } = useAccount();
+	const { handleFetchList } = useFetchData();
 
 	const [passwordList, setPasswordList] = useState([]);
 	const [itemIndex, setItemIndex] = useState(null); // index for add, edit and view
@@ -61,15 +65,15 @@ const MainPage = () => {
 	const [mode, setMode] = useState(null); // modes for different view selection (null, view, edit, add)
 	const [searchItem, setSearchItem] = useState("");
 	const [pageMode, setPageMode] = useState("All");
-	const [, forceRender] = useState(false);
+	// const [, forceRender] = useState(false);
 	// all, fav, trash
 	// Errors
 	const [pageError, setPageError] = useState("");
 	const nameRef = useRef();
 	const searchRef = useRef();
 	const areaRef = useRef();
-	const navigate = useNavigate();
-	const location = useLocation();
+	// const navigate = useNavigate();
+	// const location = useLocation();
 	const { masterKey } = useAuth();
 	const { handleEncrypt } = useCrypto();
 	const privateInstance = usePrivateInstance();
@@ -77,6 +81,15 @@ const MainPage = () => {
 	// const masterKey = useRef("");
 	// masterKey.current = location.state?.masterKey;
 	// const masterKey = location.state?.masterKey;
+
+	useEffect(() => {
+		(async () => {
+			const plainItemList = await handleFetchList();
+			console.log("MainPage -> Password List:", plainItemList);
+
+			setPasswordList(plainItemList);
+		})();
+	}, []);
 
 	useEffect(() => {
 		searchRef.current?.focus();
@@ -106,18 +119,18 @@ const MainPage = () => {
 	// 	}
 	// }, [masterKey.current]);
 	// Search & filters data based upon user search query & active page
-	// const filteredList = passwordList.filter((item) => {
-	// 	const matchesSearch =
-	// 		item?.name?.toLowerCase().includes(searchItem?.toLowerCase()) ||
-	// 		item?.user?.toLowerCase().includes(searchItem?.toLowerCase());
+	const filteredList = passwordList.filter((item) => {
+		const matchesSearch =
+			item?.name?.toLowerCase().includes(searchItem?.toLowerCase()) ||
+			item?.user?.toLowerCase().includes(searchItem?.toLowerCase());
 
-	// 	const matchesMode =
-	// 		(pageMode === "All" && item.trash === false) || // Only show if not in trash for "View"
-	// 		(pageMode === "Fav" && item.favourite === true && item.trash === false) ||
-	// 		(pageMode === "Trash" && item.trash === true);
+		const matchesMode =
+			(pageMode === "All" && item.trash === false) || // Only show if not in trash for "View"
+			(pageMode === "Fav" && item.favourite === true && item.trash === false) ||
+			(pageMode === "Trash" && item.trash === true);
 
-	// 	return matchesSearch && matchesMode;
-	// });
+		return matchesSearch && matchesMode;
+	});
 
 	// const handlePassReveal = () => {
 	// 	setPassReveal((prev) => !prev);
@@ -181,7 +194,7 @@ const MainPage = () => {
 		}
 	};
 	// Adds new empty URI entry in view
-	const handleNewURI = () => {
+	const handleNewURI = async () => {
 		if (mode === "Edit" || mode === "Add") {
 			setFocusItem((prev) => {
 				const newURIs = [...prev.uri];
@@ -191,19 +204,23 @@ const MainPage = () => {
 		}
 	};
 	// mark fav when clicking the whole component
-	const handleFavouriteDiv = (e) => {
+	const handleFavouriteDiv = async (e) => {
 		if (e.target.type === "checkbox") {
 			e.stopPropagation();
 			console.log("checkbox");
 			return;
 		}
 		if (mode === "Edit" || mode === "Add") {
+			// const itemUUID = passwordList[itemIndex].uuid;
+			// await handleToggleFavDB(itemUUID, passwordList[itemIndex].favourite);
 			setFocusItem((prev) => ({ ...prev, favourite: !prev.favourite }));
 		}
 	};
 	// mark fav when clicking on the checkbox itself
-	const handleFavouriteCheckbox = () => {
+	const handleFavouriteCheckbox = async () => {
 		if (mode === "Edit" || mode === "Add") {
+			// const itemUUID = passwordList[itemIndex].uuid;
+			// await handleToggleFavDB(itemUUID, passwordList[itemIndex].favourite);
 			setFocusItem((prev) => ({ ...prev, favourite: !prev.favourite }));
 		}
 	};
@@ -222,6 +239,8 @@ const MainPage = () => {
 	const handleDeleteItem = async () => {
 		if (pageMode === "All" || pageMode === "Fav") {
 			const itemUUID = passwordList[itemIndex].uuid;
+			console.log("MainPage->Moving to Trash an item: ", itemUUID);
+
 			try {
 				const response = await privateInstance.patch(
 					`/api/v1/item/${itemUUID}`,
@@ -230,6 +249,7 @@ const MainPage = () => {
 					}
 				);
 				if (response.status === 200 && response.data.success) {
+					await handleToggleTrashDB(itemUUID, false);
 					setPasswordList((prev) => {
 						const updatedList = [...prev];
 						const item = updatedList[itemIndex];
@@ -259,6 +279,7 @@ const MainPage = () => {
 				console.log(response);
 
 				if (response.status === 200 && response.data.success === true) {
+					await handleDeleteItemDB(itemUUID);
 					setPasswordList((prev) => {
 						console.log("Empty trash list update");
 
@@ -288,6 +309,7 @@ const MainPage = () => {
 			console.log("Empty Trash: ", response.status, response.data.success);
 
 			if (response.status === 200 && response.data.success === true) {
+				await handleEmptyTrashDB();
 				setPasswordList((prev) => {
 					let updatedList = [...prev];
 					updatedList = passwordList.filter((item) => {
@@ -310,12 +332,13 @@ const MainPage = () => {
 	};
 	// it restores the items in the trash & can be done one item at a time
 	const handleRestore = async () => {
-		const itemID = passwordList[itemIndex].id;
+		const itemUUID = passwordList[itemIndex].uuid;
 		try {
-			const response = await privateInstance.patch(`/api/v1/item/${itemID}`, {
+			const response = await privateInstance.patch(`/api/v1/item/${itemUUID}`, {
 				trash: false,
 			});
 			if (response.status === 200 && response.data.success) {
+				await handleToggleTrashDB(itemUUID, true);
 				setPasswordList((prev) => {
 					const updatedList = [...prev];
 					const item = updatedList[itemIndex];
@@ -371,6 +394,8 @@ const MainPage = () => {
 					note: await handleEncrypt(focusItem.note),
 					favourite: focusItem.favourite,
 					trash: focusItem.trash,
+					createdAt: focusItem.createdAt,
+					updatedAt: new Date().toUTCString(),
 				};
 				console.log("Encrypted Data to upload: ", encryptedFocusItem);
 
@@ -380,6 +405,7 @@ const MainPage = () => {
 						encryptedFocusItem
 					);
 					if (response.status === 200 && response.data.success === true) {
+						await handleEditItemDB(encryptedFocusItem);
 						setPasswordList((prev) => {
 							const updatedList = [...prev];
 							updatedList[itemIndex] = focusItem;
@@ -400,7 +426,6 @@ const MainPage = () => {
 				setPageError("Decryption Failed");
 			}
 		} else if (mode === "Add") {
-			// const itemID = uuidv4();
 			const itemUUID = crypto.randomUUID();
 			// Encrypt Data
 			const uriString = JSON.stringify(focusItem.uri);
@@ -415,6 +440,8 @@ const MainPage = () => {
 				note: await handleEncrypt(focusItem.note),
 				favourite: focusItem.favourite,
 				trash: focusItem.trash,
+				createAt: new Date().toUTCString(),
+				updatedAt: new Date().toUTCString(),
 			};
 			const item = { ...focusItem, uuid: itemUUID };
 			try {
@@ -424,11 +451,9 @@ const MainPage = () => {
 					// item
 				);
 				if (response.status === 201 && response.data.success === true) {
+					console.table(encryptedFocusItem);
 					try {
-						const dbOp = await handleAddItemDB({
-							uuid: encryptedFocusItem.uuid,
-							...encryptedFocusItem,
-						});
+						const dbOp = await handleAddItemDB(encryptedFocusItem);
 						console.log("DB Operation: ", dbOp);
 					} catch (error) {
 						console.error(error);
@@ -453,6 +478,8 @@ const MainPage = () => {
 	// retreive the index of the item clicked and open its view mode that retrieve data of the item using the index we get from the item clicked
 	const handleClickItem = (uuid) => {
 		// Display Clicked Passwd View
+		console.log("Item UUID: ", uuid);
+
 		let prevItemIndex = itemIndex; // get old clicked item index
 		let i = passwordList.findIndex((item) => item.uuid === uuid); // find index uring id
 		setItemIndex(i); // setting index to show that passwd item
@@ -563,7 +590,7 @@ const MainPage = () => {
 					{/* {passwordList.length !== 0 ? ( */}
 					<DisplayList
 						// filteredList={filteredList}
-						filteredList={passwordList}
+						filteredList={filteredList}
 						passwordList={passwordList}
 						itemIndex={itemIndex}
 						handleClickItem={handleClickItem}
@@ -686,7 +713,7 @@ const MainPage = () => {
 								{passwordList.length !== 0 &&
 									mode === "View" &&
 									itemIndex !== null &&
-									passwordList[itemIndex].uri.map((item, i) => {
+									passwordList[itemIndex]?.uri.map((item, i) => {
 										return item === "" ? (
 											""
 										) : (
@@ -835,7 +862,7 @@ const MainPage = () => {
 					{mode === "View" && (
 						<div className="flex justify-between">
 							<div className="flex gap-4">
-								{passwordList[itemIndex].trash === true ? null : (
+								{passwordList[itemIndex]?.trash === true ? null : (
 									<Button
 										Icon={MdModeEdit}
 										variant="diffOps"
@@ -843,7 +870,7 @@ const MainPage = () => {
 										onClick={handleEditItem}
 									></Button>
 								)}
-								{passwordList[itemIndex].trash === true && (
+								{passwordList[itemIndex]?.trash === true && (
 									<Button
 										Icon={TbRestore}
 										variant="diffOps"

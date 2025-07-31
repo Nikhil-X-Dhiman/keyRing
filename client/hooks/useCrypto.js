@@ -139,7 +139,7 @@ export const useCrypto = () => {
 				iv: bufferToBase64(iv),
 			};
 			console.log("Encrypted Data: ", JSON.stringify(payload));
-			return payload;
+			return JSON.stringify(payload);
 		} catch (error) {
 			console.error("Error: Encryption Failed: ", error);
 			throw new Error("Encryption Failed: ", error.message);
@@ -147,6 +147,7 @@ export const useCrypto = () => {
 	};
 	// Decrypt the Data from the server using master key
 	const handleDecrypt = async (payload) => {
+		payload = JSON.parse(payload) || null;
 		if (!payload?.encryptedData) {
 			return null;
 		}
@@ -193,18 +194,20 @@ export const useCrypto = () => {
 	};
 
 	const handleListToDecrypt = async (itemList) => {
+		console.log("useCrypto->Decryption itemlist: ", itemList);
 		const updatedListPromises = itemList.map(async (item) => {
+			console.log("useCrypto->Decryption item: ", itemList);
+
 			const { uuid, name, username, password, uri, note, favourite, trash } =
 				item;
-
 			// Decrypt Data upon arrival
 			return {
 				uuid,
-				name: await handleDecrypt(JSON.parse(name)),
-				username: await handleDecrypt(JSON.parse(username)),
-				password: await handleDecrypt(JSON.parse(password)),
-				uri: JSON.parse(await handleDecrypt(JSON.parse(uri))),
-				note: await handleDecrypt(JSON.parse(note)),
+				name: await handleDecrypt(name),
+				username: await handleDecrypt(username),
+				password: await handleDecrypt(password),
+				uri: JSON.parse(await handleDecrypt(uri)),
+				note: await handleDecrypt(note),
 				favourite,
 				trash,
 			};

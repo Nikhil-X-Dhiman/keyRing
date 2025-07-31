@@ -1,11 +1,12 @@
-import { useAuth } from "./useAuth";
+import { useApp } from "./useApp";
 import { jwtVerify, importSPKI } from "jose";
+import { useAuth } from "./useAuth";
 
 export const useVerifyAccessToken = () => {
-	const { auth } = useAuth();
+	const { derivedAuth } = useAuth();
 
 	const verifyToken = async (token, publicKey) => {
-		if (!auth.publicKey && !publicKey) {
+		if (!derivedAuth.publicKey && !publicKey) {
 			console.warn("Public Key Not available for Token Verification");
 			return {
 				success: false,
@@ -14,7 +15,7 @@ export const useVerifyAccessToken = () => {
 			};
 		}
 		if (!publicKey) {
-			publicKey = auth.publicKey;
+			publicKey = derivedAuth.publicKey;
 		}
 		if (!token) {
 			console.error("No Token is provided for Verification");

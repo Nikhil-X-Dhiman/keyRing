@@ -48,6 +48,7 @@ export const useAccount = () => {
 			appState.current = { persist: false, online: false };
 			console.log("Logout: Persist Value: ", appState.persist);
 			clearSessionKey();
+			await handleEmptyListDB();
 			console.log("Lougout -> Navigation to Email");
 
 			navigate("/login/email");

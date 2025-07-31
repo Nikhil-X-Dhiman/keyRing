@@ -2,7 +2,7 @@ import { GiRoundStar } from "react-icons/gi";
 
 export const ListItem = ({
 	itemIndex,
-	passwdList,
+	passwordList,
 	handleClickItem,
 	filteredList,
 }) => {
@@ -15,12 +15,12 @@ export const ListItem = ({
 					role="button"
 					tabIndex={0}
 					className={`${listStyle} ${
-						item.id === passwdList[itemIndex]?.id && itemIndex !== null
+						item.uuid === passwordList[itemIndex]?.uuid && itemIndex !== null
 							? "border-l-blue-400 bg-slate-700"
 							: "border-l-transparent"
 					}`}
-					key={item.id}
-					onClick={() => handleClickItem(item.id)}
+					key={item.uuid}
+					onClick={() => handleClickItem(item.uuid)}
 				>
 					<div className="flex items-center gap-2">
 						{/* List Icon */}

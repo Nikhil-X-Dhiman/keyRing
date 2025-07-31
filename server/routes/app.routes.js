@@ -23,7 +23,7 @@ router.route("/all/del").delete(handleEmptyTrash);
 // Insert, edit, move to trash, del from trash
 router
 	// route where individual CRUD op is done
-	.route("/item/:itemID")
+	.route("/item/:uuid")
 	// insert passwd
 	.post(handleAddItem)
 	// remove passwd from trash bin

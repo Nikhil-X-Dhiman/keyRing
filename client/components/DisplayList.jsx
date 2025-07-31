@@ -3,7 +3,7 @@ import { ListItem } from "./ListItem";
 
 export const DisplayList = ({
 	filteredList,
-	passwdList,
+	passwordList,
 	itemIndex,
 	handleClickItem,
 }) => {
@@ -13,7 +13,7 @@ export const DisplayList = ({
 				<ul>
 					<ListItem
 						itemIndex={itemIndex}
-						passwdList={passwdList}
+						passwordList={passwordList}
 						filteredList={filteredList}
 						handleClickItem={handleClickItem}
 					/>

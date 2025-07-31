@@ -42,7 +42,7 @@ export const insertPasswdById = async (userID, item) => {
 				uri,
 				uuid,
 			})
-			.$returning();
+			.$returningId();
 	} catch (error) {
 		console.error(error);
 		return null;
@@ -86,6 +86,8 @@ export const markPasswdTrashByItemID = async (uuid, payload) => {
 };
 
 export const updatePasswdByItemUUID = async (uuid, payload) => {
+	console.log("Model: Update Passwd By Item UUID: ", payload, uuid);
+
 	const { name, username, password, favourite, note, trash, uri } = payload;
 
 	try {

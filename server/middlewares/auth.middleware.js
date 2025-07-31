@@ -1,3 +1,4 @@
+import { log } from "console";
 import { verifyAccessToken } from "../utils/handleTokens.js";
 
 export const authenticateUserRequest = async (req, res, next) => {
@@ -12,6 +13,8 @@ export const authenticateUserRequest = async (req, res, next) => {
 		return next();
 	} else if (accessToken) {
 		const decodedAccessToken = verifyAccessToken(accessToken);
+		console.log("Middleware -> Access Token: ", decodedAccessToken);
+
 		if (decodedAccessToken) {
 			// verified access token
 			req.user = decodedAccessToken;

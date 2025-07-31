@@ -1,3 +1,4 @@
+import { log } from "console";
 import {
 	delPasswdByItemID,
 	delTrashPasswd,
@@ -63,6 +64,8 @@ export const handleDeleteItem = async (req, res) => {
 		});
 	}
 	const { uuid } = req.params;
+	console.log("Req User: ", req.user);
+
 	console.log("UUID: ", uuid);
 
 	const [result] = await delPasswdByItemID(uuid);
@@ -83,7 +86,10 @@ export const handleEmptyTrash = async (req, res) => {
 			msg: "Access is Denied...Authentication Required!!!",
 		});
 	}
+	console.log("Req User: ", req.user);
+
 	const userID = req.user.userID;
+	console.log("Controller: Empty Trash: ", req.user);
 	const [result] = await delTrashPasswd(userID);
 	// console.log("Trash Del: ", result);
 	if (result?.affectedRows === 0) {
@@ -103,7 +109,7 @@ export const handleMarkTrash = async (req, res) => {
 	}
 	const { uuid } = req.params;
 	const payload = req.body;
-	console.log("Trash Value: ", payload, uuid);
+	console.log("Trash Value: ", payload, uuid, req.user);
 	const result = await markPasswdTrashByItemID(uuid, payload);
 	console.log("Result: ", result);
 	if (!result) {
@@ -121,6 +127,8 @@ export const handleEditItem = async (req, res) => {
 	}
 	const { uuid } = req.params;
 	const payload = req.body;
+	console.log("Controller: Handle Edit Item: ", payload, uuid);
+
 	const result = await updatePasswdByItemUUID(uuid, payload);
 	console.log("Result: ", result);
 	if (!result) {

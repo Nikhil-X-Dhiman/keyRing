@@ -42,37 +42,45 @@ export const useFetchData = () => {
 	const handleFetchList = async () => {
 		try {
 			const response = await privateInstance.get("/api/v1/all");
+			const localItemList = await fetchAllItemsDB();
 
-			const { success, result } = response.data;
+			const stripItem = ({
+				uuid,
+				name,
+				username,
+				password,
+				uri,
+				note,
+				favourite,
+				trash,
+				createdAt,
+				updatedAt,
+			}) => ({
+				uuid,
+				name,
+				username,
+				password,
+				uri,
+				note,
+				favourite,
+				trash,
+				createdAt,
+				updatedAt,
+			});
+			// Add Items to Local DB, can't use bulk coz of different columns name and maybe deep copy will also not work here
+
+			const localStripped = localItemList.map(stripItem);
+
+			let { success, result } = response.data;
+			console.table("useFetchData: Cloud List: ", result);
+			console.table("useFetchData: Local List: ", localItemList);
+			success = false;
 			if (success) {
-				// Add Items to Local DB, can't use bulk coz of different columns name and maybe deep copy will also not work here
-				const localItemList = await fetchAllItemsDB();
-
 				// making both size equal in column
-				const stripItem = ({
-					uuid,
-					name,
-					username,
-					password,
-					uri,
-					note,
-					favourite,
-					trash,
-				}) => ({
-					uuid,
-					name,
-					username,
-					password,
-					uri,
-					note,
-					favourite,
-					trash,
-				});
 
 				const cloudStripped = result.map(stripItem);
-				const localStripped = localItemList.map(stripItem);
 
-				console.log(cloudStripped, localStripped);
+				console.table(cloudStripped, localStripped);
 
 				if (!equal(cloudStripped, localStripped)) {
 					const localUUIDs = new Set(localItemList.map((item) => item.uuid));
@@ -109,13 +117,22 @@ export const useFetchData = () => {
 						}
 					}
 				}
+				console.log("useFetchData: handle pre decrypt: ", result);
 
 				const plainTextCloudList = await handleListToDecrypt(result);
 				console.log("Plain Text Cloud List: ", plainTextCloudList);
-
-				setPasswdList(plainTextCloudList);
+				return plainTextCloudList;
+				// setPasswdList(plainTextCloudList);
 			} else {
-				await handleFetchLocalDbList();
+				// if server is not rechable...fallback to local db
+				// await handleFetchLocalDbList();
+				console.log(
+					"useFetchDate: Local DB Data about to decrypt: ",
+					localStripped
+				);
+
+				const decryptedLocalItems = await handleListToDecrypt(localStripped);
+				return decryptedLocalItems;
 			}
 		} catch (error) {
 			console.error(error.response?.data?.msg, error);

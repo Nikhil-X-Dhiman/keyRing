@@ -18,6 +18,7 @@ import {
 	passwdSchema,
 } from "../utils/handleSchema.js";
 import { publicKey } from "../utils/handleCryptoKeys.js";
+import { log } from "console";
 
 export const handleLogin = async (req, res) => {
 	if (req.user) {
@@ -245,13 +246,16 @@ export const handleRefreshToken = async (req, res) => {
 			.status(403)
 			.json({ success: false, msg: "Refresh Token Not Received!!!" });
 	}
-	const decodedRefreshToken = await verifyRefreshToken(refreshToken);
+	const [decodedRefreshToken] = await verifyRefreshToken(refreshToken);
 	// it verify, refresh token is valid & exist inside session db
 	if (!decodedRefreshToken) {
 		return res
 			.status(404)
 			.json({ success: false, msg: "Invalid or Expired Token!!!" });
 	}
+	const userID = decodedRefreshToken?.users?.userID;
+	console.log("Auth Controller->Decoded Refresh Token: ", decodedRefreshToken);
+
 	// payload for new access token creation
 	const payload = {
 		userID: decodedRefreshToken?.users?.userID,

@@ -3,6 +3,33 @@
 import { useCallback } from "react";
 import { db } from "../db/db";
 
+function reformItem(item) {
+	const {
+		uuid,
+		name,
+		username,
+		password,
+		uri,
+		note,
+		favourite,
+		trash,
+		createdAt: created_at,
+		updatedAt: updated_at,
+	} = item;
+	return {
+		uuid,
+		name,
+		username,
+		password,
+		uri,
+		note,
+		favourite,
+		trash,
+		created_at,
+		updated_at,
+	};
+}
+
 export const useDB = () => {
 	const fetchAllItemsDB = async () => {
 		// set start loading
@@ -32,8 +59,8 @@ export const useDB = () => {
 				note,
 				favourite,
 				trash,
-				createdAt,
-				updatedAt,
+				createdAt = new Date().toUTCString(),
+				updatedAt = new Date().toUTCString(),
 			} = item;
 			const id = await db.passwdList.put({
 				uuid,
@@ -54,6 +81,15 @@ export const useDB = () => {
 			throw new Error("Failed to Add Item");
 		}
 	};
+	const handleEditItemDB = async (item) => {
+		try {
+			const success = await db.passwdList.put({ ...reformItem(item) });
+			return success;
+		} catch (error) {
+			console.error("useDB: Saving Edit Item Failed: ", error);
+			return false;
+		}
+	};
 	const handleBulkAddItemsDB = async (itemList) => {
 		try {
 			await db.passwdList.bulkAdd(itemList);
@@ -63,9 +99,9 @@ export const useDB = () => {
 			throw new Error("Bulk Add to DB Failed");
 		}
 	};
-	const handleToggleFavDB = async (id, currentValue) => {
+	const handleToggleFavDB = async (uuid, currentValue) => {
 		try {
-			const success = await db.passwdList.update(id, {
+			const success = await db.passwdList.update(uuid, {
 				favourite: !currentValue,
 				updated_at: new Date().toISOString(),
 			});
@@ -82,12 +118,16 @@ export const useDB = () => {
 		}
 	};
 
-	const handleToggleTrashDB = async (id, currentValue) => {
+	const handleToggleTrashDB = async (uuid, currentValue) => {
+		console.log("useDB: UUID of item: ", uuid);
+
 		try {
-			const success = await db.passwdList.update(id, {
+			const success = await db.passwdList.update(uuid, {
 				trash: !currentValue,
 				updated_at: new Date().toISOString(),
 			});
+			console.log("useDB: Success Value: ", success);
+
 			if (success) {
 				console.log("Item is now in Trash");
 				return true;
@@ -101,9 +141,9 @@ export const useDB = () => {
 		}
 	};
 
-	const handleDeleteItemDB = async (id) => {
+	const handleDeleteItemDB = async (uuid) => {
 		try {
-			await db.passwdList.delete(id);
+			await db.passwdList.delete(uuid);
 			console.log("Item is deleted");
 			return true;
 		} catch (error) {
@@ -294,6 +334,7 @@ export const useDB = () => {
 	return {
 		fetchAllItemsDB,
 		handleAddItemDB,
+		handleEditItemDB,
 		handleDeleteItemDB,
 		handleEmptyListDB,
 		handleEmptyTrashDB,
