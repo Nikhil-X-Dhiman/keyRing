@@ -6,7 +6,7 @@ export const ListItem = ({
 	handleClickItem,
 	filteredList,
 }) => {
-	const listStyle = `hover:bg-slate-700 pl-2 py-2 flex items-center justify-between gap-x-1 border-l-4  active:border-l-slate-400 cursor-pointer truncate`;
+	const listStyle = `hover:bg-slate-700 pl-2 pr-3 py-2 flex items-center justify-between gap-x-1 border-l-4  active:border-l-slate-400 cursor-pointer truncate`;
 
 	return (
 		<>
