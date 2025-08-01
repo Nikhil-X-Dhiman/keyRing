@@ -1,48 +1,46 @@
+import { memo } from "react";
 import { GiRoundStar } from "react-icons/gi";
 
-export const ListItem = ({
-	itemIndex,
-	passwordList,
-	handleClickItem,
-	filteredList,
-}) => {
-	const listStyle = `hover:bg-slate-700 pl-2 pr-3 py-2 flex items-center justify-between gap-x-1 border-l-4  active:border-l-slate-400 cursor-pointer truncate`;
+export const ListItem = memo(
+	({ itemIndex, passwordList, handleClickItem, filteredList }) => {
+		const listStyle = `hover:bg-slate-700 pl-2 pr-3 py-2 flex items-center justify-between gap-x-1 border-l-4  active:border-l-slate-400 cursor-pointer truncate`;
 
-	return (
-		<>
-			{filteredList.map((item) => (
-				<li
-					role="button"
-					tabIndex={0}
-					className={`${listStyle} ${
-						item.uuid === passwordList[itemIndex]?.uuid && itemIndex !== null
-							? "border-l-blue-400 bg-slate-700"
-							: "border-l-transparent"
-					}`}
-					key={item.uuid}
-					onClick={() => handleClickItem(item.uuid)}
-				>
-					<div className="flex items-center gap-2">
-						{/* List Icon */}
-						<span className="w-10 h-10 bg-slate-500 rounded-full flex justify-center items-center font-medium text-slate-200 shrink-0 text-xl">
-							{item.name.charAt(0).toUpperCase()}
-						</span>
+		return (
+			<>
+				{filteredList.map((item) => (
+					<li
+						role="button"
+						tabIndex={0}
+						className={`${listStyle} ${
+							item.uuid === passwordList[itemIndex]?.uuid && itemIndex !== null
+								? "border-l-blue-400 bg-slate-700"
+								: "border-l-transparent"
+						}`}
+						key={item.uuid}
+						onClick={() => handleClickItem(item.uuid)}
+					>
+						<div className="flex items-center gap-2">
+							{/* List Icon */}
+							<span className="w-10 h-10 bg-slate-500 rounded-full flex justify-center items-center font-medium text-slate-200 shrink-0 text-xl">
+								{item.name.charAt(0).toUpperCase()}
+							</span>
 
-						{/* List Item Name */}
-						<div>
-							<p>
-								{item.name.length > 40
-									? item.name.slice(0, 37) + "..."
-									: item.name}
-							</p>
-							<p>{item.user}</p>
+							{/* List Item Name */}
+							<div>
+								<p>
+									{item.name.length > 40
+										? item.name.slice(0, 37) + "..."
+										: item.name}
+								</p>
+								<p>{item.user}</p>
+							</div>
+
+							{/* List Item Favourite's Star */}
 						</div>
-
-						{/* List Item Favourite's Star */}
-					</div>
-					{item.favourite && <GiRoundStar className="text-yellow-300" />}
-				</li>
-			))}
-		</>
-	);
-};
+						{item.favourite && <GiRoundStar className="text-yellow-300" />}
+					</li>
+				))}
+			</>
+		);
+	}
+);

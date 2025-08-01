@@ -2,6 +2,7 @@ import { TbBorderAll } from "react-icons/tb";
 import { SideNavLink } from "./SideNavLink";
 import { LuStar } from "react-icons/lu";
 import { HiOutlineTrash } from "react-icons/hi2";
+import { memo } from "react";
 
 const navLinks = [
 	{ text: "All", label: "All Items", Icon: TbBorderAll },
@@ -9,7 +10,7 @@ const navLinks = [
 	{ text: "Trash", label: "Trash", Icon: HiOutlineTrash },
 ];
 
-export const SideNav = ({ pageMode, setPageMode }) => {
+export const SideNav = memo(({ pageMode, setPageMode }) => {
 	return (
 		<ul className="flex flex-col gap-y-1.5 mt-auto text-lg">
 			{navLinks.map(({ text, label, Icon }) => (
@@ -24,7 +25,7 @@ export const SideNav = ({ pageMode, setPageMode }) => {
 			))}
 		</ul>
 	);
-};
+});
 
 // export const SideNav = ({ pageMode, setPageMode }) => {
 // 	return (
