@@ -62,10 +62,10 @@ const LoginPasswd = () => {
 	// Request to Server for Authentication
 	const handleSubmitBtn = async (e) => {
 		e.preventDefault();
+		setLocalLoading(true);
 		console.log("Password: Auth Request to Server (Local Loading Started)");
 
 		if (validPassword) {
-			setLocalLoading(true);
 			try {
 				console.log("Password: Auth Request Sending");
 				const response = await instance.post(

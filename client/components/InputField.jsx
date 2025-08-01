@@ -34,7 +34,10 @@ export const InputField = React.memo(
 
 			const handleToggleVisibility = useCallback((e) => {
 				e.preventDefault();
-				setVisible((prev) => !prev);
+				if (document.activeElement === e.currentTarget) {
+					setVisible((prev) => !prev);
+				}
+				// setVisible((prev) => !prev);
 			}, []);
 
 			const passwordRevealBtn = useMemo(() => {
