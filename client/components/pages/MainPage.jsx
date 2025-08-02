@@ -83,12 +83,18 @@ const MainPage = () => {
 	// const masterKey = location.state?.masterKey;
 
 	useEffect(() => {
-		(async () => {
-			const plainItemList = await handleFetchList();
-			console.log("MainPage -> Password List:", plainItemList);
+		if (masterKey.current) {
+			(async () => {
+				const plainItemList = await handleFetchList();
+				console.log("MainPage -> Password List:", plainItemList);
 
-			setPasswordList(plainItemList);
-		})();
+				setPasswordList(plainItemList);
+			})();
+		} else {
+			console.log(
+				"Fetch Data: No MasterKey Found!!! Skipping Fetching new data"
+			);
+		}
 	}, []);
 
 	useEffect(() => {
