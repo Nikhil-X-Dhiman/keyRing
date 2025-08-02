@@ -170,13 +170,10 @@ export const useDB = () => {
 
 	const handleEmptyTrashDB = async () => {
 		try {
-			await db.transaction("rw", db.passwdList, async () => {
-				const keysList = await db.passwdList
-					.where("trash")
-					.equals(true)
-					.primaryKeys(); // only get primary Keys for efficiency
-				await db.passwdList.bulkDelete(keysList);
-			});
+			console.log("useDB: handleEmptyTrash: Empty Trash running!!! ");
+			await db.passwdList.filter((item) => item.trash === true).delete();
+			// using filter is inefficient, so next time store true -> 1 && false -> 0 & use "db.passwd.where("trash").equals(1).delete()"
+
 			console.log("Trash is now Empty");
 			return true;
 		} catch (error) {
