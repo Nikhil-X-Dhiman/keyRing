@@ -80,7 +80,7 @@ export const useFetchData = () => {
 			let { success, result } = response.data;
 			console.table("useFetchData: Cloud List: ", result);
 			console.table("useFetchData: Local List: ", localItemList);
-			success = false;
+
 			if (success) {
 				// making both size equal in column
 
@@ -123,9 +123,9 @@ export const useFetchData = () => {
 						}
 					}
 				}
-				console.log("useFetchData: handle pre decrypt: ", result);
+				console.log("useFetchData: handle pre decrypt: ", cloudStripped);
 
-				const plainTextCloudList = await handleListToDecrypt(result);
+				const plainTextCloudList = await handleListToDecrypt(cloudStripped);
 				console.log("Plain Text Cloud List: ", plainTextCloudList);
 				return plainTextCloudList;
 				// setPasswdList(plainTextCloudList);
@@ -137,13 +137,14 @@ export const useFetchData = () => {
 					localStripped
 				);
 
-				const decryptedLocalItems = await handleListToDecrypt(localStripped);
+				// const decryptedLocalItems = await handleListToDecrypt(localStripped);
+				const decryptedLocalItems = await handleFetchLocalDbList();
 				return decryptedLocalItems;
 			}
 		} catch (error) {
 			console.error(error.response?.data?.msg, error);
-			// await handleFetchLocalDbList();
-			throw new Error("Retrieving & Decrypting Data Failed");
+			return await handleFetchLocalDbList();
+			// throw new Error("Retrieving & Decrypting Data Failed");
 		}
 	};
 

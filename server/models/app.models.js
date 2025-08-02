@@ -6,7 +6,7 @@ export const getAllPasswdById = async (userID) => {
 	try {
 		return await db
 			.select({
-				itemID: appDataTable.uuid,
+				uuid: appDataTable.uuid,
 				name: appDataTable.name,
 				username: appDataTable.username,
 				password: appDataTable.password,
