@@ -11,8 +11,9 @@ export const useFetchData = () => {
 		// setAuth,
 		// appLoading,
 		// setAppLoading,
-		setPublicKey,
-		setPasswdList,
+		// setPublicKey,
+		// setPasswdList,
+		setDerivedAuth,
 	} = useAuth();
 	const privateInstance = usePrivateInstance();
 	const { handleListToDecrypt } = useCrypto();
@@ -23,7 +24,11 @@ export const useFetchData = () => {
 		try {
 			const response = await instance.get("/api/v1/auth/public");
 			if (response.status === 200) {
-				await setPublicKey(response.data.publicKey);
+				setDerivedAuth((prev) => ({
+					...prev,
+					publicKey: response.data.publicKey,
+				}));
+				// await setPublicKey(response.data.publicKey);
 			} else if (response.status === 204) {
 				throw new Error("Public Key Not Found");
 			}
@@ -36,7 +41,8 @@ export const useFetchData = () => {
 	const handleFetchLocalDbList = async () => {
 		const localDBItemsList = await fetchAllItemsDB();
 		const plainTextLocalDBList = await handleListToDecrypt(localDBItemsList);
-		setPasswdList(plainTextLocalDBList);
+		return plainTextLocalDBList;
+		// setPasswdList(plainTextLocalDBList);
 	};
 
 	const handleFetchList = async () => {
