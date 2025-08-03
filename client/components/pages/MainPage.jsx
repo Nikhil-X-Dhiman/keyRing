@@ -33,6 +33,7 @@ import { MdCloseFullscreen } from "react-icons/md";
 import { useAccount } from "../../hooks/useAccount";
 import { error } from "zod/v4/locales/ar.js";
 import { useFetchData } from "../../hooks/useFetchData";
+import { useStorage } from "../../hooks/useStorage";
 
 const MainPage = () => {
 	const defaultEmpty = {
@@ -58,6 +59,7 @@ const MainPage = () => {
 	} = useDB();
 	const { logout } = useAccount();
 	const { handleFetchList } = useFetchData();
+	const { saveToFile } = useStorage();
 
 	const [passwordList, setPasswordList] = useState([]);
 	const [itemIndex, setItemIndex] = useState(null); // index for add, edit and view
@@ -65,6 +67,7 @@ const MainPage = () => {
 	const [mode, setMode] = useState(null); // modes for different view selection (null, view, edit, add)
 	const [searchItem, setSearchItem] = useState("");
 	const [pageMode, setPageMode] = useState("All");
+	const [, forceRender] = useState(0);
 	// const [, forceRender] = useState(false);
 	// all, fav, trash
 	// Errors
@@ -85,7 +88,7 @@ const MainPage = () => {
 	useEffect(() => {
 		if (masterKey.current) {
 			(async () => {
-				const plainItemList = await handleFetchList();
+				const [plainItemList] = await handleFetchList();
 				console.log("MainPage -> Password List:", plainItemList);
 
 				setPasswordList(plainItemList);
@@ -546,6 +549,34 @@ const MainPage = () => {
 		setPageError("");
 	};
 
+	const handleLockVault = () => {
+		masterKey.current = "";
+		return <Navigate to="/locked" replace />;
+	};
+
+	const handleSync = async () => {
+		console.log("handleSync: Sync Started");
+		setPasswordList([]);
+		const newPasswordList = await handleFetchList();
+		setPasswordList(newPasswordList);
+		console.log("handleSync: Sync Ended");
+	};
+
+	const handleExport = async () => {
+		console.log("handleExport: Export Started");
+		try {
+			const [, encryptedData] = await handleFetchList();
+			if (!encryptedData) {
+				console.error("No Data to store");
+				return;
+			}
+			await saveToFile(encryptedData);
+			console.log("handleExport: Export Completed Successfully");
+		} catch (error) {
+			console.error("handleExport: Error during export process:", error);
+		}
+	};
+
 	console.log("inside main: ", masterKey.current);
 	// console.log("inside main: ", location.state.masterKey);
 	// if (!masterKey.current) {
@@ -579,6 +610,7 @@ const MainPage = () => {
 				<Button onClick={handleLogout} variant="danger">
 					Logout
 				</Button>
+				<Button onClick={handleExport}>Export</Button>
 			</section>
 
 			<section className="col-start-1 col-end-2 row-start-2 row-end-3 content-center border-r border-slate-950 pl-3">

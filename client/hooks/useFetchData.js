@@ -127,7 +127,7 @@ export const useFetchData = () => {
 
 				const plainTextCloudList = await handleListToDecrypt(cloudStripped);
 				console.log("Plain Text Cloud List: ", plainTextCloudList);
-				return plainTextCloudList;
+				return [plainTextCloudList, result];
 				// setPasswdList(plainTextCloudList);
 			} else {
 				// if server is not rechable...fallback to local db
