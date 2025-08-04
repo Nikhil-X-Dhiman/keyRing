@@ -2,6 +2,7 @@ import e from "express";
 import {
 	handleAddItem,
 	handleAllDataRetrieval,
+	handleBulkAddItems,
 	handleConnectionCheck,
 	handleDeleteItem,
 	handleEditItem,
@@ -15,7 +16,7 @@ const router = e.Router();
 router.route("/connect").get(handleConnectionCheck);
 
 // Retrieve all the passwd list
-router.route("/all").get(handleAllDataRetrieval);
+router.route("/all").get(handleAllDataRetrieval).post(handleBulkAddItems);
 
 // Empty the trash bin
 router.route("/all/del").delete(handleEmptyTrash);

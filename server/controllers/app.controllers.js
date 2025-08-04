@@ -3,6 +3,7 @@ import {
 	delPasswdByItemID,
 	delTrashPasswd,
 	getAllPasswdById,
+	insertBulkItemsByID,
 	insertPasswdById,
 	markPasswdTrashByItemID,
 	updatePasswdByItemUUID,
@@ -36,6 +37,23 @@ export const handleAllDataRetrieval = async (req, res) => {
 	return res
 		.status(200)
 		.json({ success: true, msg: "All Data Retrieved", result: result });
+};
+
+export const handleBulkAddItems = async (req, res) => {
+	if (!req.user) {
+		return res.status(403).json({
+			success: false,
+			msg: "Access is Denied...Authentication Required!!!",
+		});
+	}
+	// const userID = req.user.userID;
+	const payload = req.body;
+
+	const result = await insertBulkItemsByID(payload);
+	console.log("BulkAddItems: ", result);
+	return res
+		.status(201)
+		.json({ success: true, msg: "Insertion of All Items Success" });
 };
 
 export const handleAddItem = async (req, res) => {

@@ -56,10 +56,11 @@ const MainPage = () => {
 		handleToggleFavDB,
 		handleDeleteItemDB,
 		handleEmptyTrashDB,
+		handleBulkAddItemsDB,
 	} = useDB();
 	const { logout } = useAccount();
 	const { handleFetchList } = useFetchData();
-	const { saveToFile } = useStorage();
+	const { saveToFile, readFromFile: restoreFromFile } = useStorage();
 
 	const [passwordList, setPasswordList] = useState([]);
 	const [itemIndex, setItemIndex] = useState(null); // index for add, edit and view
@@ -77,8 +78,8 @@ const MainPage = () => {
 	const areaRef = useRef();
 	// const navigate = useNavigate();
 	// const location = useLocation();
-	const { masterKey } = useAuth();
-	const { handleEncrypt } = useCrypto();
+	const { masterKey, auth } = useAuth();
+	const { handleEncrypt, handleListToDecrypt } = useCrypto();
 	const privateInstance = usePrivateInstance();
 
 	// const masterKey = useRef("");
@@ -577,6 +578,51 @@ const MainPage = () => {
 		}
 	};
 
+	const handleImport = async (event) => {
+		try {
+			console.log("handleImport: Event: ", event);
+			const encryptedFileData = await restoreFromFile(event);
+			// Upload data to cloud
+			const userID = auth.user.userID;
+			const newEncryptedFileData = encryptedFileData.map((item) => ({
+				name: item.name,
+				username: item.username,
+				password: item.password,
+				favourite: item.favourite,
+				note: item.note,
+				trash: item.trash,
+				uri: item.uri,
+				uuid: item.uuid,
+				userID,
+			}));
+			const response = await privateInstance.post(
+				`/api/v1/all`,
+				newEncryptedFileData
+			);
+			if (response.status === 201 && response.data.success === true) {
+				console.log("MainPage > handleImport: Cloud Restore is Successfull");
+			}
+			// Save Data to indexedDB
+			console.table(
+				"MainPage > Imported Data: ",
+				encryptedFileData,
+				typeof encryptedFileData,
+				Array.isArray(encryptedFileData)
+			);
+			const success = await handleBulkAddItemsDB(encryptedFileData);
+			if (success) {
+				console.log("MainPage > handleImport: Bulk Add Success: ");
+			} else {
+				console.error("MainPage > handleImport: Bulk Add Failed to IndexedDB");
+			}
+
+			const decryptedData = await handleListToDecrypt(encryptedFileData);
+			setPasswordList(decryptedData);
+		} catch (error) {
+			console.error("handleImport: Importing Data Failed: ", error);
+		}
+	};
+
 	console.log("inside main: ", masterKey.current);
 	// console.log("inside main: ", location.state.masterKey);
 	// if (!masterKey.current) {
@@ -611,11 +657,20 @@ const MainPage = () => {
 					Logout
 				</Button>
 				<Button onClick={handleExport}>Export</Button>
+				<label htmlFor="fileImport">Import</label>
+				<input
+					id="fileImport"
+					type="file"
+					accept="application/json"
+					onChange={handleImport}
+					className="hidden"
+				/>
 			</section>
 
 			<section className="col-start-1 col-end-2 row-start-2 row-end-3 content-center border-r border-slate-950 pl-3">
 				<SideNav
 					pageMode={pageMode}
+					parsedFile
 					pageModeText="All"
 					setPageMode={setPageMode}
 				/>

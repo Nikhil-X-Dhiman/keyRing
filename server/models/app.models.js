@@ -49,6 +49,17 @@ export const insertPasswdById = async (userID, item) => {
 	}
 };
 
+export const insertBulkItemsByID = async (payload) => {
+	console.log("App Models > Insert Bulk: ", payload);
+
+	try {
+		return await db.insert(appDataTable).values(payload);
+	} catch (error) {
+		console.error("App Models > Insert Bulk: ", error);
+		return null;
+	}
+};
+
 export const delPasswdByItemID = async (uuid) => {
 	try {
 		return await db.delete(appDataTable).where(eq(appDataTable.uuid, uuid));
