@@ -31,9 +31,9 @@ import { MdModeEdit } from "react-icons/md";
 import { LuSave } from "react-icons/lu";
 import { MdCloseFullscreen } from "react-icons/md";
 import { useAccount } from "../../hooks/useAccount";
-import { error } from "zod/v4/locales/ar.js";
 import { useFetchData } from "../../hooks/useFetchData";
 import { useStorage } from "../../hooks/useStorage";
+import DropDownBtn from "../DropDownBtn";
 
 const MainPage = () => {
 	const defaultEmpty = {
@@ -663,10 +663,16 @@ const MainPage = () => {
 					Icon={IoMdCloseCircleOutline}
 				/>
 				{/* Logout Button */}
-				<Button onClick={handleLogout} variant="danger">
-					Logout
-				</Button>
-				<Button onClick={handleExport}>Export</Button>
+				<div className="flex">
+					{/* <Button variant="dropDown">{`>`}</Button> */}
+					<DropDownBtn>
+						<p className="rotate-90">{">"}</p>
+					</DropDownBtn>
+					<Button onClick={handleLogout} variant="danger">
+						Logout
+					</Button>
+				</div>
+				{/* <Button onClick={handleExport}>Export</Button>
 				<label htmlFor="fileImport">Import</label>
 				<input
 					id="fileImport"
@@ -676,7 +682,7 @@ const MainPage = () => {
 					className="hidden"
 				/>
 				<Button onClick={handleLockVault}>Lock</Button>
-				<Button onClick={handleSync}>Sync</Button>
+				<Button onClick={handleSync}>Sync</Button> */}
 			</section>
 
 			<section className="col-start-1 col-end-2 row-start-2 row-end-3 content-center border-r border-slate-950 pl-3">
