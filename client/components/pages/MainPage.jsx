@@ -16,7 +16,7 @@ import { ItemField } from "../ItemField";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useDB } from "../../hooks/useDB";
-import { Navigate, useLocation, useNavigate } from "react-router";
+import { Navigate, replace, useLocation, useNavigate } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
 import { useCrypto } from "../../hooks/useCrypto";
 import { usePrivateInstance } from "../../hooks/usePrivateInstance";
@@ -76,7 +76,7 @@ const MainPage = () => {
 	const nameRef = useRef();
 	const searchRef = useRef();
 	const areaRef = useRef();
-	// const navigate = useNavigate();
+	const navigate = useNavigate();
 	// const location = useLocation();
 	const { masterKey, auth } = useAuth();
 	const { handleEncrypt, handleListToDecrypt } = useCrypto();
@@ -551,12 +551,17 @@ const MainPage = () => {
 	};
 
 	const handleLockVault = () => {
+		console.log("Vault Locked");
+
 		masterKey.current = "";
-		return <Navigate to="/locked" replace />;
+		navigate("/locked", { replace: true });
 	};
 
 	const handleSync = async () => {
 		console.log("handleSync: Sync Started");
+		if (!masterKey.current) {
+			handleLockVault();
+		}
 		setPasswordList([]);
 		const newPasswordList = await handleFetchList();
 		setPasswordList(newPasswordList);
@@ -665,6 +670,8 @@ const MainPage = () => {
 					onChange={handleImport}
 					className="hidden"
 				/>
+				<Button onClick={handleLockVault}>Lock</Button>
+				<Button onClick={handleSync}>Sync</Button>
 			</section>
 
 			<section className="col-start-1 col-end-2 row-start-2 row-end-3 content-center border-r border-slate-950 pl-3">
