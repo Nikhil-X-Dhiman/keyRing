@@ -551,19 +551,24 @@ const MainPage = () => {
 	};
 
 	const handleLockVault = () => {
-		console.log("Vault Locked");
+		console.log("MainPage > handleLockVault: Vault Locked");
 
 		masterKey.current = "";
 		navigate("/locked", { replace: true });
 	};
 
 	const handleSync = async () => {
+		// debugger;
 		console.log("handleSync: Sync Started");
 		if (!masterKey.current) {
 			handleLockVault();
 		}
 		setPasswordList([]);
-		const newPasswordList = await handleFetchList();
+		const [newPasswordList] = await handleFetchList();
+		console.log("handleSync: New Password table: ");
+
+		console.table(newPasswordList);
+
 		setPasswordList(newPasswordList);
 		console.log("handleSync: Sync Ended");
 	};
