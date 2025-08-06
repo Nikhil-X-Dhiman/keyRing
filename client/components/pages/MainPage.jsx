@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 // import { useEffect, useLayoutEffect, useRef, useState } from "react";
 // // import { v4 as uuidv4 } from "uuid";
 // import { useNavigate } from "react-router";
@@ -14,7 +13,14 @@ import { BgBrand } from "../BgBrand";
 import { ItemField } from "../ItemField";
 // import { useDB } from "../../hooks/useDB";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+	useCallback,
+	useEffect,
+	useLayoutEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { useDB } from "../../hooks/useDB";
 import { Navigate, useLocation, useNavigate } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
@@ -39,16 +45,19 @@ import DropDownBtn from "../DropDownBtn";
 import Generator from "../Generator";
 
 const MainPage = () => {
-	const defaultEmpty = {
-		uuid: undefined,
-		name: "",
-		username: "",
-		password: "",
-		uri: [""],
-		note: "",
-		favourite: false,
-		trash: false,
-	};
+	const defaultEmpty = useMemo(
+		() => ({
+			uuid: undefined,
+			name: "",
+			username: "",
+			password: "",
+			uri: [""],
+			note: "",
+			favourite: false,
+			trash: false,
+		}),
+		[]
+	);
 
 	// fetch data from the server and save it to the server only then save the to local too
 	// const [passwordList, setPasswordList] = useState([]); //
@@ -197,7 +206,7 @@ const MainPage = () => {
 		});
 	};
 	// opens the view to add new item
-	const handleAddItem = () => {
+	const handleAddItem = useCallback(() => {
 		// Adding new passwd entry btn
 		setMode((prev) => {
 			// Changing mode to display add form
@@ -209,7 +218,7 @@ const MainPage = () => {
 		});
 		// setNewPasswd(defaultEmpty); // reset newPasswd
 		setFocusItem(defaultEmpty);
-	};
+	}, []);
 	// takes user input for different fields
 	const handleInputChange = (e) => {
 		if (mode === "Edit" || mode === "Add") {
@@ -326,7 +335,7 @@ const MainPage = () => {
 		setMode(null);
 	};
 	// it removes all the items in the trash both locally & on the cloud & this action is non-recoverable
-	const handleEmptyTrash = async () => {
+	const handleEmptyTrash = useCallback(async () => {
 		try {
 			const response = await privateInstance.delete(`/api/v1/all/del`);
 			console.log(response);
@@ -335,8 +344,7 @@ const MainPage = () => {
 			if (response.status === 200 && response.data.success === true) {
 				await handleEmptyTrashDB();
 				setPasswordList((prev) => {
-					let updatedList = [...prev];
-					updatedList = passwordList.filter((item) => {
+					let updatedList = prev.filter((item) => {
 						return item.trash === false;
 					});
 					return updatedList;
@@ -353,7 +361,7 @@ const MainPage = () => {
 
 		setMode(null);
 		setItemIndex(null);
-	};
+	}, []);
 	// it restores the items in the trash & can be done one item at a time
 	const handleRestore = async () => {
 		const itemUUID = passwordList[itemIndex].uuid;
@@ -500,28 +508,31 @@ const MainPage = () => {
 		}
 	};
 	// retreive the index of the item clicked and open its view mode that retrieve data of the item using the index we get from the item clicked
-	const handleClickItem = (uuid) => {
-		// Display Clicked Passwd View
-		console.log("Item UUID: ", uuid);
+	const handleClickItem = useCallback(
+		(uuid) => {
+			// Display Clicked Passwd View
+			console.log("Item UUID: ", uuid);
 
-		let prevItemIndex = itemIndex; // get old clicked item index
-		let i = passwordList.findIndex((item) => item.uuid === uuid); // find index uring id
-		setItemIndex(i); // setting index to show that passwd item
-		setMode((prev) => {
-			// setting mode to view the clicked passwd item
-			if (
-				prev === null ||
-				prev === "Add" ||
-				prev === "Edit" ||
-				(prev === "View" && prevItemIndex !== i) // close view for same item click
-			) {
-				return "View";
-			} else {
-				setItemIndex(null);
-				return null; // click again to close the view from
-			}
-		});
-	};
+			let prevItemIndex = itemIndex; // get old clicked item index
+			let i = passwordList.findIndex((item) => item.uuid === uuid); // find index uring id
+			setItemIndex(i); // setting index to show that passwd item
+			setMode((prev) => {
+				// setting mode to view the clicked passwd item
+				if (
+					prev === null ||
+					prev === "Add" ||
+					prev === "Edit" ||
+					(prev === "View" && prevItemIndex !== i) // close view for same item click
+				) {
+					return "View";
+				} else {
+					setItemIndex(null);
+					return null; // click again to close the view from
+				}
+			});
+		},
+		[itemIndex, passwordList]
+	);
 	// del the user auth status and the data with it
 	const handleLogout = async () => {
 		// const response = await privateInstance.get("/api/v1/auth/logout", {
