@@ -16,7 +16,7 @@ import { ItemField } from "../ItemField";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useDB } from "../../hooks/useDB";
-import { Navigate, replace, useLocation, useNavigate } from "react-router";
+import { Navigate, useLocation, useNavigate } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
 import { useCrypto } from "../../hooks/useCrypto";
 import { usePrivateInstance } from "../../hooks/usePrivateInstance";

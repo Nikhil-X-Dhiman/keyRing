@@ -21,24 +21,16 @@ const Generator = ({ title, isOpen, onClose, setGeneratePassword }) => {
 	};
 
 	// Fisher Yates Shuffle Algorithm
-	const randomShuffle = (array) => {
-		let currentIndex = array.length,
-			randomIndex;
-
-		// While there remain elements to shuffle.
-		while (currentIndex > 0) {
-			// Pick a remaining element.
-			randomIndex = Math.floor(Math.random() * currentIndex);
-			currentIndex--;
-
-			// And swap it with the current element.
-			[array[currentIndex], array[array[randomIndex]]] = [
-				array[randomIndex],
-				array[currentIndex],
-			];
+	const randomShuffle = (str) => {
+		// Convert string into array
+		let arr = str.split("");
+		// Array Shuffle
+		for (let i = arr.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1)); // Random index
+			[arr[i], arr[j]] = [arr[j], arr[i]]; // Swap
 		}
-
-		return array;
+		// Convert array back to string
+		return arr.join("");
 	};
 
 	const handlePasswordCopy = async () => {
@@ -202,10 +194,8 @@ const Generator = ({ title, isOpen, onClose, setGeneratePassword }) => {
 				];
 		}
 		console.log("Generator > Before Shuffle Password: ", newPassword);
-		// Shuffle Password to not make password predictable
-		let newPasswordArray = newPassword.split("");
-		newPasswordArray = randomShuffle(newPasswordArray);
-		newPassword = newPasswordArray.join("");
+		// Calling function to shuffle
+		newPassword = randomShuffle(newPassword);
 		console.log("Generator > Generated Password: ", newPassword);
 		setPassword(newPassword);
 	}, [

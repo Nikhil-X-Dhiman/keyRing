@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import { Button } from "./Button";
 import CrossIcon from "../public/cross.svg?react";
 
@@ -40,8 +40,6 @@ const Modal = ({
 				className="fixed inset-0 z-40 bg-opacity-50 backdrop-blur-sm flex justify-center items-center rounded-2xl"
 				onClick={onClose}
 			>
-				{/* TODO: correct onclose method above */}
-				{/* Modal Content */}
 				<div
 					className="relative inset-0 z-50 flex flex-col gap-4 justify-center items-center bg-slate-900 rounded-2xl shadow-xl w-xl"
 					onClick={(e) => e.stopPropagation()}
