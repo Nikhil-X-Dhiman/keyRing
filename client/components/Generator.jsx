@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import Modal from "./Modal";
 import { ItemField } from "./ItemField";
 import { InputField } from "./InputField";
 import { CheckboxField } from "./CheckboxField";
 
-const Generator = ({ title, isOpen, onClose, setGeneratePassword }) => {
+const Generator = memo(({ title, isOpen, onClose, setGeneratePassword }) => {
 	const [passwordLength, setPasswordLength] = useState(14);
 	const [capitalLetters, setCapitalLetters] = useState(true);
 	const [smallLetters, setSmallLetters] = useState(true);
@@ -33,52 +33,52 @@ const Generator = ({ title, isOpen, onClose, setGeneratePassword }) => {
 		return arr.join("");
 	};
 
-	const handlePasswordCopy = async () => {
+	const handlePasswordCopy = useCallback(async () => {
 		try {
 			await navigator.clipboard.writeText(password);
 		} catch (error) {
 			console.error("Generator > Error Copying Password: ", error);
 		}
-	};
+	}, [password]);
 
-	const handleSavePassword = () => {
+	const handleSavePassword = useCallback(() => {
 		setGeneratePassword(password);
-	};
+	}, [password, setGeneratePassword]);
 
-	const handleSetPasswordLength = (e) => {
+	const handleSetPasswordLength = useCallback((e) => {
 		const value = e.target.value;
 		if (value >= 5 && value <= 100) {
 			setPasswordLength(value);
 		}
-	};
+	}, []);
 
-	const handleSetCapitalLetters = () => {
+	const handleSetCapitalLetters = useCallback(() => {
 		setCapitalLetters((prev) => !prev);
-	};
-	const handleSetSmallLetters = () => {
+	}, []);
+	const handleSetSmallLetters = useCallback(() => {
 		setSmallLetters((prev) => !prev);
-	};
-	const handleSetNumericalLetters = () => {
+	}, []);
+	const handleSetNumericalLetters = useCallback(() => {
 		setNumericalLetters((prev) => !prev);
-	};
-	const handleSetSpecialLetters = () => {
+	}, []);
+	const handleSetSpecialLetters = useCallback(() => {
 		setSpecialLetters((prev) => !prev);
-	};
-	const handleSetMinNumericalLetters = (e) => {
+	}, []);
+	const handleSetMinNumericalLetters = useCallback((e) => {
 		const value = e.target.value;
 		if (value >= 0) {
 			setMinNumericalLetters(e.target.value);
 		}
-	};
-	const handleSetMinSpecialLetters = (e) => {
+	}, []);
+	const handleSetMinSpecialLetters = useCallback((e) => {
 		const value = e.target.value;
 		if (value >= 0) {
 			setMinSpecialLetters(e.target.value);
 		}
-	};
-	const handleReRunGeneratePassword = () => {
+	}, []);
+	const handleReRunGeneratePassword = useCallback(() => {
 		setRefreshModal((prev) => !prev);
-	};
+	}, []);
 
 	useEffect(() => {
 		if (minNumericalLetters < 1) {
@@ -298,6 +298,6 @@ const Generator = ({ title, isOpen, onClose, setGeneratePassword }) => {
 			</div>
 		</Modal>
 	);
-};
+});
 
 export default Generator;

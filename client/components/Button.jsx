@@ -48,7 +48,7 @@ export const Button = React.memo(
 				diffOps:
 					"bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-slate-200 font-medium py-3.5 px-5 rounded cursor-pointer shadow-2xl transition-all",
 				dropDown:
-					"bg-blue-400 hover:bg-blue-300 border border-slate-600 hover:border-slate-400 active:bg-blue-400 text-slate-800 font-medium cursor-pointer shadow-2xl px-3 rounded-l transition-all h-full",
+					"bg-blue-400 hover:bg-blue-300 border border-slate-600 hover:border-slate-400 active:bg-blue-400 text-slate-800 font-medium cursor-pointer shadow-2xl px-2 rounded-l transition-all h-full",
 			};
 
 			const finalClass = `${className} ${variants[variant]}

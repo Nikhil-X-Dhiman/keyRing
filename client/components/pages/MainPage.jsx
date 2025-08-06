@@ -16,6 +16,7 @@ import { ErrorModal } from "../ErrorModal";
 
 import { IoMdCloseCircleOutline } from "react-icons/io";
 import { PiPasswordDuotone } from "react-icons/pi";
+import { TiThMenu } from "react-icons/ti";
 
 import { HiOutlineTrash } from "react-icons/hi2";
 import { IoMdAddCircleOutline } from "react-icons/io";
@@ -189,6 +190,10 @@ const MainPage = () => {
 			return { ...prev, uri: updateURIList };
 		});
 	};
+	const TiThMenuContent = useMemo(() => {
+		return <TiThMenu className="text-xl" />;
+	}, []);
+
 	// opens the view to add new item
 	const handleAddItem = useCallback(() => {
 		// Adding new passwd entry btn
@@ -645,7 +650,7 @@ const MainPage = () => {
 			focusItem.password = newPassword;
 			handleCloseGeneratorModal();
 		},
-		[focusItem]
+		[focusItem, handleCloseGeneratorModal]
 	);
 
 	console.log("inside main: ", masterKey.current);
@@ -691,7 +696,8 @@ const MainPage = () => {
 						handleImport={handleImport}
 						handleExport={handleExport}
 					>
-						<p className="rotate-90">{">"}</p>
+						{/* <p className="rotate-90">{">"}</p> */}
+						{TiThMenuContent}
 					</DropDownBtn>
 					<Button onClick={handleLogout} variant="danger">
 						Logout

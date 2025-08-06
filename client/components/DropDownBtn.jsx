@@ -25,13 +25,18 @@ const DropDownBtn = memo(
 					setOpen(false);
 				}
 			};
+			const handleEscapeClick = (e) => {
+				if (e.key === "Escape") {
+					setOpen(false);
+				}
+			};
 			if (open) {
 				document.addEventListener("mousedown", handleOutsideClick);
-			} else {
-				document.removeEventListener("mousedown", handleOutsideClick);
+				document.addEventListener("keydown", handleEscapeClick);
 			}
 			return () => {
 				document.removeEventListener("mousedown", handleOutsideClick);
+				document.removeEventListener("keydown", handleEscapeClick);
 			};
 		}, [open]);
 		return (

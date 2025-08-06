@@ -95,7 +95,7 @@ export const ItemField = React.memo(
 						onClick={() => onURICopyClick(i)}
 					/>
 				);
-			}, [i]);
+			}, [i, onURICopyClick]);
 			const BiSolidCopyContent2 = useMemo(() => {
 				return (
 					<BiSolidCopy
@@ -104,7 +104,7 @@ export const ItemField = React.memo(
 						onClick={onClick}
 					/>
 				);
-			}, []);
+			}, [copyTitle, onClick]);
 			const FiMinusCircleContent = useMemo(() => {
 				return (
 					<FiMinusCircle
@@ -113,7 +113,7 @@ export const ItemField = React.memo(
 						onClick={() => onLinkDel(i)}
 					/>
 				);
-			}, []);
+			}, [i]);
 			return (
 				<>
 					{showDel === true && (
