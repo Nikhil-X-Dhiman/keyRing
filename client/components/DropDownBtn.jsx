@@ -39,7 +39,6 @@ const DropDownBtn = ({
 			document.removeEventListener("mousedown", handleOutsideClick);
 		};
 	}, [open]);
-	S;
 	return (
 		<div className="">
 			<Button
@@ -52,22 +51,27 @@ const DropDownBtn = ({
 
 			<div
 				ref={dropDownDivRef}
-				className={`absolute right-0 p-2 ${
+				className={`absolute flex flex-col right-0 p-2 ${
 					open
 						? "z-10 bg-slate-700 text-slate-300 rounded-2xl shadow-lg w-56 ring-1 ring-slate-600"
 						: "hidden"
 				}`}
 			>
-				<Button onclick={handleSync}>Sync</Button>
-				<Button onclick={handleLockVault}>Lock Vault</Button>
-				<label htmlFor="fileImport"></label>
+				<Button onClick={handleSync}>Sync</Button>
+				<Button onClick={handleLockVault}>Lock Vault</Button>
+				<label
+					htmlFor="fileImport"
+					className="py-2 px-4 w-full rounded-3xl shadow-md mt-2 transiton-color duration-200 bg-blue-400 hover:bg-blue-300 text-slate-800 cursor-pointer text-center"
+				>
+					Import
+				</label>
 				<input
 					type="file"
 					id="fileImport"
 					className="hidden"
 					onChange={handleImport}
 				/>
-				<Button onclick={handleExport}>Export</Button>
+				<Button onClick={handleExport}>Export</Button>
 			</div>
 		</div>
 	);

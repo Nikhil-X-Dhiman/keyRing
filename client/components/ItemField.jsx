@@ -3,6 +3,8 @@ import { BiSolidCopy } from "react-icons/bi";
 import { FiMinusCircle } from "react-icons/fi";
 import { MdOutlineLaunch } from "react-icons/md";
 import { PiEyeDuotone, PiEyeSlash } from "react-icons/pi";
+import { PiPasswordDuotone } from "react-icons/pi";
+import { TbRefreshDot } from "react-icons/tb";
 
 export const ItemField = React.forwardRef(
 	(
@@ -27,10 +29,16 @@ export const ItemField = React.forwardRef(
 			onLinkClick,
 			showLinkOpen,
 			onLinkDel,
+			showGeneratePassword,
+			onOpenPasswordGenerate,
+			showRefreshGeneratePassword,
+			handleReRunGeneratePassword,
+			defaultValue,
 		},
 		ref
 	) => {
 		const [visible, setVisible] = useState(false);
+		const copyTitle = name?.charAt(0)?.toUpperCase() + name?.slice(1);
 		return (
 			<>
 				{showDel === true && (
@@ -53,6 +61,7 @@ export const ItemField = React.forwardRef(
 						id={id}
 						value={value}
 						onChange={onChange}
+						defaultValue={defaultValue}
 						readOnly={readOnly}
 						ref={ref}
 						autoComplete={autoComplete}
@@ -86,6 +95,21 @@ export const ItemField = React.forwardRef(
 						/>
 					)}
 
+					{showGeneratePassword && (
+						<PiPasswordDuotone
+							className="text-2xl cursor-pointer opacity-40 hover:opacity-100 transition-all"
+							title="Open Password Generate Modal"
+							onClick={onOpenPasswordGenerate}
+						/>
+					)}
+					{showRefreshGeneratePassword && (
+						<TbRefreshDot
+							className="text-2xl cursor-pointer opacity-40 hover:opacity-100 transition-all"
+							title="Generate New Password"
+							onClick={handleReRunGeneratePassword}
+						/>
+					)}
+
 					{showCopyLink && (
 						<BiSolidCopy
 							className="text-2xl cursor-pointer opacity-40 hover:opacity-100 transition-all"
@@ -94,10 +118,10 @@ export const ItemField = React.forwardRef(
 						/>
 					)}
 
-					{mode === "View" && showCopy === true && (
+					{showCopy === true && (
 						<BiSolidCopy
 							className="text-2xl cursor-pointer opacity-40 hover:opacity-100 transition-all"
-							title="Copy Password"
+							title={`Copy ${copyTitle}`}
 							onClick={onClick}
 						/>
 					)}

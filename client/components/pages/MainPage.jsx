@@ -23,6 +23,8 @@ import { usePrivateInstance } from "../../hooks/usePrivateInstance";
 import { ErrorModal } from "../ErrorModal";
 
 import { IoMdCloseCircleOutline } from "react-icons/io";
+import { PiPasswordDuotone } from "react-icons/pi";
+
 import { HiOutlineTrash } from "react-icons/hi2";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { TbRestore } from "react-icons/tb";
@@ -34,6 +36,7 @@ import { useAccount } from "../../hooks/useAccount";
 import { useFetchData } from "../../hooks/useFetchData";
 import { useStorage } from "../../hooks/useStorage";
 import DropDownBtn from "../DropDownBtn";
+import Generator from "../Generator";
 
 const MainPage = () => {
 	const defaultEmpty = {
@@ -68,6 +71,7 @@ const MainPage = () => {
 	const [mode, setMode] = useState(null); // modes for different view selection (null, view, edit, add)
 	const [searchItem, setSearchItem] = useState("");
 	const [pageMode, setPageMode] = useState("All");
+	const [generatorModal, setGeneratorModal] = useState(false);
 	const [, forceRender] = useState(0);
 	// const [, forceRender] = useState(false);
 	// all, fav, trash
@@ -85,6 +89,12 @@ const MainPage = () => {
 	// const masterKey = useRef("");
 	// masterKey.current = location.state?.masterKey;
 	// const masterKey = location.state?.masterKey;
+
+	// useEffect(() => {
+	// 	if (generatorModal === false) {
+	// 		setGeneratorModal(true);
+	// 	}
+	// }, [generatorModal]);
 
 	useEffect(() => {
 		if (masterKey.current) {
@@ -148,6 +158,10 @@ const MainPage = () => {
 	// Copy the desired field into os clipboard
 	const handleCopy = async (field) => {
 		try {
+			if (mode === "Add") {
+				await navigator.clipboard.writeText(focusItem.password);
+				return;
+			}
 			await navigator.clipboard.writeText(passwordList[itemIndex][field]);
 		} catch (error) {
 			console.error("Error Copying: ", error);
@@ -633,6 +647,19 @@ const MainPage = () => {
 		}
 	};
 
+	const handleOpenGeneratorModal = () => {
+		setGeneratorModal(true);
+	};
+
+	const handleCloseGeneratorModal = () => {
+		setGeneratorModal(false);
+	};
+
+	const handleSetGeneratePassword = (newPassword) => {
+		focusItem.password = newPassword;
+		handleCloseGeneratorModal();
+	};
+
 	console.log("inside main: ", masterKey.current);
 	// console.log("inside main: ", location.state.masterKey);
 	// if (!masterKey.current) {
@@ -652,6 +679,12 @@ const MainPage = () => {
 				onClose={handleCloseErrorModal}
 				isOpen={pageError}
 			/>
+			<Generator
+				isOpen={generatorModal}
+				onClose={handleCloseGeneratorModal}
+				title="Generate"
+				setGeneratePassword={handleSetGeneratePassword}
+			/>
 			<section className="col-start-1 col-end-4 row-start-1 row-end-2 grid grid-cols-[1fr_10rem] justify-items-center p-2 border border-l-0 border-slate-950">
 				{/* Search Bar */}
 				<SearchField
@@ -664,25 +697,18 @@ const MainPage = () => {
 				/>
 				{/* Logout Button */}
 				<div className="flex">
-					{/* <Button variant="dropDown">{`>`}</Button> */}
-					<DropDownBtn>
+					<DropDownBtn
+						handleSync={handleSync}
+						handleLockVault={handleLockVault}
+						handleImport={handleImport}
+						handleExport={handleExport}
+					>
 						<p className="rotate-90">{">"}</p>
 					</DropDownBtn>
 					<Button onClick={handleLogout} variant="danger">
 						Logout
 					</Button>
 				</div>
-				{/* <Button onClick={handleExport}>Export</Button>
-				<label htmlFor="fileImport">Import</label>
-				<input
-					id="fileImport"
-					type="file"
-					accept="application/json"
-					onChange={handleImport}
-					className="hidden"
-				/>
-				<Button onClick={handleLockVault}>Lock</Button>
-				<Button onClick={handleSync}>Sync</Button> */}
 			</section>
 
 			<section className="col-start-1 col-end-2 row-start-2 row-end-3 content-center border-r border-slate-950 pl-3">
@@ -812,6 +838,8 @@ const MainPage = () => {
 											onClick={() => handleCopy("password")}
 											showCopy={true}
 											showToggle={true}
+											showGeneratePassword={mode === "Edit" || mode === "Add"}
+											onOpenPasswordGenerate={handleOpenGeneratorModal}
 										/>
 									</div>
 								) : (
