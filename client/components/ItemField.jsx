@@ -105,16 +105,19 @@ export const ItemField = React.memo(
 					/>
 				);
 			}, []);
+			const FiMinusCircleContent = useMemo(() => {
+				return (
+					<FiMinusCircle
+						title="Remove"
+						className="text-2xl text-red-500 cursor-pointer"
+						onClick={() => onLinkDel(i)}
+					/>
+				);
+			}, []);
 			return (
 				<>
 					{showDel === true && (
-						<div className="pr-3.5">
-							<FiMinusCircle
-								title="Remove"
-								className="text-2xl text-red-500 cursor-pointer"
-								onClick={onLinkDel}
-							/>
-						</div>
+						<div className="pr-3.5">{FiMinusCircleContent}</div>
 					)}
 
 					<div className="flex flex-col w-full">
@@ -126,7 +129,7 @@ export const ItemField = React.memo(
 							name={name}
 							id={id}
 							value={value}
-							onChange={onChange}
+							onChange={(e) => onChange(e, i)}
 							defaultValue={defaultValue}
 							readOnly={readOnly}
 							ref={ref}
@@ -140,10 +143,13 @@ export const ItemField = React.memo(
 
 					<div className="flex gap-3">
 						{visible && showToggle && PiEyeSlashContent}
+
 						{!visible && showToggle && PiEyeDuotoneContent}
+
 						{showLinkOpen && MdOutlineLaunchContent}
 
 						{showGeneratePassword && PiPasswordDuotoneContent}
+
 						{showRefreshGeneratePassword && TbRefreshDotContent}
 
 						{showCopyLink && BiSolidCopyContent}

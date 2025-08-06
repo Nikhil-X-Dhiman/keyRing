@@ -214,7 +214,7 @@ const MainPage = () => {
 		[mode]
 	);
 	// Adds new empty URI entry in view
-	const handleNewURI = async () => {
+	const handleNewURI = useCallback(async () => {
 		if (mode === "Edit" || mode === "Add") {
 			setFocusItem((prev) => {
 				const newURIs = [...prev.uri];
@@ -222,7 +222,15 @@ const MainPage = () => {
 				return { ...prev, uri: newURIs };
 			});
 		}
-	};
+	}, [mode]);
+
+	const handleURIChange = useCallback((e, i) => {
+		setFocusItem((prev) => {
+			const newURIs = [...prev.uri];
+			newURIs[i] = e.target.value;
+			return { ...prev, uri: newURIs };
+		});
+	}, []);
 
 	// mark fav when clicking the whole component
 	const handleFavouriteDiv = async (e) => {
@@ -624,18 +632,21 @@ const MainPage = () => {
 		[auth.user.userID]
 	);
 
-	const handleOpenGeneratorModal = () => {
+	const handleOpenGeneratorModal = useCallback(() => {
 		setGeneratorModal(true);
-	};
+	}, []);
 
-	const handleCloseGeneratorModal = () => {
+	const handleCloseGeneratorModal = useCallback(() => {
 		setGeneratorModal(false);
-	};
+	}, []);
 
-	const handleSetGeneratePassword = (newPassword) => {
-		focusItem.password = newPassword;
-		handleCloseGeneratorModal();
-	};
+	const handleSetGeneratePassword = useCallback(
+		(newPassword) => {
+			focusItem.password = newPassword;
+			handleCloseGeneratorModal();
+		},
+		[focusItem]
+	);
 
 	console.log("inside main: ", masterKey.current);
 	// console.log("inside main: ", location.state.masterKey);
@@ -841,6 +852,7 @@ const MainPage = () => {
 													label={`URI ${i + 1}`}
 													type="text"
 													i={i}
+													handleNewURI
 													name={`uri-${i}`}
 													id={`uri-${i}`}
 													value={item || ""}
@@ -869,18 +881,13 @@ const MainPage = () => {
 													type="text"
 													name={`uri-${i}`}
 													id={`uri-${i}`}
+													i={i}
 													value={item || ""}
-													onChange={(e) => {
-														setFocusItem((prev) => {
-															const newURIs = [...prev.uri];
-															newURIs[i] = e.target.value;
-															return { ...prev, uri: newURIs };
-														});
-													}}
+													onChange={handleURIChange}
 													readOnly={mode === "View"}
 													autoComplete="off"
 													mode={mode}
-													onLinkDel={() => handleURIRemove(i)}
+													onLinkDel={handleURIRemove}
 													showDel={true}
 												/>
 											</div>
