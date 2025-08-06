@@ -1,9 +1,3 @@
-// import { useEffect, useLayoutEffect, useRef, useState } from "react";
-// // import { v4 as uuidv4 } from "uuid";
-// import { useNavigate } from "react-router";
-// import { useAuth } from "../../hooks/useAuth";
-// import { usePrivateInstance } from "../../hooks/usePrivateInstance";
-// import { useCrypto } from "../../hooks/useCrypto";
 import { SearchField } from "../SearchField";
 import { Button } from "../Button";
 import { SideNav } from "../SideNav";
@@ -11,16 +5,8 @@ import { DisplayList } from "../DisplayList";
 import { AddItemBtn } from "../AddItemBtn";
 import { BgBrand } from "../BgBrand";
 import { ItemField } from "../ItemField";
-// import { useDB } from "../../hooks/useDB";
 
-import {
-	useCallback,
-	useEffect,
-	useLayoutEffect,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDB } from "../../hooks/useDB";
 import { Navigate, useLocation, useNavigate } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
@@ -81,8 +67,6 @@ const MainPage = () => {
 	const [searchItem, setSearchItem] = useState("");
 	const [pageMode, setPageMode] = useState("All");
 	const [generatorModal, setGeneratorModal] = useState(false);
-	const [, forceRender] = useState(0);
-	// const [, forceRender] = useState(false);
 	// all, fav, trash
 	// Errors
 	const [pageError, setPageError] = useState("");
@@ -94,16 +78,6 @@ const MainPage = () => {
 	const { masterKey, auth } = useAuth();
 	const { handleEncrypt, handleListToDecrypt } = useCrypto();
 	const privateInstance = usePrivateInstance();
-
-	// const masterKey = useRef("");
-	// masterKey.current = location.state?.masterKey;
-	// const masterKey = location.state?.masterKey;
-
-	// useEffect(() => {
-	// 	if (generatorModal === false) {
-	// 		setGeneratorModal(true);
-	// 	}
-	// }, [generatorModal]);
 
 	useEffect(() => {
 		if (masterKey.current) {
@@ -148,18 +122,22 @@ const MainPage = () => {
 	// 	}
 	// }, [masterKey.current]);
 	// Search & filters data based upon user search query & active page
-	const filteredList = passwordList.filter((item) => {
-		const matchesSearch =
-			item?.name?.toLowerCase().includes(searchItem?.toLowerCase()) ||
-			item?.user?.toLowerCase().includes(searchItem?.toLowerCase());
+	const filteredList = useMemo(() => {
+		return passwordList.filter((item) => {
+			const matchesSearch =
+				item?.name?.toLowerCase().includes(searchItem?.toLowerCase()) ||
+				item?.user?.toLowerCase().includes(searchItem?.toLowerCase());
 
-		const matchesMode =
-			(pageMode === "All" && item.trash === false) || // Only show if not in trash for "View"
-			(pageMode === "Fav" && item.favourite === true && item.trash === false) ||
-			(pageMode === "Trash" && item.trash === true);
+			const matchesMode =
+				(pageMode === "All" && item.trash === false) || // Only show if not in trash for "View"
+				(pageMode === "Fav" &&
+					item.favourite === true &&
+					item.trash === false) ||
+				(pageMode === "Trash" && item.trash === true);
 
-		return matchesSearch && matchesMode;
-	});
+			return matchesSearch && matchesMode;
+		});
+	}, [pageMode, passwordList, searchItem]);
 
 	// const handlePassReveal = () => {
 	// 	setPassReveal((prev) => !prev);
@@ -178,25 +156,31 @@ const MainPage = () => {
 		}
 	};
 	// Opens the URI link in the browser
-	const handleLinkOpen = (i) => {
-		try {
-			let url = passwordList[itemIndex].uri[i];
-			url = "https://" + url;
-			window.open(url, "_blank", "noopener noreferrer");
-		} catch (error) {
-			console.error("Error Link Opening: ", error);
-			setPageError("Opening Link Failed");
-		}
-	};
+	const handleLinkOpen = useCallback(
+		(i) => {
+			try {
+				let url = passwordList[itemIndex].uri[i];
+				url = "https://" + url;
+				window.open(url, "_blank", "noopener noreferrer");
+			} catch (error) {
+				console.error("Error Link Opening: ", error);
+				setPageError("Opening Link Failed");
+			}
+		},
+		[itemIndex, passwordList]
+	);
 	// Copy the URI into the clipboard
-	const handleURICopy = async (i) => {
-		try {
-			await navigator.clipboard.writeText(passwordList[itemIndex].uri[i]);
-		} catch (error) {
-			console.error("Error Copying: ", error);
-			setPageError("Copying Item URI Failed");
-		}
-	};
+	const handleURICopy = useCallback(
+		async (i) => {
+			try {
+				await navigator.clipboard.writeText(passwordList[itemIndex].uri[i]);
+			} catch (error) {
+				console.error("Error Copying: ", error);
+				setPageError("Copying Item URI Failed");
+			}
+		},
+		[itemIndex, passwordList]
+	);
 	// Removes the URI link
 	const handleURIRemove = (i) => {
 		setFocusItem((prev) => {
@@ -218,14 +202,17 @@ const MainPage = () => {
 		});
 		// setNewPasswd(defaultEmpty); // reset newPasswd
 		setFocusItem(defaultEmpty);
-	}, []);
+	}, [defaultEmpty]);
 	// takes user input for different fields
-	const handleInputChange = (e) => {
-		if (mode === "Edit" || mode === "Add") {
-			const { name, value } = e.target;
-			setFocusItem((prev) => ({ ...prev, [name]: value }));
-		}
-	};
+	const handleInputChange = useCallback(
+		(e) => {
+			if (mode === "Edit" || mode === "Add") {
+				const { name, value } = e.target;
+				setFocusItem((prev) => ({ ...prev, [name]: value }));
+			}
+		},
+		[mode]
+	);
 	// Adds new empty URI entry in view
 	const handleNewURI = async () => {
 		if (mode === "Edit" || mode === "Add") {
@@ -236,6 +223,7 @@ const MainPage = () => {
 			});
 		}
 	};
+
 	// mark fav when clicking the whole component
 	const handleFavouriteDiv = async (e) => {
 		if (e.target.type === "checkbox") {
@@ -258,7 +246,7 @@ const MainPage = () => {
 		}
 	};
 	// open the edit view with copy of the current item in the FocusItem state for edit
-	const handleEditItem = () => {
+	const handleEditItem = useCallback(() => {
 		setFocusItem(passwordList[itemIndex] || "");
 		setMode((prev) => {
 			if (prev === null || prev === "Add" || prev === "View") {
@@ -267,9 +255,9 @@ const MainPage = () => {
 				return null;
 			}
 		});
-	};
+	}, [itemIndex, passwordList]);
 	// for page all & fav it sends them to trash by marking them so they can be restored, but for trash page it removes them completly & cannot ve recovered...also sends request to server to del it in the cloud too
-	const handleDeleteItem = async () => {
+	const handleDeleteItem = useCallback(async () => {
 		if (pageMode === "All" || pageMode === "Fav") {
 			const itemUUID = passwordList[itemIndex].uuid;
 			console.log("MainPage->Moving to Trash an item: ", itemUUID);
@@ -333,7 +321,7 @@ const MainPage = () => {
 		}
 
 		setMode(null);
-	};
+	}, [itemIndex, pageMode, passwordList]);
 	// it removes all the items in the trash both locally & on the cloud & this action is non-recoverable
 	const handleEmptyTrash = useCallback(async () => {
 		try {
@@ -344,7 +332,8 @@ const MainPage = () => {
 			if (response.status === 200 && response.data.success === true) {
 				await handleEmptyTrashDB();
 				setPasswordList((prev) => {
-					let updatedList = prev.filter((item) => {
+					let updatedList = [...prev];
+					updatedList = passwordList.filter((item) => {
 						return item.trash === false;
 					});
 					return updatedList;
@@ -361,9 +350,9 @@ const MainPage = () => {
 
 		setMode(null);
 		setItemIndex(null);
-	}, []);
+	}, [passwordList]);
 	// it restores the items in the trash & can be done one item at a time
-	const handleRestore = async () => {
+	const handleRestore = useCallback(async () => {
 		const itemUUID = passwordList[itemIndex].uuid;
 		try {
 			const response = await privateInstance.patch(`/api/v1/item/${itemUUID}`, {
@@ -387,9 +376,9 @@ const MainPage = () => {
 			);
 			setPageError("Restoring Item Failed");
 		}
-	};
+	});
 	// cancel any item being edited or added
-	const handleCancel = () => {
+	const handleCancel = useCallback(() => {
 		if (mode === "Edit") {
 			setFocusItem(defaultEmpty);
 			setMode("View");
@@ -397,15 +386,15 @@ const MainPage = () => {
 			setFocusItem(defaultEmpty);
 			setMode(null);
 		}
-	};
+	}, [defaultEmpty, mode]);
 	// revert the view page to the brand(null page) logo
-	const handleClose = () => {
+	const handleClose = useCallback(() => {
 		setItemIndex(null);
 		setFocusItem(defaultEmpty);
 		setMode(null);
-	};
+	}, [defaultEmpty]);
 	// data is checked, then encrypted to be sent to the cloud and then save in the local
-	const handleSaveItem = async () => {
+	const handleSaveItem = useCallback(async () => {
 		// TODO: Add created and updated time
 		if (focusItem.name === "") {
 			console.error("Name field cannot be empty!!!");
@@ -506,7 +495,7 @@ const MainPage = () => {
 				setPageError("Adding Item Failed");
 			}
 		}
-	};
+	}, [defaultEmpty, focusItem, itemIndex, mode, passwordList]);
 	// retreive the index of the item clicked and open its view mode that retrieve data of the item using the index we get from the item clicked
 	const handleClickItem = useCallback(
 		(uuid) => {
@@ -534,55 +523,27 @@ const MainPage = () => {
 		[itemIndex, passwordList]
 	);
 	// del the user auth status and the data with it
-	const handleLogout = async () => {
-		// const response = await privateInstance.get("/api/v1/auth/logout", {
-		// 	withCredentials: true,
-		// });
-		// const success = response?.data?.success;
-		// const message = response?.data?.msg;
-		// console.log("logout response: ", response);
-
-		// console.log(success, message);
-
-		// if (response.status === 200) {
-		// 	console.log("logged out");
-		// 	setItemIndex(null);
-		// 	setFocusItem(defaultEmpty);
-		// 	setSearchItem("");
-		// 	setPasswordList([]);
-		// 	setMode(null);
-		// 	setPageMode("All");
-		// 	localStorage.setItem("isLogged", JSON.stringify(false));
-		// 	setAuth(null);
-		// 	await handleEmptyListDB();
-		// 	await handleEmptyAppState();
-		// 	await handleDelDB();
-		// 	clearSessionKey();
-		// 	navigate("/login/email");
-		// } else {
-		// 	console.error("Error: Logging Out");
-		// 	setPageError("Failed to Logout");
-		// }
+	const handleLogout = useCallback(async () => {
 		await logout();
-	};
+	}, []);
 	// Clears the search field entry
 	const handleSearchClear = () => {
 		setSearchItem("");
 		searchRef.current?.focus();
 	};
 
-	const handleCloseErrorModal = () => {
+	const handleCloseErrorModal = useCallback(() => {
 		setPageError("");
-	};
+	}, []);
 
-	const handleLockVault = () => {
+	const handleLockVault = useCallback(() => {
 		console.log("MainPage > handleLockVault: Vault Locked");
 
 		masterKey.current = "";
 		navigate("/locked", { replace: true });
-	};
+	}, [masterKey]);
 
-	const handleSync = async () => {
+	const handleSync = useCallback(async () => {
 		// debugger;
 		console.log("handleSync: Sync Started");
 		if (!masterKey.current) {
@@ -596,9 +557,9 @@ const MainPage = () => {
 
 		setPasswordList(newPasswordList);
 		console.log("handleSync: Sync Ended");
-	};
+	}, [masterKey]);
 
-	const handleExport = async () => {
+	const handleExport = useCallback(async () => {
 		console.log("handleExport: Export Started");
 		try {
 			const [, encryptedData] = await handleFetchList();
@@ -611,52 +572,57 @@ const MainPage = () => {
 		} catch (error) {
 			console.error("handleExport: Error during export process:", error);
 		}
-	};
+	}, []);
 
-	const handleImport = async (event) => {
-		try {
-			console.log("handleImport: Event: ", event);
-			const encryptedFileData = await restoreFromFile(event);
-			// Upload data to cloud
-			const userID = auth.user.userID;
-			const newEncryptedFileData = encryptedFileData.map((item) => ({
-				name: item.name,
-				username: item.username,
-				password: item.password,
-				favourite: item.favourite,
-				note: item.note,
-				trash: item.trash,
-				uri: item.uri,
-				uuid: item.uuid,
-				userID,
-			}));
-			const response = await privateInstance.post(
-				`/api/v1/all`,
-				newEncryptedFileData
-			);
-			if (response.status === 201 && response.data.success === true) {
-				console.log("MainPage > handleImport: Cloud Restore is Successfull");
-			}
-			// Save Data to indexedDB
-			console.table(
-				"MainPage > Imported Data: ",
-				encryptedFileData,
-				typeof encryptedFileData,
-				Array.isArray(encryptedFileData)
-			);
-			const success = await handleBulkAddItemsDB(encryptedFileData);
-			if (success) {
-				console.log("MainPage > handleImport: Bulk Add Success: ");
-			} else {
-				console.error("MainPage > handleImport: Bulk Add Failed to IndexedDB");
-			}
+	const handleImport = useCallback(
+		async (event) => {
+			try {
+				console.log("handleImport: Event: ", event);
+				const encryptedFileData = await restoreFromFile(event);
+				// Upload data to cloud
+				const userID = auth.user.userID;
+				const newEncryptedFileData = encryptedFileData.map((item) => ({
+					name: item.name,
+					username: item.username,
+					password: item.password,
+					favourite: item.favourite,
+					note: item.note,
+					trash: item.trash,
+					uri: item.uri,
+					uuid: item.uuid,
+					userID,
+				}));
+				const response = await privateInstance.post(
+					`/api/v1/all`,
+					newEncryptedFileData
+				);
+				if (response.status === 201 && response.data.success === true) {
+					console.log("MainPage > handleImport: Cloud Restore is Successfull");
+				}
+				// Save Data to indexedDB
+				console.table(
+					"MainPage > Imported Data: ",
+					encryptedFileData,
+					typeof encryptedFileData,
+					Array.isArray(encryptedFileData)
+				);
+				const success = await handleBulkAddItemsDB(encryptedFileData);
+				if (success) {
+					console.log("MainPage > handleImport: Bulk Add Success: ");
+				} else {
+					console.error(
+						"MainPage > handleImport: Bulk Add Failed to IndexedDB"
+					);
+				}
 
-			const decryptedData = await handleListToDecrypt(encryptedFileData);
-			setPasswordList(decryptedData);
-		} catch (error) {
-			console.error("handleImport: Importing Data Failed: ", error);
-		}
-	};
+				const decryptedData = await handleListToDecrypt(encryptedFileData);
+				setPasswordList(decryptedData);
+			} catch (error) {
+				console.error("handleImport: Importing Data Failed: ", error);
+			}
+		},
+		[auth.user.userID]
+	);
 
 	const handleOpenGeneratorModal = () => {
 		setGeneratorModal(true);
@@ -874,6 +840,7 @@ const MainPage = () => {
 												<ItemField
 													label={`URI ${i + 1}`}
 													type="text"
+													i={i}
 													name={`uri-${i}`}
 													id={`uri-${i}`}
 													value={item || ""}
@@ -881,8 +848,8 @@ const MainPage = () => {
 													readOnly={mode === "View"}
 													autoComplete="off"
 													mode={mode}
-													onLinkClick={() => handleLinkOpen(i)}
-													onURICopyClick={() => handleURICopy(i)}
+													onLinkClick={handleLinkOpen}
+													onURICopyClick={handleURICopy}
 													showCopyLink={true}
 													showLinkOpen={true}
 												/>

@@ -1,7 +1,11 @@
-import React from "react";
+import React, { useMemo } from "react";
 
 export const SearchField = React.forwardRef(
 	({ searchItem, onChange, pageMode = "All", onClick, Icon }, ref) => {
+		const IconContent = useMemo(() => {
+			return <Icon className="w-5 h-5 text-gray-100" />;
+		}, []);
+
 		return (
 			<div className="w-full flex justify-center items-center relative">
 				<label htmlFor="app-search" className="hidden">
@@ -43,7 +47,8 @@ export const SearchField = React.forwardRef(
 						}`}
 						aria-label="Clear search"
 					>
-						<Icon className="w-5 h-5 text-gray-100" />
+						{/* <Icon className="w-5 h-5 text-gray-100" /> */}
+						{IconContent}
 					</button>
 				)}
 			</div>

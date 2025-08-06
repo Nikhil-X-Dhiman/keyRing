@@ -1,8 +1,11 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { GiRoundStar } from "react-icons/gi";
 
 export const ListItem = memo(
 	({ itemIndex, passwordList, handleClickItem, filteredList }) => {
+		const GiRoundStarContent = useMemo(() => {
+			return <GiRoundStar className="text-yellow-300" />;
+		}, []);
 		const listStyle = `hover:bg-slate-700 pl-2 pr-3 py-2 flex items-center justify-between gap-x-1 border-l-4  active:border-l-slate-400 cursor-pointer truncate`;
 
 		return (
@@ -37,7 +40,7 @@ export const ListItem = memo(
 
 							{/* List Item Favourite's Star */}
 						</div>
-						{item.favourite && <GiRoundStar className="text-yellow-300" />}
+						{item.favourite && GiRoundStarContent}
 					</li>
 				))}
 			</>

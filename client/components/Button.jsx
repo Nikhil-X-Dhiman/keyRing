@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 
 export const Button = React.memo(
 	React.forwardRef(
@@ -17,6 +17,15 @@ export const Button = React.memo(
 			},
 			ref
 		) => {
+			const IconContent = useMemo(() => {
+				return (
+					<Icon
+						className={` ${
+							variant === "diffOps" ? "text-blue-400 text-xl" : "text-2xl"
+						} ${IconStyle}`}
+					/>
+				);
+			}, [IconStyle, variant]);
 			const variants = {
 				primary:
 					"font-medium py-2 px-4 w-full rounded-3xl shadow-md mt-2 transition-color duration-200 bg-blue-400 hover:bg-blue-300 text-slate-800 cursor-pointer",
@@ -55,13 +64,7 @@ export const Button = React.memo(
 					tabIndex={tabIndex}
 					ref={ref}
 				>
-					{Icon && (
-						<Icon
-							className={` ${
-								variant === "diffOps" ? "text-blue-400 text-xl" : "text-2xl"
-							} ${IconStyle}`}
-						/>
-					)}
+					{Icon && IconContent}
 					{children}
 				</button>
 			);
