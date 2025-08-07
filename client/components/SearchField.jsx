@@ -28,7 +28,7 @@ export const SearchField = React.forwardRef(
 					}`}
 					autoComplete="off"
 					ref={ref}
-					className="focus:outline-none p-2 rounded-md border-1 border-gray-400 hover:border-gray-300 focus:border-gray-300 shadow-sm w-full webkit-search-input transition-all"
+					className="focus:outline-none p-2 mr-2 rounded-md border-1 border-gray-400 hover:border-gray-300 focus:border-gray-300 shadow-sm w-full webkit-search-input transition-all"
 				/>
 				{/* <i
 					className={`ml-[-2.2rem] cursor-pointer text-gray-100 ${
@@ -42,7 +42,7 @@ export const SearchField = React.forwardRef(
 					<button
 						type="button"
 						onClick={onClick}
-						className={`absolute top-1/2 transform -translate-y-1/2 right-3 ${
+						className={`absolute top-1/2 transform -translate-y-1/2 right-4 ${
 							searchItem ? "visible cursor-pointer" : "invisible"
 						}`}
 						aria-label="Clear search"

@@ -7,7 +7,7 @@ export const DisplayList = memo(
 		return (
 			<div className="h-full">
 				{filteredList.length !== 0 ? (
-					<ul>
+					<ul className="w-full">
 						<ListItem
 							itemIndex={itemIndex}
 							passwordList={passwordList}

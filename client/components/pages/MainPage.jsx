@@ -785,7 +785,7 @@ const MainPage = () => {
 			>
 				{/* Background Brand Image */}
 				{mode === null && <BgBrand />}
-				<div className="px-7 overflow-y-auto pb-2">
+				<div className="px-4 lg:px-7 overflow-y-auto pb-2">
 					{/* Display view of passwd and edition of them here */}
 					{(mode === "View" || mode === "Edit" || mode === "Add") && (
 						<>
