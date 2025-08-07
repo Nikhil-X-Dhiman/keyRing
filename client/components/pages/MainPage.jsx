@@ -30,6 +30,8 @@ import { useFetchData } from "../../hooks/useFetchData";
 import { useStorage } from "../../hooks/useStorage";
 import DropDownBtn from "../DropDownBtn";
 import Generator from "../Generator";
+import ConfirmEmptyModals from "../ConfirmEmptyModal";
+import Modal from "../Modal";
 
 const MainPage = () => {
 	const defaultEmpty = useMemo(
@@ -67,6 +69,7 @@ const MainPage = () => {
 	const [mode, setMode] = useState(null); // modes for different view selection (null, view, edit, add)
 	const [searchItem, setSearchItem] = useState("");
 	const [pageMode, setPageMode] = useState("All");
+	const [openEmptyModal, setOpenEmptyModal] = useState(false);
 	const [generatorModal, setGeneratorModal] = useState(false);
 	// all, fav, trash
 	// Errors
@@ -351,6 +354,7 @@ const MainPage = () => {
 					});
 					return updatedList;
 				});
+				handleCloseEmptyModal();
 			}
 		} catch (error) {
 			console.error(
@@ -365,6 +369,10 @@ const MainPage = () => {
 		setItemIndex(null);
 	}, [passwordList]);
 	// it restores the items in the trash & can be done one item at a time
+	const handleOpenEmptyModal = useCallback(() => {
+		setOpenEmptyModal(true);
+	}, []);
+
 	const handleRestore = useCallback(async () => {
 		const itemUUID = passwordList[itemIndex].uuid;
 		try {
@@ -652,6 +660,10 @@ const MainPage = () => {
 		[focusItem, handleCloseGeneratorModal]
 	);
 
+	const handleCloseEmptyModal = useCallback(() => {
+		setOpenEmptyModal(false);
+	}, []);
+
 	console.log("inside main: ", masterKey.current);
 	// console.log("inside main: ", location.state.masterKey);
 	// if (!masterKey.current) {
@@ -671,12 +683,39 @@ const MainPage = () => {
 				onClose={handleCloseErrorModal}
 				isOpen={pageError}
 			/>
-			<Generator
-				isOpen={generatorModal}
-				onClose={handleCloseGeneratorModal}
-				title="Generate"
-				setGeneratePassword={handleSetGeneratePassword}
-			/>
+			{generatorModal && (
+				<Generator
+					isOpen={generatorModal}
+					onClose={handleCloseGeneratorModal}
+					title="Generate"
+					setGeneratePassword={handleSetGeneratePassword}
+				/>
+			)}
+			{openEmptyModal && (
+				// <ConfirmEmptyModals
+				// 	isOpen={openEmptyModal}
+				// 	onClose={handleCloseEmptyModal}
+				// 	button2Behaviour={handleCloseEmptyModal}
+				// 	title="Empty Trash"
+				// 	button1Behaviour={handleEmptyTrash}
+				// 	button1="Empty Now"
+				// 	button2="Cancel"
+				// >
+				// 	Are you Sure you want to Empty Trash?
+				// </ConfirmEmptyModals>
+				<Modal
+					isOpen={openEmptyModal}
+					onClose={handleCloseEmptyModal}
+					title="Empty Trash"
+					button1Behaviour={handleEmptyTrash}
+					button2Behaviour={handleCloseEmptyModal}
+					button1="Empty Now"
+					button2="Cancel"
+				>
+					Are you Sure you want to Empty Trash?
+				</Modal>
+			)}
+
 			<section className="col-start-1 col-end-4 row-start-1 row-end-2 grid grid-cols-[1fr_10rem] justify-items-center p-2 border border-l-0 border-slate-950">
 				{/* Search Bar */}
 				<SearchField
@@ -730,7 +769,7 @@ const MainPage = () => {
 					<AddItemBtn
 						pageMode={pageMode}
 						handleAddItem={handleAddItem}
-						handleEmptyTrash={handleEmptyTrash}
+						handleEmptyTrash={handleOpenEmptyModal}
 					/>
 				</div>
 			</section>
