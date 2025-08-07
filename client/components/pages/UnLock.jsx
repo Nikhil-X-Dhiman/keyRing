@@ -1,52 +1,30 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-// import { useEffect, useRef, useState } from "react";
-// import { useAuth } from "../../hooks/useAuth";
-// import { base64ToBuffer, useCrypto } from "../../hooks/useCrypto";
-// import { usePrivateInstance } from "../../hooks/usePrivateInstance";
-// import { passwdSchema } from "../../utils/authSchema";
-// // import { instance } from "../../api/axios";
-// import { useLocation, useNavigate } from "react-router";
 import { InputField } from "../InputField";
 import { Button } from "../Button";
 import { ErrorModal } from "../ErrorModal";
 import { AuthFormHeader } from "../AuthFormHeader";
-// import { useFetchData } from "../../hooks/useFetchData";
 import { ClockLoader } from "react-spinners";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import { base64ToBuffer, useCrypto } from "../../hooks/useCrypto";
-// import { useFetchData } from "../../hooks/useFetchData";
-// import { usePrivateInstance } from "../../hooks/usePrivateInstance";
-import { useLocation, useNavigate } from "react-router";
+import { useCrypto } from "../../hooks/useCrypto";
+import { useNavigate } from "react-router";
 import { passwdSchema } from "../../utils/authSchema";
 import LockIcon from "../../src/assets/lock.svg?react";
 import { useAccount } from "../../hooks/useAccount";
 import { useDB } from "../../hooks/useDB";
 
-// import { useDB } from "../../hooks/useDB";
 const UnLock = () => {
 	const { auth, masterKey } = useAuth();
 	const { logout } = useAccount();
-	const { handleFetchAppStateDB } = useDB();
-	const { initialiseCrypto } = useCrypto();
-	// const privateInstance = usePrivateInstance();
+	const { handleFetchAppStateDB, handleGetProtectedStateDB } = useDB();
+	const { initialiseCrypto, handleVerifyHash, handleHashing } = useCrypto();
 	const navigate = useNavigate();
-	const location = useLocation();
-	const from = location.state?.from || "/home";
-	const [isPending, startTransition] = useTransition();
-	// const { publicKeyRequest, handleFetchList } = useFetchData();
-
-	// const [masterKey, setMasterKey] = useState("");
 	const [passwordValue, setPasswordValue] = useState("");
 	const [validPassword, setValidPassword] = useState("");
 	const [modalError, setModalError] = useState("");
 	const [inputError, setInputError] = useState("");
 	const [localLoading, setLocalLoading] = useState(false);
 	const passwordRef = useRef(null);
-
-	// const location = useLocation();
-	// const from = location.state?.from?.pathname || "/user/home";
 
 	useEffect(() => {
 		passwordRef.current.focus();
@@ -55,34 +33,6 @@ const UnLock = () => {
 	useEffect(() => {
 		setLocalLoading(false);
 	}, [modalError]);
-
-	// useEffect(() => {
-	// 	if (auth.masterKey && loading === false) {
-	// 		console.log("UnLock: Loading complete redirecting to Home");
-	// 		// navigate("/user/home", { replace: true });
-	// 		navigate("/user/home", { replace: true });
-	// 	}
-	// }, [loading]);
-
-	// useEffect(() => {
-	// 	// async function fetch() {
-	// 	// 	if (auth.masterKey && loading === true) {
-	// 	// 		console.log("Unlock: Master Key Detected...Fetching List from cloud");
-	// 	// 		await handleFetchList();
-	// 	// 		setLoading(false);
-	// 	// 	}
-	// 	// }
-	// 	// fetch();
-	// 	if (masterKey.current) {
-	// 		console.log("Master Key Detected...Navigating to home");
-	// 		setLocalLoading(false);
-	// 		startTransition(() => {
-	// 			// navigate(from, { state: { masterKey }, replace: true });
-	// 			navigate(from, { replace: true });
-	// 		});
-	// 	}
-	// }, [masterKey]);
-	// }, [auth.masterKey]);
 
 	useEffect(() => {
 		if (validPassword === true) {
@@ -96,23 +46,10 @@ const UnLock = () => {
 			// success, error & data
 			setValidPassword(success);
 			setInputError(success ? "" : "Incorrect Password Format.");
-			// if (success) {
-			// 	setValidPassword(true);
-			// 	setInputError("");
-			// } else {
-			// 	setValidPassword(false);
-			// 	setInputError("Incorrect Password Format.");
-			// }
 		} else {
 			setInputError("Password Field is Empty");
 		}
 	}, [passwordValue]);
-
-	// if (!auth.user) {
-	// 	console.error("User Not Logged In!!! Redirect to Email Page");
-
-	// 	return <Navigate to="/login/email" replace />;
-	// }
 
 	const handleSubmitBtn = async (e) => {
 		setLocalLoading(true);
@@ -125,54 +62,23 @@ const UnLock = () => {
 
 		if (validPassword) {
 			try {
-				// const response = await privateInstance.post("/api/v1/auth/salt", {
-				// 	email: auth.user?.email,
-				// 	password: passwordValue,
-				// });
-				// console.log("Unlock: Salt Requested");
-				// const masterSalt = await base64ToBuffer(
-				// 	await handleFetchAppStateDB("master_salt")
-				// );
+				const result = await handleVerifyHash(passwordValue);
+				if (!result) {
+					setModalError("Incorrect Password.");
+					console.error(
+						"UnLock > handleSubmit: Error occured while unlocking Vault: "
+					);
+					return;
+				}
 				const masterSalt = await handleFetchAppStateDB("master_salt");
-				console.log(masterSalt);
-				// setMasterKey(await initialiseCrypto(passwordValue, masterSalt));
+				// console.log(masterSalt);
 				masterKey.current = await initialiseCrypto(passwordValue, masterSalt);
 				console.log("UnLock -> MasterKey Created: ", masterKey.current);
 				setLocalLoading(false);
 				console.log("UnLock -> Redirecting to Home");
 
 				navigate("/home", { replace: true });
-				// startTransition(() => {
-				// });
-				// if (response.status === 200) {
-				// 	console.log("post post submit request");
-				// 	const masterSalt = await base64ToBuffer(response.data?.master_salt);
-				// 	console.log("post x3 submit request");
-				// 	console.log("UnLock salt: ", masterSalt);
-				// 	console.log("post x4 submit request");
-				// 	await publicKeyRequest();
-				// 	await initialiseCrypto(userLogin.password, masterSalt);
-				// 	// await handleFetchList();
-				// 	console.log(
-				// 		"UnLock: initialiseCrypto completed (Master Key is created)."
-				// 	);
-				// 	setUserLogin((prev) => ({ ...prev, password: "" }));
-				// }
 			} catch (error) {
-				// if (!error?.response) {
-				// 	console.error("No Server Response", error);
-				// 	setModalError("No Server Response.");
-				// } else if (error?.response?.status === 403) {
-				// 	console.error("Error: Failed to Unlock.");
-
-				// 	setModalError("Failed to Unlock.");
-				// } else {
-				// 	console.error("Server Error: Unlock Failed!!!: ", error);
-				// 	setModalError(
-				// 		"Error: ",
-				// 		error?.response?.data?.msg || "Error: Failed to Unlock!!!"
-				// 	);
-				// }
 				setModalError("Failed to Unlock");
 				console.error("Unlock -> Failed to Unlock: ", error);
 			}
@@ -209,10 +115,7 @@ const UnLock = () => {
 					ref={passwordRef}
 					value={passwordValue}
 					error={inputError}
-					onChange={
-						(e) => setPasswordValue(e.target.value)
-						// setUserLogin((prev) => ({ ...prev, password: e.target.value }))
-					}
+					onChange={(e) => setPasswordValue(e.target.value)}
 				/>
 
 				<Button

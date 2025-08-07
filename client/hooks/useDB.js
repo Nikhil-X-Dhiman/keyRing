@@ -232,7 +232,8 @@ export const useDB = () => {
 
 	const handleLoginUpdateAppState = useCallback(async (state) => {
 		try {
-			const success = await db.appState.update(1, {
+			const success = await db.appState.put({
+				id: 1,
 				user: state.user,
 				master_salt: state.master_salt,
 				access_token: state.access_token,
@@ -260,6 +261,19 @@ export const useDB = () => {
 			}
 		} catch (error) {
 			console.error("Updating Field " + field + " failed: ", error);
+		}
+	};
+
+	const handleClearLocalDB = async () => {
+		try {
+			await db.passwdList.clear();
+			await db.appState.clear();
+			await db.protectedState.clear();
+		} catch (error) {
+			console.error(
+				"useDB > handleClearLocalDB: Clearing Data from IndexedDB Failed: ",
+				error
+			);
 		}
 	};
 
@@ -328,6 +342,32 @@ export const useDB = () => {
 		}
 	};
 
+	const handlePutProtectedStateDB = async (payload) => {
+		try {
+			await db.protectedState.put({
+				id: 1,
+				passwd_hash: payload.passwordHash,
+				hash_salt: payload.passwordSalt,
+			});
+		} catch (error) {
+			console.error(
+				"useDB > handleAddProtedtedStateDB: Addition of Protected State Failed: ",
+				error
+			);
+		}
+	};
+
+	const handleGetProtectedStateDB = async () => {
+		try {
+			return await db.protectedState.get(1);
+		} catch (error) {
+			console.error(
+				"useDB > handleGetProtectedStateDB: Fetching of Protected State Failed: ",
+				error
+			);
+		}
+	};
+
 	return {
 		fetchAllItemsDB,
 		handleAddItemDB,
@@ -350,5 +390,8 @@ export const useDB = () => {
 		handleLoginUpdateAppState,
 		handleInitializeAppState,
 		handlePersistEmptyAppState,
+		handleClearLocalDB,
+		handlePutProtectedStateDB,
+		handleGetProtectedStateDB,
 	};
 };

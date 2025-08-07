@@ -41,7 +41,7 @@ export const useFetchData = () => {
 	const handleFetchLocalDbList = async () => {
 		const localDBItemsList = await fetchAllItemsDB();
 		const plainTextLocalDBList = await handleListToDecrypt(localDBItemsList);
-		return plainTextLocalDBList;
+		return [plainTextLocalDBList, localDBItemsList];
 		// setPasswdList(plainTextLocalDBList);
 	};
 

@@ -21,10 +21,10 @@ export const InitializeDB = () => {
 			try {
 				// open connection to DB
 				await handleDBOpen();
-				console.log("DB Connection Successfull");
+				console.log("InitializeDB > DB Connection Successfull");
 				// loads the state to the context from localDB
 				const state = await handleFetchFullAppState();
-				console.log("DB DATA: ", state);
+				console.log("InitializeDB > DB DATA: ", state);
 
 				if (state) {
 					console.log("DB Found -> Updating States");

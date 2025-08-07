@@ -3,7 +3,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { useVerifyAccessToken } from "../../hooks/useVerifyJWT";
 import { useDB } from "../../hooks/useDB";
-import { useCrypto } from "../../hooks/useCrypto";
+import {
+	bufferToHex,
+	generateCryptoRandomValue,
+	useCrypto,
+} from "../../hooks/useCrypto";
 import { passwdSchema } from "../../utils/authSchema";
 import { useAuth } from "../../hooks/useAuth";
 import { instance } from "../../api/axios";
@@ -23,9 +27,9 @@ const LoginPasswd = () => {
 	const navigate = useNavigate();
 	// Custom Hooks
 	const { verifyToken } = useVerifyAccessToken();
-	const { handleLoginUpdateAppState } = useDB();
+	const { handleLoginUpdateAppState, handlePutProtectedStateDB } = useDB();
 	const { setAuth, setDerivedAuth, masterKey } = useAuth();
-	const { initialiseCrypto } = useCrypto();
+	const { initialiseCrypto, handleHashing } = useCrypto();
 	// Page States
 	const [localLoading, setLocalLoading] = useState(false);
 	const [passwordValue, setPasswordValue] = useState("");
@@ -37,7 +41,7 @@ const LoginPasswd = () => {
 	const passwordFieldRef = useRef();
 
 	// passed from login email page
-	const from = location.state?.from || "/home";
+	// const from = location.state?.from || "/home";
 	const email = location.state?.email || null;
 	const persist = location.state?.persist || null;
 
@@ -109,12 +113,27 @@ const LoginPasswd = () => {
 							};
 							// only add state to DB when persist is enable
 							console.error("Persist Value: ", persist);
-
+							// debugger;
 							if (persist) {
 								console.log(
 									"Password: States added to the DB (Persist Enabled)"
 								);
+								// put auth states in localDB
 								await handleLoginUpdateAppState(currentAppState);
+								// create a hash for local hashing
+								let passwordSalt = generateCryptoRandomValue();
+								// convert it to hex for text encoding in handleHashing fucntion
+								passwordSalt = bufferToHex(passwordSalt);
+								// hash the masterpassword
+								const masterPasswordHash = await handleHashing(
+									passwordValue,
+									passwordSalt
+								);
+								// put the hashed password & mastersalt to localDB
+								await handlePutProtectedStateDB({
+									passwordHash: masterPasswordHash,
+									passwordSalt,
+								});
 							}
 						} catch (err) {
 							console.error("Password: Failed to save App state to DB", err);

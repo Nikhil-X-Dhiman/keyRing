@@ -3,6 +3,7 @@ import {
 	CryptoBytesRequirement,
 	UnmatchedPayloadParams,
 } from "../errors/customError";
+import { useDB } from "./useDB";
 
 const PBKDF2_ITERATIONS = 500000; // Recommended iterations
 const PBKDF2_HASH_ALGORITHM = "SHA-256";
@@ -41,6 +42,26 @@ export const base64ToBuffer = (base64) => {
 	return bytes;
 };
 
+// Convert Buffer to Hex
+export function bufferToHex(buffer) {
+	const bytes = new Uint8Array(buffer);
+	return Array.from(bytes)
+		.map((byte) => byte.toString(16).padStart(2, "0"))
+		.join("");
+}
+
+// Convert Hex to Buffer
+export function hexToBuffer(hex) {
+	if (hex.length % 2 !== 0) {
+		throw new Error("Invalid hex string");
+	}
+	const byteArray = new Uint8Array(hex.length / 2);
+	for (let i = 0; i < hex.length; i += 2) {
+		byteArray[i / 2] = parseInt(hex.slice(i, i + 2), 16);
+	}
+	return byteArray.buffer; // Returns ArrayBuffer
+}
+
 // Derive the Key From The Password
 const deriveKey = async (password, salt) => {
 	if (!password || !salt) {
@@ -74,6 +95,7 @@ const deriveKey = async (password, salt) => {
 export const useCrypto = () => {
 	// Starts Derive Key by suppling passwd and salt
 	const { masterKey } = useAuth();
+	const { handleGetProtectedStateDB } = useDB();
 	// const masterKeyRef = useRef(null);
 
 	const initialiseCrypto = async (masterPassword, masterSalt) => {
@@ -216,6 +238,70 @@ export const useCrypto = () => {
 		return updatedList;
 	};
 
+	const handleHashing = async (masterPassword, passwordSalt) => {
+		try {
+			const encodedPassword = new TextEncoder().encode(
+				masterPassword + passwordSalt
+			);
+
+			const hashPasswordBuffer = await crypto.subtle.digest(
+				"SHA-256",
+				encodedPassword
+			);
+
+			console.log(
+				"useCrypto > handleHashing: Hash Buffer of Password: ",
+				hashPasswordBuffer
+			);
+
+			const hexPassword = bufferToHex(hashPasswordBuffer);
+
+			console.log(
+				"useCrypto > handleHashing: Hex Hash Buffer of Password: ",
+				hashPasswordBuffer
+			);
+
+			return hexPassword;
+		} catch (error) {
+			console.error(
+				"useCrypto > handleHashing: Error Occured Hashing the Password: ",
+				error
+			);
+			return false;
+		}
+	};
+
+	const handleVerifyHash = async (currentMasterPassword) => {
+		try {
+			const { passwd_hash: passwordHash, hash_salt: hashSalt } =
+				await handleGetProtectedStateDB();
+			console.log(
+				"useCrypto > verifyHash: Password Hash & Salt Hash Got from LocalDB: ",
+				passwordHash,
+				hashSalt
+			);
+			const currentPasswordHash = await handleHashing(
+				currentMasterPassword,
+				hashSalt
+			);
+			if (currentPasswordHash === passwordHash) {
+				console.log(
+					"useCrypto > verifyHash: Master Password Verified & is valid"
+				);
+				return true;
+			} else {
+				console.error("useCrypto > verifyHash: Master Password is Not Correct");
+				return false;
+			}
+		} catch (error) {
+			console.error(
+				"useCrypto > verifyHashError: Error Occured while verifying the Password using LocalDB: ",
+				error
+			);
+			return false;
+		}
+	};
+
 	// generateSessionKey: call when signing in
 	// clearSessionKey: call when signing out
 	return {
@@ -224,5 +310,7 @@ export const useCrypto = () => {
 		handleDecrypt,
 		clearSessionKey,
 		handleListToDecrypt,
+		handleHashing,
+		handleVerifyHash,
 	};
 };

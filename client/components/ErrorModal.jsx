@@ -3,8 +3,6 @@ import CrossIcon from "../public/cross.svg?react";
 
 export const ErrorModal = memo(
 	({ title = "Error Message", message, onClose, isOpen }) => {
-		console.log(message, isOpen);
-
 		const crossBtnContent = useMemo(() => {
 			return <CrossIcon className="w-4 h-4 font-bold" />;
 		}, []);

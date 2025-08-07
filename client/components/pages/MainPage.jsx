@@ -557,7 +557,6 @@ const MainPage = () => {
 	}, [masterKey]);
 
 	const handleSync = useCallback(async () => {
-		// debugger;
 		console.log("handleSync: Sync Started");
 		if (!masterKey.current) {
 			handleLockVault();
@@ -954,7 +953,9 @@ const MainPage = () => {
 							(mode === "View" && passwordList[itemIndex]?.favourite) ? (
 								// Favourite Button for Item
 								<div
-									className="flex items-center justify-between gap-1.5 bg-slate-700 hover:bg-slate-600 py-2 px-3.5 cursor-pointer mt-5 mb-3"
+									className={`flex items-center justify-between gap-1.5 bg-slate-700 hover:bg-slate-600 py-2 px-3.5  mt-5 mb-3 ${
+										mode === "View" ? "cursor-default" : "cursor-pointer"
+									}`}
 									onClick={handleFavouriteDiv}
 								>
 									<label
@@ -977,7 +978,9 @@ const MainPage = () => {
 										}
 										onChange={handleFavouriteCheckbox}
 										readOnly={mode === "View"}
-										className="cursor-pointer scale-130"
+										className={`${
+											mode === "View" ? "cursor-default" : "cursor-pointer"
+										} scale-130`}
 									/>
 								</div>
 							) : null}

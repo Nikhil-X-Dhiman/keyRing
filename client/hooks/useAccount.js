@@ -11,8 +11,9 @@ export const useAccount = () => {
 	const privateInstance = usePrivateInstance();
 	const {
 		handleEmptyListDB,
-		handleFullEmptyAppState,
-		handlePersistEmptyAppState,
+		// handleFullEmptyAppState,
+		// handlePersistEmptyAppState,
+		handleClearLocalDB,
 	} = useDB();
 	const { clearSessionKey } = useCrypto();
 	const { handleInitAuthValues, masterKey } = useAuth();
@@ -34,21 +35,22 @@ export const useAccount = () => {
 			await handleEmptyListDB();
 			console.log("Logout: Persist Value: ", appState.persist);
 
-			if (appState.persist) {
-				// clears all but publickey, persist
-				await handlePersistEmptyAppState();
-			} else {
-				// clears all the state
-				await handleFullEmptyAppState();
-			}
+			// if (appState.persist) {
+			// 	// clears all but publickey, persist
+			// 	await handlePersistEmptyAppState();
+			// } else {
+			// 	// clears all the state
+			// 	await handleFullEmptyAppState();
+			// }
 			// await handleDelDB();
+			await handleClearLocalDB();
 			await handleInitAuthValues();
 			masterKey.current = "";
 			console.log("Logout: Persist Value: ", appState.persist);
 			appState.current = { persist: false, online: false };
 			console.log("Logout: Persist Value: ", appState.persist);
 			clearSessionKey();
-			await handleEmptyListDB();
+			// await handleEmptyListDB();
 			console.log("Lougout -> Navigation to Email");
 
 			navigate("/login/email");

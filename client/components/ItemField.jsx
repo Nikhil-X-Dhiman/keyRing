@@ -136,8 +136,10 @@ export const ItemField = React.memo(
 							autoComplete={autoComplete}
 							required={required}
 							className={`${
-								mode === "View" ? "focus:outline-none" : "outline-none"
-							} cursor-default text-[1.2rem] ${styles}`}
+								mode === "View"
+									? "focus:outline-none cursor-default"
+									: "outline-none cursor-text"
+							} text-[1.2rem] ${styles}`}
 						/>
 					</div>
 

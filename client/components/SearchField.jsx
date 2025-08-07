@@ -7,7 +7,7 @@ export const SearchField = React.forwardRef(
 		}, []);
 
 		return (
-			<div className="w-full flex justify-center items-center relative">
+			<div className="w-full flex justify-center items-center relative pl-40">
 				<label htmlFor="app-search" className="hidden">
 					Search Bar
 				</label>
@@ -28,7 +28,7 @@ export const SearchField = React.forwardRef(
 					}`}
 					autoComplete="off"
 					ref={ref}
-					className="focus:outline-none p-2 rounded-md border-1 border-gray-400 hover:border-gray-300 focus:border-gray-300 shadow-sm w-[70%] webkit-search-input transition-all"
+					className="focus:outline-none p-2 rounded-md border-1 border-gray-400 hover:border-gray-300 focus:border-gray-300 shadow-sm w-full webkit-search-input transition-all"
 				/>
 				{/* <i
 					className={`ml-[-2.2rem] cursor-pointer text-gray-100 ${
@@ -42,8 +42,8 @@ export const SearchField = React.forwardRef(
 					<button
 						type="button"
 						onClick={onClick}
-						className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${
-							searchItem ? "visible" : "invisible"
+						className={`absolute top-1/2 transform -translate-y-1/2 right-3 ${
+							searchItem ? "visible cursor-pointer" : "invisible"
 						}`}
 						aria-label="Clear search"
 					>
