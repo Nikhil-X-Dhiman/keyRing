@@ -29,13 +29,13 @@ export const ListItem = memo(
 							</span>
 
 							{/* List Item Name */}
-							<div>
-								<p>
+							<div className="truncate">
+								<p className="truncate">
 									{item.name.length > 40
 										? item.name.slice(0, 37) + "..."
 										: item.name}
 								</p>
-								<p>{item.user}</p>
+								<p className="truncate">{item.user}</p>
 							</div>
 
 							{/* List Item Favourite's Star */}

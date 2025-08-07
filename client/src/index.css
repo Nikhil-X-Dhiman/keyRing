@@ -9,6 +9,8 @@
 	--color-amber-orange: #ffbf00;
 	--color-melon-red: #ff4e63;
 	--color-medium-purple: #976fd9;
+	--breakpoint-xs: 370px;
+	--breakpoint-md: 780px;
 }
 
 /* Text Color: text-blue-300 */

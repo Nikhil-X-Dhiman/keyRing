@@ -12,7 +12,7 @@ const navLinks = [
 
 export const SideNav = memo(({ pageMode, setPageMode }) => {
 	return (
-		<ul className="flex flex-col gap-y-1.5 mt-[-50%] text-lg">
+		<ul className="flex md:gap-7 justify-evenly md:justify-start md:flex-col lg:gap-y-2 md:mt-[-50%] text-lg">
 			{navLinks.map(({ text, label, Icon }) => (
 				<SideNavLink
 					key={text}

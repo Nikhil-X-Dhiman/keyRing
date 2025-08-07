@@ -7,7 +7,7 @@ export const SearchField = React.forwardRef(
 		}, []);
 
 		return (
-			<div className="w-full flex justify-center items-center relative pl-40">
+			<div className="w-full flex justify-center items-center relative sm:pl-40">
 				<label htmlFor="app-search" className="hidden">
 					Search Bar
 				</label>

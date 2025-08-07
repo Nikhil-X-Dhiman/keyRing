@@ -120,7 +120,7 @@ export const ItemField = React.memo(
 						<div className="pr-3.5">{FiMinusCircleContent}</div>
 					)}
 
-					<div className="flex flex-col w-full">
+					<div className="flex min-w-0 flex-col w-full">
 						<label className="text-slate-300 text-sm" htmlFor="name">
 							{label}
 						</label>
@@ -139,11 +139,11 @@ export const ItemField = React.memo(
 								mode === "View"
 									? "focus:outline-none cursor-default"
 									: "outline-none cursor-text"
-							} text-[1.2rem] ${styles}`}
+							} text-[1.2rem] ${styles} `}
 						/>
 					</div>
 
-					<div className="flex gap-3">
+					<div className="flex gap-3 ">
 						{visible && showToggle && PiEyeSlashContent}
 
 						{!visible && showToggle && PiEyeDuotoneContent}

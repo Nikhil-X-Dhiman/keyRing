@@ -8,7 +8,7 @@ import { ItemField } from "../ItemField";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDB } from "../../hooks/useDB";
-import { Navigate, useLocation, useNavigate } from "react-router";
+import { Navigate, useNavigate } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
 import { useCrypto } from "../../hooks/useCrypto";
 import { usePrivateInstance } from "../../hooks/usePrivateInstance";
@@ -54,7 +54,6 @@ const MainPage = () => {
 		handleAddItemDB,
 		handleEditItemDB,
 		handleToggleTrashDB,
-		handleToggleFavDB,
 		handleDeleteItemDB,
 		handleEmptyTrashDB,
 		handleBulkAddItemsDB,
@@ -676,8 +675,7 @@ const MainPage = () => {
 	}
 
 	return (
-		// <main className="grid grid-cols-3 grid-rows-[auto_1fr] h-full">
-		<main className="grid grid-cols-[10rem_24rem_1fr] grid-rows-[auto_1fr] h-full select-none">
+		<main className="grid grid-cols-1 md:grid-cols-[3rem_20rem_1fr] lg:grid-cols-[10rem_24rem_1fr] grid-rows-[auto_1fr_auto] md:grid-rows-[auto_1fr] h-full select-none">
 			<ErrorModal
 				message={pageError}
 				onClose={handleCloseErrorModal}
@@ -716,7 +714,7 @@ const MainPage = () => {
 				</Modal>
 			)}
 
-			<section className="col-start-1 col-end-4 row-start-1 row-end-2 grid grid-cols-[1fr_10rem] justify-items-center p-2 border border-l-0 border-slate-950">
+			<section className="col-start-1 col-end-2 md:col-start-1 md:col-end-4 md:row-start-1 md:row-end-2 grid grid-cols-[3fr_1fr] md:grid-cols-[1fr_10rem] justify-items-center p-2 border border-l-0 border-slate-950">
 				{/* Search Bar */}
 				<SearchField
 					searchItem={searchItem}
@@ -743,7 +741,7 @@ const MainPage = () => {
 				</div>
 			</section>
 
-			<section className="col-start-1 col-end-2 row-start-2 row-end-3 content-center border-r border-slate-950 pl-3">
+			<section className="col-start-1 col-end-2 row-start-3 row-end-4 md:row-start-2 md:row-end-3 content-center border-r border-slate-950 pl-3">
 				<SideNav
 					pageMode={pageMode}
 					parsedFile
@@ -752,7 +750,11 @@ const MainPage = () => {
 				/>
 			</section>
 
-			<section className="col-start-2 col-end-3 row-start-2 row-end-3 flex flex-col justify-between min-h-0 ">
+			<section
+				className={`${
+					mode === null ? "flex" : "hidden"
+				} col-span-1 row-start-2 row-end-3 md:col-start-2 md:col-end-3 md:row-start-2 md:row-end-3 md:flex flex-col justify-between min-h-0`}
+			>
 				{/* min-h-0 for flex and grid to bend them to the will of overflow */}
 				{/* Display all passwd list here */}
 				<div className="overflow-y-scroll h-full">
@@ -775,9 +777,11 @@ const MainPage = () => {
 			</section>
 
 			<section
-				className={`col-start-3 col-end-4 row-start-2 row-end-3 ${
-					mode === null ? "" : "bg-slate-900"
-				} h-full min-h-0 flex flex-col justify-between border-1 border-slate-950`}
+				className={`col-span-1 row-start-2 row-end-3 md:col-start-3 md:col-end-4 md:row-start-2 md:row-end-3 ${
+					mode === null
+						? "-z-10 md:z-0 hidden"
+						: "bg-slate-900 z-10 md:z-0 flex"
+				} h-full min-h-0 md:flex flex-col justify-between border-1 border-slate-950`}
 			>
 				{/* Background Brand Image */}
 				{mode === null && <BgBrand />}

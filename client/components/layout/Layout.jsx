@@ -14,7 +14,7 @@ const Layout = () => {
 			</header>
 			<div className="grow min-h-0 h-full flex flex-col">{<Outlet />}</div>
 			{/* Footer */}
-			<footer className="flex justify-center items-center p-2 border-t border-slate-700">
+			<footer className="hidden md:flex justify-center items-center p-2 border-t border-slate-700">
 				<h1 className="select-none">
 					Made By <span className="text-blue-300">Nikhil Dhiman</span>
 				</h1>
