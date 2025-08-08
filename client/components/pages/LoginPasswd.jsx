@@ -189,9 +189,10 @@ const LoginPasswd = () => {
 
 	if (!email) {
 		return <Navigate to="/login/email" replace />;
-	} else if (localLoading) {
-		return <Loading loading={localLoading} />;
 	}
+	// else if (localLoading) {
+	// 	return <Loading loading={localLoading} />;
+	// }
 
 	return (
 		<main className="flex flex-col justify-center items-center pt-15 select-none">
