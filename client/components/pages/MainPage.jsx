@@ -85,8 +85,13 @@ const MainPage = () => {
 	useEffect(() => {
 		if (masterKey.current) {
 			(async () => {
-				const [plainItemList] = await handleFetchList();
+				let [plainItemList] = await handleFetchList();
 				console.log("MainPage -> Password List:", plainItemList);
+
+				// Sort Data Alphabetically
+				plainItemList = plainItemList.sort((a, b) =>
+					a.name.localeCompare(b.name)
+				);
 
 				setPasswordList(plainItemList);
 			})();
@@ -544,7 +549,15 @@ const MainPage = () => {
 	);
 	// del the user auth status and the data with it
 	const handleLogout = useCallback(async () => {
-		await logout();
+		try {
+			await logout();
+		} catch (error) {
+			setPageError("Error Logging Out of Device. Check your Connection!!!");
+			console.error(
+				"mainPage > handleLogout: Error Logging Out of Device. Check your Connection: ",
+				error
+			);
+		}
 	}, []);
 	// Clears the search field entry
 	const handleSearchClear = () => {

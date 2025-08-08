@@ -18,6 +18,7 @@ import { InputField } from "../InputField";
 import { Button } from "../Button";
 import { ClockLoader } from "react-spinners";
 import { Loading } from "./Loading";
+import { useFetchData } from "../../hooks/useFetchData";
 
 const LoginPasswd = () => {
 	const PASSWD_REGEX =
@@ -28,8 +29,10 @@ const LoginPasswd = () => {
 	// Custom Hooks
 	const { verifyToken } = useVerifyAccessToken();
 	const { handleLoginUpdateAppState, handlePutProtectedStateDB } = useDB();
+	const { publicKeyRequest } = useFetchData();
 	const { setAuth, setDerivedAuth, masterKey } = useAuth();
-	const { initialiseCrypto, handleHashing } = useCrypto();
+	const { initialiseCrypto, handleHashing, handlePublicKeyEncryption } =
+		useCrypto();
 	// Page States
 	const [localLoading, setLocalLoading] = useState(false);
 	const [passwordValue, setPasswordValue] = useState("");
@@ -71,10 +74,21 @@ const LoginPasswd = () => {
 
 		if (validPassword) {
 			try {
+				console.log("LoginPasswd > handleSubmitBtn: Fetching Public Key");
+				const publicKey = await publicKeyRequest();
+				const encryptedPassword = await handlePublicKeyEncryption(
+					passwordValue,
+					publicKey
+				);
+				console.log(
+					"loginPasswd > handleSubmitBtn: Encrypted Password Value: ",
+					encryptedPassword
+				);
+
 				console.log("Password: Auth Request Sending");
 				const response = await instance.post(
 					"/api/v1/auth/login",
-					{ email, password: passwordValue },
+					{ email, password: encryptedPassword },
 					{
 						headers: { "Content-Type": "application/json" },
 						withCredentials: true,

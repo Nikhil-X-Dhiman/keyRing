@@ -302,6 +302,44 @@ export const useCrypto = () => {
 		}
 	};
 
+	// Import PEM Public Key & convert it to Crypto Key
+	const importPublicKey = async (key) => {
+		const keyHeader = "-----BEGIN PUBLIC KEY-----";
+		const keyFooter = "-----END PUBLIC KEY-----";
+		// Remove Header, Footer & any whitespace character
+		const base64Key = key
+			.replace(keyHeader, "")
+			.replace(keyFooter, "")
+			.replace(/\s/g, "");
+		const binaryKey = base64ToBuffer(base64Key);
+		const cryptoKey = await crypto.subtle.importKey(
+			"spki",
+			binaryKey.buffer,
+			{
+				name: "RSA-OAEP",
+				hash: "SHA-256",
+			},
+			false,
+			["encrypt"]
+		);
+		return cryptoKey;
+	};
+
+	const handlePublicKeyEncryption = async (password, publicKey) => {
+		const cryptoPublicKey = await importPublicKey(publicKey);
+
+		const encodedPassword = new TextEncoder().encode(password);
+
+		const encryptedData = await crypto.subtle.encrypt(
+			{ name: "RSA-OAEP" },
+			cryptoPublicKey,
+			encodedPassword
+		);
+
+		const base64Password = bufferToBase64(encryptedData);
+		return base64Password;
+	};
+
 	// generateSessionKey: call when signing in
 	// clearSessionKey: call when signing out
 	return {
@@ -312,5 +350,6 @@ export const useCrypto = () => {
 		handleListToDecrypt,
 		handleHashing,
 		handleVerifyHash,
+		handlePublicKeyEncryption,
 	};
 };

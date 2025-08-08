@@ -9,7 +9,7 @@ export const ErrorModal = memo(
 		return (
 			<>
 				<div
-					className={`fixed top-10 w-70 border-1 border-gray-400 rounded-2xl transition-all duration-300 ease-in-out ${
+					className={`z-50 fixed top-10 w-70 border-1 border-gray-400 rounded-2xl transition-all duration-300 ease-in-out ${
 						isOpen
 							? "right-10 opacity-100 scale-100"
 							: "right-[-50rem] pointer-events-none opacity-0 scale-90"

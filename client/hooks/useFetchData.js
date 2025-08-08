@@ -23,13 +23,17 @@ export const useFetchData = () => {
 		// On demand Fetch Public Key to Verify Access Token
 		try {
 			const response = await instance.get("/api/v1/auth/public");
+			const publicKey = response.data.publicKey;
 			if (response.status === 200) {
 				setDerivedAuth((prev) => ({
 					...prev,
-					publicKey: response.data.publicKey,
+					publicKey,
 				}));
+				return publicKey;
 				// await setPublicKey(response.data.publicKey);
 			} else if (response.status === 204) {
+				console.error("useFetchData > publicKeyRequest: Public Key Not Found.");
+
 				throw new Error("Public Key Not Found");
 			}
 		} catch (error) {

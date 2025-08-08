@@ -1,3 +1,4 @@
+import crypto, { privateDecrypt } from "crypto";
 import {
 	getUserByCredentials,
 	insertUserByCredential,
@@ -17,7 +18,8 @@ import {
 	nameSchema,
 	passwdSchema,
 } from "../utils/handleSchema.js";
-import { publicKey } from "../utils/handleCryptoKeys.js";
+import { privateKey, publicKey } from "../utils/handleCryptoKeys.js";
+
 import { log } from "console";
 
 export const handleLogin = async (req, res) => {
@@ -27,7 +29,7 @@ export const handleLogin = async (req, res) => {
 			.status(405)
 			.json({ success: false, msg: "User Already Logged In!!!" });
 	}
-	const { email, password } = req.body;
+	let { email, password } = req.body;
 	if (!email || !password) {
 		// checks if email or password is present
 		return res.status(400).json({
@@ -35,6 +37,21 @@ export const handleLogin = async (req, res) => {
 			msg: "Email or Password is required!!!",
 		});
 	}
+
+	// Decrypt Encrypted Password
+	password = privateDecrypt(
+		{
+			key: privateKey,
+			padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+			oaepHash: "sha256",
+		},
+		Buffer.from(password, "base64")
+	).toString("utf-8");
+	console.log(
+		"authController > handleLogin: Decrypted Password Value: ",
+		password
+	);
+
 	const { success, data } = emailSchema.safeParse(email);
 	if (!success) {
 		// checks if the format of the email is correct
